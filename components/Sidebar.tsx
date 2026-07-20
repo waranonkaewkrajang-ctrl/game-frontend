@@ -13,7 +13,8 @@ import {
   Settings,
   CircleDot,
   LogOut,
-  Shield 
+  Shield,
+  ImageIcon
 } from "lucide-react";
 
 const menuItems = [
@@ -65,6 +66,12 @@ const menuItems = [
     icon: <LayoutDashboard size={20} />,
     href: "/dashboard/games",
     permissionKey: "games"
+  },
+  {
+    title: "จัดการแบนเนอร์",
+    icon: <ImageIcon size={20} />,
+    href: "/dashboard/banners",
+    permissionKey: "settings" // ให้ใช้สิทธิ์ระดับตั้งค่า หรือจะเปลี่ยนเป็น "promotions" ก็ได้ครับ
   },
   // --- เพิ่มเมนูจัดการสิทธิ์ตรงนี้ ---
   {
