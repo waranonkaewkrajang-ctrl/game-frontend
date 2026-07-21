@@ -230,7 +230,7 @@ export default function GamesPage() {
                 {inactive > 0 && <span style={chip("#fee2e2", "#991b1b")}>{inactive}</span>}
                 <button onClick={() => handleToggleProduct(p.product_id, true)} style={{ background: "none", border: "none", cursor: "pointer", fontSize: "0.7rem", color: "#059669", fontWeight: 700, padding: "2px 4px" }}>ON</button>
                 <button onClick={() => handleToggleProduct(p.product_id, false)} style={{ background: "none", border: "none", cursor: "pointer", fontSize: "0.7rem", color: "#dc2626", fontWeight: 700, padding: "2px 4px" }}>OFF</button>
-                <button onClick={() => handleUploadImage(p.product_id)} style={{ background: "none", border: "none", cursor: "pointer", fontSize: "0.7rem", color: "#6366f1", fontWeight: 700, padding: "2px 4px" }}>📷</button>
+                <button onClick={() => handleUploadImage(p.product_id)} style={{ background: "#eff6ff", border: "1px solid #bfdbfe", borderRadius: "6px", cursor: "pointer", fontSize: "0.65rem", color: "#2563eb", fontWeight: 700, padding: "3px 8px" }}>เปลี่ยนรูป</button>
               </div>
             );
           })}
