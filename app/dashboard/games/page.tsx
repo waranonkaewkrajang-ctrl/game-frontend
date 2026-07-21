@@ -35,6 +35,7 @@ export default function GamesPage() {
   const [search, setSearch] = useState("");
   const [agentCredit, setAgentCredit] = useState<any>(null);
   const [view, setView] = useState<"grid" | "list">("grid");
+  const [productImages, setProductImages] = useState<Record<string, any>>({});
 
   const fetchGames = () => {
     setLoading(true);
@@ -61,7 +62,34 @@ export default function GamesPage() {
     }).catch(() => {});
   };
 
-  useEffect(() => { fetchGames(); fetchProducts(); fetchAgentCredit(); }, [filterProduct, filterStatus]);
+  const fetchProductImages = () => {
+    api.get("/admin/games/product-images").then((res) => {
+      if (res.data.status === "success") setProductImages(res.data.data || {});
+    }).catch(() => {});
+  };
+
+  const handleUploadImage = async (productId: string) => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/jpeg,image/png,image/webp,image/gif";
+    input.onchange = async (e: any) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const formData = new FormData();
+      formData.append("product_id", productId);
+      formData.append("image", file);
+      try {
+        const res = await api.post("/admin/games/product-image", formData, { headers: { "Content-Type": "multipart/form-data" } });
+        Swal.fire({ icon: "success", title: res.data.message, timer: 1500, showConfirmButton: false });
+        fetchProductImages();
+      } catch (err: any) {
+        Swal.fire({ icon: "error", title: "อัปโหลดไม่สำเร็จ", text: err.response?.data?.message || "เกิดข้อผิดพลาด" });
+      }
+    };
+    input.click();
+  };
+
+  useEffect(() => { fetchGames(); fetchProducts(); fetchAgentCredit(); fetchProductImages(); }, [filterProduct, filterStatus]);
 
   const handleSync = async () => {
     if (!syncProduct) { Swal.fire({ icon: "warning", title: "กรุณาเลือกค่ายเกม" }); return; }
@@ -191,12 +219,18 @@ export default function GamesPage() {
           {summary.products.map((p) => {
             const inactive = p.total - p.active;
             return (
-              <div key={p.product_id} style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "white", border: "1px solid #e2e8f0", borderRadius: "999px", padding: "5px 6px 5px 12px", fontSize: "0.78rem", fontWeight: 600, color: "#334155" }}>
+              <div key={p.product_id} style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "white", border: "1px solid #e2e8f0", borderRadius: "999px", padding: "5px 6px 5px 6px", fontSize: "0.78rem", fontWeight: 600, color: "#334155" }}>
+                {productImages[p.product_id]?.image_url ? (
+                  <img src={productImages[p.product_id].image_url} alt={p.product_id} style={{ width: "24px", height: "24px", borderRadius: "50%", objectFit: "cover" }} />
+                ) : (
+                  <div style={{ width: "24px", height: "24px", borderRadius: "50%", background: "#f1f5f9", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.6rem", color: "#94a3b8" }}>?</div>
+                )}
                 {p.product_id}
                 <span style={chip("#d1fae5", "#065f46")}>{p.active}</span>
                 {inactive > 0 && <span style={chip("#fee2e2", "#991b1b")}>{inactive}</span>}
                 <button onClick={() => handleToggleProduct(p.product_id, true)} style={{ background: "none", border: "none", cursor: "pointer", fontSize: "0.7rem", color: "#059669", fontWeight: 700, padding: "2px 4px" }}>ON</button>
                 <button onClick={() => handleToggleProduct(p.product_id, false)} style={{ background: "none", border: "none", cursor: "pointer", fontSize: "0.7rem", color: "#dc2626", fontWeight: 700, padding: "2px 4px" }}>OFF</button>
+                <button onClick={() => handleUploadImage(p.product_id)} style={{ background: "none", border: "none", cursor: "pointer", fontSize: "0.7rem", color: "#6366f1", fontWeight: 700, padding: "2px 4px" }}>📷</button>
               </div>
             );
           })}
