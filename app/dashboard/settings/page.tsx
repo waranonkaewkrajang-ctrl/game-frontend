@@ -17,6 +17,8 @@ export default function SettingsPage() {
     line_notify_token: "",
     contact_line: "",
     contact_tel: "",
+    cashback_percent: "5",     // ← เพิ่ม
+    referral_percent: "1",
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -220,6 +222,21 @@ export default function SettingsPage() {
               <div style={fieldStyle}>
                 <label style={labelStyle}>เบอร์โทรศัพท์</label>
                 <input className="input" value={settings.contact_tel} onChange={(e) => setSettings({ ...settings, contact_tel: e.target.value })} placeholder="0812345678" />
+              </div>
+            </div>
+
+            {/* ตั้งค่ายอดเสีย & แนะนำเพื่อน — เพิ่มตรงนี้ */}
+            <div style={sectionStyle}>
+              {sectionTitle("ยอดเสีย & แนะนำเพื่อน", "ตั้งค่า % คืนยอดเสียรายวัน และ % ค่าคอมแนะนำเพื่อน")}
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+                <div style={fieldStyle}>
+                  <label style={labelStyle}>% คืนยอดเสีย (Cashback)</label>
+                  <input className="input" type="number" step="0.1" value={settings.cashback_percent} onChange={(e) => setSettings({ ...settings, cashback_percent: e.target.value })} placeholder="เช่น 5" />
+                </div>
+                <div style={fieldStyle}>
+                  <label style={labelStyle}>% ค่าคอมแนะนำเพื่อน (Referral)</label>
+                  <input className="input" type="number" step="0.1" value={settings.referral_percent} onChange={(e) => setSettings({ ...settings, referral_percent: e.target.value })} placeholder="เช่น 1" />
+                </div>
               </div>
             </div>
 
