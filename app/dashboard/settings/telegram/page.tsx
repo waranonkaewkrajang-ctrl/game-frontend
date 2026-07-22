@@ -61,10 +61,10 @@ export default function TelegramSettingsPage() {
 
       <form onSubmit={handleSave} style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
 
-        {/* วิธีตั้งค่า (ปรับเป็นสไตล์ Alert แบบคลีนๆ) */}
-        <div style={{ background: "#f8fafc", borderLeft: "4px solid #3b82f6", borderRadius: "0 8px 8px 0", padding: "1.25rem 1.5rem" }}>
-          <h3 style={{ fontSize: "0.9rem", fontWeight: 600, color: "#1e293b", margin: "0 0 0.75rem" }}>คำแนะนำการสร้าง Bot</h3>
-          <ol style={{ fontSize: "0.85rem", color: "#475569", lineHeight: 1.7, margin: 0, paddingLeft: "1.25rem" }}>
+        {/* วิธีตั้งค่า (พื้นหลังแดงอ่อน) */}
+        <div style={{ background: "#fef2f2", borderLeft: "4px solid #ef4444", borderRadius: "0 8px 8px 0", padding: "1.25rem 1.5rem" }}>
+          <h3 style={{ fontSize: "0.9rem", fontWeight: 600, color: "#b91c1c", margin: "0 0 0.75rem" }}>คำแนะนำการสร้าง Bot</h3>
+          <ol style={{ fontSize: "0.85rem", color: "#7f1d1d", lineHeight: 1.7, margin: 0, paddingLeft: "1.25rem" }}>
             <li>ค้นหา <strong>@BotFather</strong> ใน Telegram และพิมพ์คำสั่ง <code>/newbot</code></li>
             <li>ตั้งชื่อ Bot ให้เรียบร้อย จากนั้นนำ <strong>Bot Token</strong> ที่ได้รับมาใส่ในช่องด้านล่าง</li>
             <li>ดึง Bot เข้ากลุ่ม (หรือเปิดแชทส่วนตัว) และค้นหา <strong>@userinfobot</strong> เพื่อรับ <strong>Chat ID</strong></li>
@@ -103,16 +103,17 @@ export default function TelegramSettingsPage() {
             onClick={handleTest} 
             disabled={testing} 
             style={{ 
-              background: "white", 
-              color: "#3b82f6", 
-              border: "1px solid #3b82f6", 
+              background: "linear-gradient(135deg, #0ea5e9, #14b8a6)", /* สีเขียวฟ้า */
+              color: "white", 
+              border: "none", 
               borderRadius: "6px", 
-              padding: "0.5rem 1rem", 
+              padding: "0.6rem 1.25rem", 
               fontSize: "0.85rem", 
               fontWeight: 500, 
               cursor: testing ? "not-allowed" : "pointer",
               transition: "all 0.2s",
-              opacity: testing ? 0.7 : 1
+              opacity: testing ? 0.7 : 1,
+              boxShadow: "0 4px 10px rgba(20, 184, 166, 0.3)"
             }}
           >
             {testing ? "กำลังทดสอบ..." : "ทดสอบส่งข้อความ"}
@@ -140,15 +141,37 @@ export default function TelegramSettingsPage() {
                 }}
               >
                 <span style={{ fontSize: "0.9rem", color: "#334155", fontWeight: 500 }}>{item.label}</span>
-                <select 
-                  className="input" 
-                  style={{ width: "100px", padding: "0.4rem 0.75rem", fontSize: "0.85rem", background: "#f8fafc", border: "1px solid #e2e8f0", color: "#0f172a", cursor: "pointer" }} 
-                  value={(settings as any)[item.key]} 
-                  onChange={(e) => setSettings({ ...settings, [item.key]: e.target.value })}
-                >
-                  <option value="true">เปิดใช้งาน</option>
-                  <option value="false">ปิดใช้งาน</option>
-                </select>
+                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                  <span style={{ fontSize: "0.8rem", fontWeight: 600, color: (settings as any)[item.key] === "true" ? "#10b981" : "#ef4444" }}>
+                    {(settings as any)[item.key] === "true" ? "ON" : "OFF"}
+                  </span>
+                  <button 
+                    type="button"
+                    onClick={() => setSettings({ ...settings, [item.key]: (settings as any)[item.key] === "true" ? "false" : "true" })}
+                    style={{
+                      position: "relative",
+                      width: "44px",
+                      height: "24px",
+                      borderRadius: "12px",
+                      background: (settings as any)[item.key] === "true" ? "#10b981" : "#ef4444",
+                      border: "none",
+                      cursor: "pointer",
+                      transition: "background 0.3s ease"
+                    }}
+                  >
+                    <div style={{
+                      position: "absolute",
+                      top: "2px",
+                      left: (settings as any)[item.key] === "true" ? "22px" : "2px",
+                      width: "20px",
+                      height: "20px",
+                      background: "white",
+                      borderRadius: "50%",
+                      transition: "left 0.3s ease",
+                      boxShadow: "0 2px 4px rgba(0,0,0,0.2)"
+                    }} />
+                  </button>
+                </div>
               </div>
             ))}
           </div>
