@@ -173,10 +173,10 @@ export default function UsersPage() {
                     </td>
                     <td style={{ padding: "0.75rem 1rem" }}>
                       <div style={{ display: "flex", gap: "4px", flexWrap: "wrap" }}>
-                        <button onClick={() => router.push(`/dashboard/users/${u.id}`)} style={btnStyle("#f0fdf4", "#166534", "#bbf7d0")}>โปรไฟล์</button>
-                        <button onClick={() => handleOpenEdit(u)} style={btnStyle("#eff6ff", "#1d4ed8", "#bfdbfe")}>แก้ไข</button>
-                        <button onClick={() => setSelected(u)} style={btnStyle("#fefce8", "#854d0e", "#fde68a")}>ปรับยอด</button>
-                        <button onClick={() => handleToggleStatus(u)} style={btnStyle(u.status === "active" ? "#fef2f2" : "#f0fdf4", u.status === "active" ? "#dc2626" : "#16a34a", u.status === "active" ? "#fecaca" : "#bbf7d0")}>
+                        <button onClick={() => router.push(`/dashboard/users/${u.id}`)} style={btnStyle("#16a34a", "#ffffff", "#16a34a")}>โปรไฟล์</button>
+                        <button onClick={() => handleOpenEdit(u)} style={btnStyle("#2563eb", "#ffffff", "#2563eb")}>แก้ไข</button>
+                        <button onClick={() => setSelected(u)} style={btnStyle("#f59e0b", "#ffffff", "#f59e0b")}>ปรับยอด</button>
+                        <button onClick={() => handleToggleStatus(u)} style={btnStyle(u.status === "active" ? "#dc2626" : "#16a34a", "#ffffff", u.status === "active" ? "#dc2626" : "#16a34a")}>
                           {u.status === "active" ? "ระงับ" : "เปิดใช้"}
                         </button>
                       </div>
