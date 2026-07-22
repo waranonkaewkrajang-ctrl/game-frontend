@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import api from "@/lib/api";
 import Swal from "sweetalert2";
+import { useRouter } from "next/navigation";
 
 interface User {
   id: number;
@@ -29,6 +30,7 @@ export default function UsersPage() {
   const [profileUser, setProfileUser] = useState<User | null>(null);
   const [editUser, setEditUser] = useState<User | null>(null);
   const [editForm, setEditForm] = useState({ full_name: "", phone: "", bank_code: "", bank_account: "", bank_name: "" });
+  const router = useRouter();
 
   const fetchUsers = (s?: string) => {
     setLoading(true);
@@ -171,7 +173,7 @@ export default function UsersPage() {
                     </td>
                     <td style={{ padding: "0.75rem 1rem" }}>
                       <div style={{ display: "flex", gap: "4px", flexWrap: "wrap" }}>
-                        <button onClick={() => handleViewProfile(u)} style={btnStyle("#f0fdf4", "#166534", "#bbf7d0")}>โปรไฟล์</button>
+                        <button onClick={() => router.push(`/dashboard/users/${u.id}`)} style={btnStyle("#f0fdf4", "#166534", "#bbf7d0")}>โปรไฟล์</button>
                         <button onClick={() => handleOpenEdit(u)} style={btnStyle("#eff6ff", "#1d4ed8", "#bfdbfe")}>แก้ไข</button>
                         <button onClick={() => setSelected(u)} style={btnStyle("#fefce8", "#854d0e", "#fde68a")}>ปรับยอด</button>
                         <button onClick={() => handleToggleStatus(u)} style={btnStyle(u.status === "active" ? "#fef2f2" : "#f0fdf4", u.status === "active" ? "#dc2626" : "#16a34a", u.status === "active" ? "#fecaca" : "#bbf7d0")}>
