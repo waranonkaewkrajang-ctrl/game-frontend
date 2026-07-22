@@ -103,7 +103,7 @@ export default function UserProfilePage() {
               style={{
                 flex: 1, padding: "0.75rem", border: "none", cursor: "pointer",
                 fontSize: "0.85rem", fontWeight: 600,
-                background: tab === t.key ? "#0f172a" : "#f8fafc",
+                background: tab === t.key ? "#2563eb" : "#f8fafc",
                 color: tab === t.key ? "white" : "#64748b",
               }}>{t.label}</button>
           ))}
