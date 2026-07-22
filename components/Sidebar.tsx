@@ -86,10 +86,12 @@ const menuItems = [
     icon: <Settings size={20} />,
     id: "settings",
     subItems: [
-      { title: "ตั้งค่าทั่วไป", href: "/dashboard/settings", permissionKey: "settings" },
-      { title: "ตั้งค่าการเงิน", href: "/dashboard/settings/finance", permissionKey: "settings" },
-      { title: "ตั้งค่าเกม & โปรโมชัน", href: "/dashboard/settings/game", permissionKey: "settings" },
-    ],
+  { title: "ตั้งค่าทั่วไป", href: "/dashboard/settings", permissionKey: "settings" },
+  { title: "ตั้งค่าการเงิน", href: "/dashboard/settings/finance", permissionKey: "settings" },
+  { title: "ตั้งค่าเกม & โปรโมชัน", href: "/dashboard/settings/game", permissionKey: "settings" },
+  { title: "ข้อมูลเว็บ & ติดต่อ", href: "/dashboard/settings/contact", permissionKey: "settings" },
+  { title: "แจ้งเตือน Telegram", href: "/dashboard/settings/telegram", permissionKey: "settings" },
+],
   },
 ];
 
