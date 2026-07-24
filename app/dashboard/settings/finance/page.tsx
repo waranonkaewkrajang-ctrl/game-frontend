@@ -35,6 +35,8 @@ export default function FinanceSettingsPage() {
   // Quick amounts
   const [amounts, setAmounts] = useState<number[]>([100, 300, 500, 1000, 5000]);
   const [newAmount, setNewAmount] = useState("");
+  const [wallets, setWallets] = useState<{phone: string; name: string; is_active: boolean}[]>([]);
+  const [newWallet, setNewWallet] = useState({ phone: "", name: "" });
 
   useEffect(() => {
     api.get("/admin/settings").then((res) => {
@@ -47,6 +49,7 @@ export default function FinanceSettingsPage() {
       try { setChannels(JSON.parse(data.deposit_channels || '["bank_transfer","promptpay","truewallet"]')); } catch {}
       // Parse amounts
       try { setAmounts(JSON.parse(data.deposit_amounts || "[100,300,500,1000,5000]")); } catch {}
+      try { setWallets(JSON.parse(data.truewallet_accounts || "[]")); } catch { setWallets([]); }
     }).catch(() => {});
   }, []);
 
@@ -59,7 +62,7 @@ export default function FinanceSettingsPage() {
         deposit_banks: JSON.stringify(banks),
         deposit_channels: JSON.stringify(channels),
         deposit_amounts: JSON.stringify(amounts),
-        truewallet_number: settings.truewallet_number,
+        truewallet_accounts: JSON.stringify(wallets),
       });
       Swal.fire({ icon: "success", title: "บันทึกสำเร็จ", timer: 1500, showConfirmButton: false });
     } catch {
@@ -170,12 +173,42 @@ export default function FinanceSettingsPage() {
 
         {/* True Wallet */}
         <div style={{ background: "white", border: "1px solid #e2e8f0", borderRadius: "0.75rem", padding: "1.25rem" }}>
-          <h3 style={{ fontSize: "0.95rem", fontWeight: 700, color: "#0f172a", margin: "0 0 0.5rem" }}>True Wallet</h3>
-          <p style={{ fontSize: "0.8rem", color: "#64748b", margin: "0 0 1rem" }}>เบอร์ True Wallet ที่ลูกค้าจะโอนเข้า</p>
-          <div>
-            <label style={labelStyle}>เบอร์โทรศัพท์</label>
-            <input className="input" value={settings.truewallet_number} onChange={(e) => setSettings({ ...settings, truewallet_number: e.target.value })} placeholder="0xxxxxxxxx" />
+          <h3 style={{ fontSize: "0.95rem", fontWeight: 700, color: "#0f172a", margin: "0 0 0.5rem" }}>บัญชี True Wallet</h3>
+          <p style={{ fontSize: "0.8rem", color: "#64748b", margin: "0 0 1rem" }}>บัญชี True Wallet ที่จะแสดงให้ลูกค้าโอนเข้า</p>
+
+          {wallets.length > 0 && (
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", marginBottom: "1rem" }}>
+              {wallets.map((w, i) => (
+                <div key={i} style={{ display: "flex", alignItems: "center", gap: "0.75rem", padding: "0.75rem", background: w.is_active ? "#f0fdf4" : "#fef2f2", border: `1px solid ${w.is_active ? "#bbf7d0" : "#fecaca"}`, borderRadius: "0.5rem" }}>
+                  <img src="https://fs.cdnrc.com/payment-layout/svg/true-wallet.svg" alt="TW" style={{ width: "32px", height: "32px" }} />
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: "0.85rem", fontWeight: 600, color: "#0f172a" }}>{w.name}</div>
+                    <div style={{ fontSize: "0.8rem", color: "#64748b" }}>{w.phone}</div>
+                  </div>
+                  <button type="button" onClick={() => setWallets(wallets.map((ww, ii) => ii === i ? { ...ww, is_active: !ww.is_active } : ww))} style={{ fontSize: "0.7rem", padding: "4px 10px", borderRadius: "4px", border: "none", cursor: "pointer", background: w.is_active ? "#dcfce7" : "#fee2e2", color: w.is_active ? "#166534" : "#991b1b", fontWeight: 600 }}>
+                    {w.is_active ? "เปิด" : "ปิด"}
+                  </button>
+                  <button type="button" onClick={() => setWallets(wallets.filter((_, ii) => ii !== i))} style={{ fontSize: "0.75rem", padding: "4px 8px", borderRadius: "4px", border: "none", cursor: "pointer", background: "#fee2e2", color: "#dc2626", fontWeight: 600 }}>ลบ</button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.5rem", marginBottom: "0.5rem" }}>
+            <div>
+              <label style={labelStyle}>เบอร์โทรศัพท์</label>
+              <input className="input" value={newWallet.phone} onChange={(e) => setNewWallet({ ...newWallet, phone: e.target.value })} placeholder="0xxxxxxxxx" />
+            </div>
+            <div>
+              <label style={labelStyle}>ชื่อบัญชี</label>
+              <input className="input" value={newWallet.name} onChange={(e) => setNewWallet({ ...newWallet, name: e.target.value })} placeholder="ชื่อ-นามสกุล" />
+            </div>
           </div>
+          <button type="button" onClick={() => {
+            if (!newWallet.phone || !newWallet.name) { Swal.fire({ icon: "warning", title: "กรุณากรอกข้อมูลให้ครบ" }); return; }
+            setWallets([...wallets, { ...newWallet, is_active: true }]);
+            setNewWallet({ phone: "", name: "" });
+          }} style={{ background: "#22c55e", color: "white", border: "none", borderRadius: "0.375rem", padding: "0.5rem 1rem", fontSize: "0.8rem", fontWeight: 600, cursor: "pointer" }}>+ เพิ่ม</button>
         </div>
 
         {/* ช่องทางฝากเงิน */}
