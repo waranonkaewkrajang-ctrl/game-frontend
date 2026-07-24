@@ -108,9 +108,9 @@ export default function FinanceSettingsPage() {
   ];
 
   const channelOptions = [
-    { key: "bank_transfer", label: "บัญชีธนาคาร", icon: "🏦" },
-    { key: "promptpay", label: "QR Payment / PromptPay", icon: "📱" },
-    { key: "truewallet", label: "True Wallet", icon: "💚" },
+    { key: "bank_transfer", label: "บัญชีธนาคาร", icon: "" },
+    { key: "promptpay", label: "QR Payment / PromptPay", icon: "" },
+    { key: "truewallet", label: "True Wallet", icon: "" },
   ];
 
   return (
