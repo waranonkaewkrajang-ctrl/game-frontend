@@ -21,6 +21,7 @@ export default function FinanceSettingsPage() {
     deposit_channels: '["bank_transfer","promptpay","truewallet"]',
     deposit_banks: "[]",
     deposit_amounts: "[100,300,500,1000,5000]",
+    truewallet_number: "",
   });
   const [saving, setSaving] = useState(false);
 
@@ -58,6 +59,7 @@ export default function FinanceSettingsPage() {
         deposit_banks: JSON.stringify(banks),
         deposit_channels: JSON.stringify(channels),
         deposit_amounts: JSON.stringify(amounts),
+        truewallet_number: settings.truewallet_number,
       });
       Swal.fire({ icon: "success", title: "บันทึกสำเร็จ", timer: 1500, showConfirmButton: false });
     } catch {
@@ -163,6 +165,16 @@ export default function FinanceSettingsPage() {
               <input className="input" value={newBank.bank_name} onChange={(e) => setNewBank({ ...newBank, bank_name: e.target.value })} placeholder="ชื่อ-นามสกุล" />
             </div>
             <button type="button" onClick={addBank} style={{ alignSelf: "flex-end", background: "#22c55e", color: "white", border: "none", borderRadius: "0.375rem", padding: "0.5rem 1rem", fontSize: "0.8rem", fontWeight: 600, cursor: "pointer" }}>+ เพิ่ม</button>
+          </div>
+        </div>
+
+        {/* True Wallet */}
+        <div style={{ background: "white", border: "1px solid #e2e8f0", borderRadius: "0.75rem", padding: "1.25rem" }}>
+          <h3 style={{ fontSize: "0.95rem", fontWeight: 700, color: "#0f172a", margin: "0 0 0.5rem" }}>True Wallet</h3>
+          <p style={{ fontSize: "0.8rem", color: "#64748b", margin: "0 0 1rem" }}>เบอร์ True Wallet ที่ลูกค้าจะโอนเข้า</p>
+          <div>
+            <label style={labelStyle}>เบอร์โทรศัพท์</label>
+            <input className="input" value={settings.truewallet_number} onChange={(e) => setSettings({ ...settings, truewallet_number: e.target.value })} placeholder="0xxxxxxxxx" />
           </div>
         </div>
 
