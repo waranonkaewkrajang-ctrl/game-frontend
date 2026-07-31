@@ -91,6 +91,7 @@ const menuItems = [
   { title: "ตั้งค่าเกม & โปรโมชัน", href: "/dashboard/settings/game", permissionKey: "settings" },
   { title: "ข้อมูลเว็บ & ติดต่อ", href: "/dashboard/settings/contact", permissionKey: "settings" },
   { title: "แจ้งเตือน Telegram", href: "/dashboard/settings/telegram", permissionKey: "settings" },
+  { title: "แรงค์สมาชิก", href: "/dashboard/settings/ranks", permissionKey: "settings" },
 ],
   },
 ];
