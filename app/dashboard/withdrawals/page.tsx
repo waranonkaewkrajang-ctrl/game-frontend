@@ -4,15 +4,21 @@ import api from "@/lib/api";
 import Swal from "sweetalert2";
 
 interface Withdrawal {
-  id: number; 
-  reference_id: string; 
-  amount: string; 
-  to_bank: string; 
-  to_account: string; 
-  to_name: string; 
-  status: string; 
+  id: number;
+  reference_id: string;
+  amount: string;
+  to_bank: string;
+  to_account: string;
+  to_name: string;
+  status: string;
+  reject_reason: string | null;
+  balance_before: string | null;
+  balance_after: string | null;
+  approved_at: string | null;
   created_at: string;
-  user: { username: string; phone: string };
+  user: { username: string; phone: string; bank_code: string; bank_account: string; bank_name: string; full_name: string | null };
+  approver: { username: string } | null;
+  processing_by: number | null;
 }
 
 export default function WithdrawalsPage() {
@@ -99,20 +105,6 @@ export default function WithdrawalsPage() {
 
   const fmt = (n: string) => parseFloat(n).toLocaleString("th-TH", { minimumFractionDigits: 2 });
 
-  const handleCopy = (text: string) => {
-    navigator.clipboard.writeText(text);
-    Swal.fire({
-      title: "คัดลอกสำเร็จ",
-      icon: "success",
-      toast: true,
-      position: "top-end",
-      showConfirmButton: false,
-      timer: 1500,
-      background: "#1a1a2e",
-      color: "#fff"
-    });
-  };
-
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -140,84 +132,95 @@ export default function WithdrawalsPage() {
                   <th style={{ padding: "0.75rem 1rem", textAlign: "center", fontWeight: "bold" }}>ธนาคารลูกค้า</th>
                   <th style={{ padding: "0.75rem 1rem", textAlign: "center", fontWeight: "bold" }}>ข้อมูลลูกค้า</th>
                   <th style={{ padding: "0.75rem 1rem", textAlign: "center", fontWeight: "bold" }}>ก่อน</th>
-                  <th style={{ padding: "0.75rem 1rem", textAlign: "center", fontWeight: "bold", cursor: "pointer" }}>ยอด ↕</th>
+                  <th style={{ padding: "0.75rem 1rem", textAlign: "center", fontWeight: "bold" }}>ยอด</th>
                   <th style={{ padding: "0.75rem 1rem", textAlign: "center", fontWeight: "bold" }}>คงเหลือ</th>
-                  <th style={{ padding: "0.75rem 1rem", textAlign: "center", fontWeight: "bold", cursor: "pointer" }}>วันที่เข้าระบบ ↕</th>
+                  <th style={{ padding: "0.75rem 1rem", textAlign: "center", fontWeight: "bold" }}>วันที่เข้าระบบ</th>
                   <th style={{ padding: "0.75rem 1rem", textAlign: "center", fontWeight: "bold" }}>ธนาคารถอน</th>
-                  <th style={{ padding: "0.75rem 1rem", textAlign: "center", fontWeight: "bold", cursor: "pointer" }}>วันที่ยืนยัน ↕</th>
-                  <th style={{ padding: "0.75rem 1rem", textAlign: "center", fontWeight: "bold" }}>ดำเนินการ</th>
+                  <th style={{ padding: "0.75rem 1rem", textAlign: "center", fontWeight: "bold" }}>วันที่ยืนยัน</th>
+                  <th style={{ padding: "0.75rem 1rem", textAlign: "center", fontWeight: "bold" }}>ดำเนินการโดย</th>
                   <th style={{ padding: "0.75rem 1rem", textAlign: "center", fontWeight: "bold" }}>หมายเหตุ</th>
                   <th style={{ padding: "0.75rem 1rem", textAlign: "center", fontWeight: "bold" }}>สถานะ</th>
                   <th style={{ padding: "0.75rem 1rem", textAlign: "center", fontWeight: "bold" }}>Action</th>
-                  <th style={{ padding: "0.75rem 1rem", textAlign: "center", fontWeight: "bold" }}>QRCODE</th>
                 </tr>
               </thead>
               <tbody style={{ background: "#ffffff" }}>
-                {withdrawals.map((w) => (
+                {withdrawals.map((w, index) => (
                   <tr key={w.id} style={{ borderBottom: "1px solid #e5e7eb", transition: "all 0.2s" }}>
-                    
+
+                    {/* # ลำดับ */}
                     <td style={{ padding: "0.75rem 1rem", textAlign: "center", color: "#111827", fontSize: "0.95rem", fontWeight: "bold" }}>
-                      {withdrawals.length - withdrawals.indexOf(w)}
+                      {withdrawals.length - index}
                     </td>
 
+                    {/* ธนาคารลูกค้า + logo */}
                     <td style={{ padding: "0.75rem 1rem" }}>
                       <div style={{ display: "flex", alignItems: "center", gap: "12px", justifyContent: "center" }}>
-                        <img 
-                          src={`/logos/${w.to_bank}.webp`} 
-                          alt={w.to_bank} 
-                          style={{ width: "32px", height: "32px", borderRadius: "6px", objectFit: "cover" }}
-                          onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                        <img
+                          src={`https://fs.cdnrc.com/payment-layout/iconbank/${w.to_bank}.png`}
+                          alt={w.to_bank}
+                          style={{ width: "32px", height: "32px", borderRadius: "6px", objectFit: "contain", background: "#fff", padding: "2px", border: "1px solid #e5e7eb" }}
+                          onError={(e) => { e.currentTarget.src = "https://fs.cdnrc.com/payment-layout/svg/bank.svg"; }}
                         />
                         <div style={{ textAlign: "left" }}>
                           <div style={{ fontSize: "0.75rem", color: "#6b7280" }}>{w.to_bank}</div>
                           <div style={{ fontWeight: 600, color: "#111827", fontSize: "0.85rem" }}>{w.to_name}</div>
-                          <div style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "2px" }}>
-                            <span style={{ color: "#2563eb", fontWeight: "bold", fontSize: "0.85rem" }}>{w.to_account}</span>
-                            <button 
-                              onClick={() => handleCopy(w.to_account)} 
-                              style={{ background: "#f3f4f6", border: "1px solid #d1d5db", color: "#4b5563", cursor: "pointer", fontSize: "0.7rem", padding: "2px 6px", borderRadius: "4px", fontWeight: "bold" }}
-                            >
-                              คัดลอก
-                            </button>
-                          </div>
+                          <div style={{ color: "#2563eb", fontWeight: "bold", fontSize: "0.85rem", marginTop: "2px" }}>{w.to_account}</div>
                         </div>
                       </div>
                     </td>
 
+                    {/* ข้อมูลลูกค้า + ชื่อจริง */}
                     <td style={{ padding: "0.75rem 1rem", textAlign: "center" }}>
-                      <div style={{ fontWeight: 600, color: "#111827", fontSize: "0.85rem" }}>{w.user?.phone}</div>
+                      <div style={{ fontWeight: 600, color: "#111827", fontSize: "0.85rem" }}>{w.user?.bank_name || w.user?.full_name || "-"}</div>
                       <div style={{ fontSize: "0.75rem", color: "#6b7280" }}>{w.user?.username}</div>
+                      <div style={{ fontSize: "0.75rem", color: "#2563eb" }}>{w.user?.phone}</div>
                     </td>
 
-                    <td style={{ padding: "0.75rem 1rem", textAlign: "center", color: "#9ca3af" }}>-</td>
+                    {/* ก่อน */}
+                    <td style={{ padding: "0.75rem 1rem", textAlign: "center", color: "#111827", fontWeight: 500 }}>
+                      {w.balance_before ? fmt(w.balance_before) : "-"}
+                    </td>
 
+                    {/* ยอด */}
                     <td style={{ padding: "0.75rem 1rem", textAlign: "center" }}>
-                      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}>
-                        <span style={{ color: "#dc2626", fontWeight: "bold", fontSize: "1rem" }}>
-                          {fmt(w.amount)}
-                        </span>
-                        <button 
-                          onClick={() => handleCopy(w.amount.toString())} 
-                          style={{ background: "#f3f4f6", border: "1px solid #d1d5db", color: "#4b5563", cursor: "pointer", fontSize: "0.7rem", padding: "2px 6px", borderRadius: "4px", fontWeight: "bold" }}
-                        >
-                          คัดลอก
-                        </button>
-                      </div>
+                      <span style={{ color: "#dc2626", fontWeight: "bold", fontSize: "1rem" }}>
+                        {fmt(w.amount)}
+                      </span>
                     </td>
 
-                    <td style={{ padding: "0.75rem 1rem", textAlign: "center", color: "#9ca3af" }}>-</td>
+                    {/* คงเหลือ */}
+                    <td style={{ padding: "0.75rem 1rem", textAlign: "center", color: "#111827", fontWeight: 500 }}>
+                      {w.balance_after ? fmt(w.balance_after) : "-"}
+                    </td>
 
+                    {/* วันที่เข้าระบบ */}
                     <td style={{ padding: "0.75rem 1rem", textAlign: "center", color: "#6b7280", fontSize: "0.8rem" }}>
                       {new Date(w.created_at).toLocaleString("th-TH")}
                     </td>
 
-                    <td style={{ padding: "0.75rem 1rem", textAlign: "center", color: "#9ca3af" }}>-</td>
-                    <td style={{ padding: "0.75rem 1rem", textAlign: "center", color: "#9ca3af" }}>-</td>
-                    <td style={{ padding: "0.75rem 1rem", textAlign: "center", color: "#9ca3af" }}>-</td>
-                    <td style={{ padding: "0.75rem 1rem", textAlign: "center", color: "#9ca3af" }}>-</td>
+                    {/* ธนาคารถอน */}
+                    <td style={{ padding: "0.75rem 1rem", textAlign: "center", color: "#6b7280", fontSize: "0.8rem" }}>
+                      {w.to_bank}
+                    </td>
 
+                    {/* วันที่ยืนยัน */}
+                    <td style={{ padding: "0.75rem 1rem", textAlign: "center", color: "#6b7280", fontSize: "0.8rem" }}>
+                      {w.approved_at ? new Date(w.approved_at).toLocaleString("th-TH") : "-"}
+                    </td>
+
+                    {/* ดำเนินการโดย */}
+                    <td style={{ padding: "0.75rem 1rem", textAlign: "center", color: "#4f46e5", fontWeight: 600, fontSize: "0.8rem" }}>
+                      {w.approver?.username || "-"}
+                    </td>
+
+                    {/* หมายเหตุ */}
+                    <td style={{ padding: "0.75rem 1rem", textAlign: "center", color: "#6b7280", fontSize: "0.8rem" }}>
+                      {w.reject_reason || "-"}
+                    </td>
+
+                    {/* สถานะ */}
                     <td style={{ padding: "0.75rem 1rem", textAlign: "center" }}>
-                      <span style={{ 
+                      <span style={{
                         padding: "4px 8px", borderRadius: "4px", fontSize: "0.75rem", fontWeight: "bold",
                         background: w.status === "pending" ? "#fef3c7" : w.status === "approved" ? "#dcfce3" : "#fee2e2",
                         color: w.status === "pending" ? "#d97706" : w.status === "approved" ? "#166534" : "#991b1b"
@@ -226,23 +229,24 @@ export default function WithdrawalsPage() {
                       </span>
                     </td>
 
+                    {/* Action */}
                     <td style={{ padding: "0.5rem", textAlign: "center" }}>
                       {w.status === "pending" && (
                         <div style={{ display: "flex", flexDirection: "column", gap: "4px", width: "70px", margin: "0 auto" }}>
-                          <button 
-                            onClick={() => handleApprove(w.id)} 
+                          <button
+                            onClick={() => handleApprove(w.id)}
                             style={{ background: "#10b981", color: "white", border: "none", padding: "4px 6px", borderRadius: "4px", cursor: "pointer", fontSize: "0.75rem", fontWeight: "600" }}
                           >
                             อนุมัติ
                           </button>
-                          <button 
+                          <button
                             onClick={() => handleReject(w.id)}
                             style={{ background: "#f59e0b", color: "white", border: "none", padding: "4px 6px", borderRadius: "4px", cursor: "pointer", fontSize: "0.75rem", fontWeight: "600" }}
                           >
                             คืนเครดิต
                           </button>
-                          <button 
-                            onClick={() => handleDelete(w.id)} 
+                          <button
+                            onClick={() => handleDelete(w.id)}
                             style={{ background: "#ef4444", color: "white", border: "none", padding: "4px 6px", borderRadius: "4px", cursor: "pointer", fontSize: "0.75rem", fontWeight: "600" }}
                           >
                             ถังขยะ
@@ -250,8 +254,6 @@ export default function WithdrawalsPage() {
                         </div>
                       )}
                     </td>
-
-                    <td style={{ padding: "0.75rem 1rem", textAlign: "center", color: "#9ca3af" }}>-</td>
 
                   </tr>
                 ))}
