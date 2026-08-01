@@ -156,10 +156,10 @@ export default function WithdrawalsPage() {
                     <td style={{ padding: "0.75rem 1rem" }}>
                       <div style={{ display: "flex", alignItems: "center", gap: "12px", justifyContent: "center" }}>
                         <img
-                          src={`https://fs.cdnrc.com/payment-layout/iconbank/${w.to_bank}.png`}
+                          src={`/logos/${w.to_bank}.webp`}
                           alt={w.to_bank}
                           style={{ width: "32px", height: "32px", borderRadius: "6px", objectFit: "contain", background: "#fff", padding: "2px", border: "1px solid #e5e7eb" }}
-                          onError={(e) => { e.currentTarget.src = "https://fs.cdnrc.com/payment-layout/svg/bank.svg"; }}
+                          onError={(e) => { e.currentTarget.src = "/logos/BBL.webp"; }}
                         />
                         <div style={{ textAlign: "left" }}>
                           <div style={{ fontSize: "0.75rem", color: "#6b7280" }}>{w.to_bank}</div>
