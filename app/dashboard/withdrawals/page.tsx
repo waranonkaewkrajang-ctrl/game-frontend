@@ -19,8 +19,6 @@ export default function WithdrawalsPage() {
   const [withdrawals, setWithdrawals] = useState<Withdrawal[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("pending");
-  const [rejectId, setRejectId] = useState<number | null>(null);
-  const [rejectReason, setRejectReason] = useState("");
 
   const fetchWithdrawals = () => {
     setLoading(true);
@@ -33,34 +31,69 @@ export default function WithdrawalsPage() {
   useEffect(() => { fetchWithdrawals(); }, [filter]);
 
   const handleApprove = async (id: number) => {
-    if (!confirm("ยืนยันอนุมัติการถอนเงิน?")) return;
-    try { 
-      await api.post(`/admin/withdrawals/${id}/approve`); 
-      fetchWithdrawals(); 
-    } catch (err: any) { 
-      alert(err.response?.data?.message || "ทำรายการไม่สำเร็จ"); 
+    const result = await Swal.fire({
+      title: "ยืนยันอนุมัติถอนเงิน?",
+      text: "เงินจะถูกโอนให้ลูกค้า",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonText: "อนุมัติ",
+      cancelButtonText: "ยกเลิก",
+      confirmButtonColor: "#10b981",
+      cancelButtonColor: "#6b7280",
+    });
+    if (!result.isConfirmed) return;
+    try {
+      await api.post(`/admin/withdrawals/${id}/approve`);
+      Swal.fire({ icon: "success", title: "อนุมัติสำเร็จ", timer: 1500, showConfirmButton: false });
+      fetchWithdrawals();
+    } catch (err: any) {
+      Swal.fire({ icon: "error", title: "ไม่สำเร็จ", text: err.response?.data?.message || "เกิดข้อผิดพลาด" });
     }
   };
 
-  const handleReject = async () => {
-    if (!rejectId || !rejectReason) return;
-    try { 
-      await api.post(`/admin/withdrawals/${rejectId}/reject`, { reason: rejectReason }); 
-      setRejectId(null); 
-      setRejectReason(""); 
-      fetchWithdrawals(); 
-    } catch (err: any) { 
-      alert(err.response?.data?.message || "ทำรายการไม่สำเร็จ"); 
+  const handleReject = async (id: number) => {
+    const result = await Swal.fire({
+      title: "คืนเครดิตให้ลูกค้า",
+      text: "เงินจะคืนกลับเข้ากระเป๋าลูกค้าอัตโนมัติ",
+      input: "text",
+      inputPlaceholder: "ระบุเหตุผล เช่น ข้อมูลบัญชีไม่ตรง",
+      inputValidator: (value) => !value ? "กรุณาระบุเหตุผล" : null,
+      icon: "info",
+      showCancelButton: true,
+      confirmButtonText: "ยืนยันคืนเครดิต",
+      cancelButtonText: "ยกเลิก",
+      confirmButtonColor: "#f59e0b",
+      cancelButtonColor: "#6b7280",
+    });
+    if (!result.isConfirmed) return;
+    try {
+      await api.post(`/admin/withdrawals/${id}/reject`, { reason: result.value });
+      Swal.fire({ icon: "success", title: "คืนเครดิตสำเร็จ", timer: 1500, showConfirmButton: false });
+      fetchWithdrawals();
+    } catch (err: any) {
+      Swal.fire({ icon: "error", title: "ไม่สำเร็จ", text: err.response?.data?.message || "เกิดข้อผิดพลาด" });
     }
   };
 
   const handleDelete = async (id: number) => {
-    if (!confirm("ยืนยันย้ายรายการนี้ลงถังขยะใช่หรือไม่?")) return;
-    try { 
-      await api.delete(`/admin/withdrawals/${id}`); 
-      fetchWithdrawals(); 
-    } catch (err: any) { 
-      alert(err.response?.data?.message || "ลบข้อมูลไม่สำเร็จ"); 
+    const result = await Swal.fire({
+      title: "ย้ายลงถังขยะ?",
+      input: "text",
+      inputPlaceholder: "ระบุเหตุผล (ถ้ามี)",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "ยืนยันลบ",
+      cancelButtonText: "ยกเลิก",
+      confirmButtonColor: "#ef4444",
+      cancelButtonColor: "#6b7280",
+    });
+    if (!result.isConfirmed) return;
+    try {
+      await api.delete(`/admin/withdrawals/${id}`);
+      Swal.fire({ icon: "success", title: "ย้ายลงถังขยะแล้ว", timer: 1500, showConfirmButton: false });
+      fetchWithdrawals();
+    } catch (err: any) {
+      Swal.fire({ icon: "error", title: "ไม่สำเร็จ", text: err.response?.data?.message || "เกิดข้อผิดพลาด" });
     }
   };
 
@@ -123,8 +156,8 @@ export default function WithdrawalsPage() {
                 {withdrawals.map((w) => (
                   <tr key={w.id} style={{ borderBottom: "1px solid #e5e7eb", transition: "all 0.2s" }}>
                     
-                    <td style={{ padding: "0.75rem 1rem", textAlign: "center", color: "#6b7280", fontSize: "0.85rem", fontFamily: "monospace" }}>
-                      {w.reference_id}
+                    <td style={{ padding: "0.75rem 1rem", textAlign: "center", color: "#111827", fontSize: "0.95rem", fontWeight: "bold" }}>
+                      {withdrawals.length - withdrawals.indexOf(w)}
                     </td>
 
                     <td style={{ padding: "0.75rem 1rem" }}>
@@ -203,7 +236,7 @@ export default function WithdrawalsPage() {
                             อนุมัติ
                           </button>
                           <button 
-                            onClick={() => setRejectId(w.id)} 
+                            onClick={() => handleReject(w.id)}
                             style={{ background: "#f59e0b", color: "white", border: "none", padding: "4px 6px", borderRadius: "4px", cursor: "pointer", fontSize: "0.75rem", fontWeight: "600" }}
                           >
                             คืนเครดิต
@@ -227,21 +260,6 @@ export default function WithdrawalsPage() {
           </div>
         )}
       </div>
-
-      {/* Modal สำหรับปุ่ม คืนเครดิต */}
-      {rejectId && (
-        <div onClick={() => setRejectId(null)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 50 }}>
-          <div className="card" style={{ width: "100%", maxWidth: "400px", background: "#fff", padding: "2rem", borderRadius: "12px" }} onClick={(e) => e.stopPropagation()}>
-            <h3 style={{ fontSize: "1.125rem", fontWeight: "bold", marginBottom: "1rem", color: "#000" }}>คืนเครดิตให้ลูกค้า</h3>
-            <p style={{ color: "#d97706", fontSize: "0.875rem", marginBottom: "0.75rem" }}>เงินจะถูกคืนกลับเข้ากระเป๋าของลูกค้าโดยอัตโนมัติ</p>
-            <input className="input" placeholder="ระบุเหตุผล (เช่น ข้อมูลบัญชีไม่ตรง)" value={rejectReason} onChange={(e) => setRejectReason(e.target.value)} style={{ marginBottom: "1rem", width: "100%", padding: "10px", border: "1px solid #d1d5db", borderRadius: "8px", color: "#000" }} />
-            <div style={{ display: "flex", gap: "0.5rem" }}>
-              <button onClick={handleReject} style={{ flex: 1, background: "#f59e0b", color: "white", border: "none", borderRadius: "0.5rem", padding: "0.5rem", cursor: "pointer", fontWeight: "bold" }}>ยืนยันคืนเครดิต</button>
-              <button onClick={() => setRejectId(null)} style={{ flex: 1, background: "#e5e7eb", color: "#374151", border: "none", borderRadius: "0.5rem", padding: "0.5rem", cursor: "pointer", fontWeight: "bold" }}>ยกเลิก</button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
