@@ -74,13 +74,15 @@ export default function WithdrawalsPage() {
         {loading ? <p style={{ textAlign: "center", padding: "3rem", color: "#9ca3af" }}>⏳ กำลังโหลด...</p> : withdrawals.length === 0 ? <p style={{ textAlign: "center", padding: "3rem", color: "#6b7280" }}>ไม่มีรายการ</p> : (
           <table style={{ width: "100%", fontSize: "0.875rem", borderCollapse: "collapse" }}>
             <thead>
-              <tr style={{ background: "rgba(31,41,55,0.5)" }}>
-                <th style={{ textAlign: "left", padding: "1rem", color: "#9ca3af" }}>เลขอ้างอิง</th>
-                <th style={{ textAlign: "left", padding: "1rem", color: "#9ca3af" }}>ข้อมูลลูกค้า</th>
-                <th style={{ textAlign: "left", padding: "1rem", color: "#9ca3af" }}>ธนาคารที่โอนออก</th>
-                <th style={{ textAlign: "left", padding: "1rem", color: "#9ca3af" }}>ยอดถอน</th>
-                <th style={{ textAlign: "left", padding: "1rem", color: "#9ca3af" }}>สถานะ</th>
-                <th style={{ textAlign: "left", padding: "1rem", color: "#9ca3af", textAlign: "right" }}>จัดการ</th>
+              {/* เปลี่ยนพื้นหลังเป็นสีแดงอ่อน (#fee2e2) */}
+              <tr style={{ background: "#fee2e2", borderBottom: "2px solid #fca5a5" }}>
+                {/* เปลี่ยนสีตัวหนังสือเป็นสีดำ (#000) และลด padding ให้เล็กลง (0.75rem) */}
+                <th style={{ textAlign: "left", padding: "0.75rem 1rem", color: "#000", fontWeight: "bold" }}>เลขอ้างอิง</th>
+                <th style={{ textAlign: "left", padding: "0.75rem 1rem", color: "#000", fontWeight: "bold" }}>ข้อมูลลูกค้า</th>
+                <th style={{ textAlign: "left", padding: "0.75rem 1rem", color: "#000", fontWeight: "bold" }}>ธนาคารที่โอนออก</th>
+                <th style={{ textAlign: "left", padding: "0.75rem 1rem", color: "#000", fontWeight: "bold" }}>ยอดถอน</th>
+                <th style={{ textAlign: "left", padding: "0.75rem 1rem", color: "#000", fontWeight: "bold" }}>สถานะ</th>
+                <th style={{ textAlign: "right", padding: "0.75rem 1rem", color: "#000", fontWeight: "bold" }}>จัดการ</th>
               </tr>
             </thead>
             <tbody>
