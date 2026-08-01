@@ -38,6 +38,21 @@ export default function WithdrawalsPage() {
 
   const fmt = (n: string) => parseFloat(n).toLocaleString("th-TH", { minimumFractionDigits: 2 });
 
+  // ฟังก์ชันสำหรับก๊อปปี้ข้อความ
+  const handleCopy = (text: string) => {
+    navigator.clipboard.writeText(text);
+    Swal.fire({
+      title: "คัดลอกสำเร็จ",
+      icon: "success",
+      toast: true,
+      position: "top-end",
+      showConfirmButton: false,
+      timer: 1500,
+      background: "#1a1a2e",
+      color: "#fff"
+    });
+  };
+
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -60,29 +75,93 @@ export default function WithdrawalsPage() {
           <table style={{ width: "100%", fontSize: "0.875rem", borderCollapse: "collapse" }}>
             <thead>
               <tr style={{ background: "rgba(31,41,55,0.5)" }}>
-                {["เลขอ้างอิง", "สมาชิก", "จำนวนเงิน", "ธนาคาร", "เลขบัญชี", "ชื่อบัญชี", "สถานะ", "จัดการ"].map((h) => (
-                  <th key={h} style={{ textAlign: "left", padding: "1rem", color: "#9ca3af", fontWeight: 500 }}>{h}</th>
-                ))}
+                <th style={{ textAlign: "left", padding: "1rem", color: "#9ca3af" }}>เลขอ้างอิง</th>
+                <th style={{ textAlign: "left", padding: "1rem", color: "#9ca3af" }}>ข้อมูลลูกค้า</th>
+                <th style={{ textAlign: "left", padding: "1rem", color: "#9ca3af" }}>ธนาคารที่โอนออก</th>
+                <th style={{ textAlign: "left", padding: "1rem", color: "#9ca3af" }}>ยอดถอน</th>
+                <th style={{ textAlign: "left", padding: "1rem", color: "#9ca3af" }}>สถานะ</th>
+                <th style={{ textAlign: "left", padding: "1rem", color: "#9ca3af", textAlign: "right" }}>จัดการ</th>
               </tr>
             </thead>
             <tbody>
               {withdrawals.map((w) => (
-                <tr key={w.id} style={{ borderBottom: "1px solid #1f2937" }}>
-                  <td style={{ padding: "1rem", fontFamily: "monospace", fontSize: "0.75rem" }}>{w.reference_id}</td>
-                  <td style={{ padding: "1rem", fontWeight: 500 }}>{w.user?.username}</td>
-                  <td style={{ padding: "1rem", color: "#fb923c", fontWeight: 500 }}>฿{fmt(w.amount)}</td>
-                  <td style={{ padding: "1rem", color: "#9ca3af" }}>{w.to_bank}</td>
-                  <td style={{ padding: "1rem", color: "#9ca3af" }}>{w.to_account}</td>
-                  <td style={{ padding: "1rem", color: "#9ca3af" }}>{w.to_name}</td>
-                  <td style={{ padding: "1rem" }}><span className={w.status === "pending" ? "badge-pending" : w.status === "approved" ? "badge-approved" : "badge-rejected"}>{w.status}</span></td>
+                <tr key={w.id} style={{ borderBottom: "1px solid #1f2937", transition: "all 0.2s" }}>
+                  
+                  {/* 1. เลขอ้างอิง และ วันที่ */}
                   <td style={{ padding: "1rem" }}>
+                    <div style={{ fontFamily: "monospace", fontSize: "0.85rem", color: "#cbd5e1" }}>{w.reference_id}</div>
+                    <div style={{ fontSize: "0.75rem", color: "#6b7280", marginTop: "4px" }}>
+                      {new Date(w.created_at).toLocaleString("th-TH")}
+                    </div>
+                  </td>
+
+                  {/* 2. ข้อมูลลูกค้า */}
+                  <td style={{ padding: "1rem" }}>
+                    <div style={{ fontWeight: 600, color: "#fff" }}>{w.user?.username}</div>
+                    <div style={{ fontSize: "0.85rem", color: "#9ca3af" }}>{w.user?.phone}</div>
+                  </td>
+
+                  {/* 3. ธนาคารลูกค้า (รวมโลโก้ + เลขบัญชี + ปุ่มก๊อปปี้) */}
+                  <td style={{ padding: "1rem" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                      <img 
+                        src={`/logos/${w.to_bank}.webp`} 
+                        alt={w.to_bank} 
+                        style={{ width: "36px", height: "36px", borderRadius: "8px", objectFit: "cover" }}
+                        onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                      />
+                      <div>
+                        <div style={{ fontSize: "0.8rem", color: "#94a3b8" }}>{w.to_bank}</div>
+                        <div style={{ fontWeight: 500, color: "#e2e8f0", fontSize: "0.9rem" }}>{w.to_name}</div>
+                        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                          <span style={{ color: "#3b82f6", fontWeight: "bold" }}>{w.to_account}</span>
+                          <button 
+                            onClick={() => handleCopy(w.to_account)}
+                            style={{ background: "rgba(255,255,255,0.1)", border: "none", color: "#cbd5e1", cursor: "pointer", padding: "2px 6px", borderRadius: "4px", fontSize: "0.75rem" }}
+                          >
+                            คัดลอก
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+
+                  {/* 4. ยอดถอน */}
+                  <td style={{ padding: "1rem" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                      <span style={{ color: "#fb923c", fontWeight: "bold", fontSize: "1.1rem" }}>
+                        ฿{fmt(w.amount)}
+                      </span>
+                      <button 
+                        onClick={() => handleCopy(w.amount.toString())}
+                        style={{ background: "rgba(255,255,255,0.1)", border: "none", color: "#cbd5e1", cursor: "pointer", padding: "2px 6px", borderRadius: "4px", fontSize: "0.75rem" }}
+                      >
+                        คัดลอก
+                      </button>
+                    </div>
+                  </td>
+
+                  {/* 5. สถานะ */}
+                  <td style={{ padding: "1rem" }}>
+                    <span className={w.status === "pending" ? "badge-pending" : w.status === "approved" ? "badge-approved" : "badge-rejected"}>
+                      {w.status === "pending" ? "⏳ รอดำเนินการ" : w.status === "approved" ? "✅ สำเร็จ" : "❌ ปฏิเสธ"}
+                    </span>
+                  </td>
+
+                  {/* 6. จัดการ */}
+                  <td style={{ padding: "1rem", textAlign: "right" }}>
                     {w.status === "pending" && (
-                      <div style={{ display: "flex", gap: "0.5rem" }}>
-                        <button onClick={() => handleApprove(w.id)} className="btn-success" style={{ fontSize: "0.75rem", padding: "0.375rem 0.75rem" }}>✅ อนุมัติ</button>
-                        <button onClick={() => setRejectId(w.id)} className="btn-danger" style={{ fontSize: "0.75rem", padding: "0.375rem 0.75rem" }}>❌ ปฏิเสธ</button>
+                      <div style={{ display: "flex", gap: "0.5rem", justifyContent: "flex-end" }}>
+                        <button onClick={() => handleApprove(w.id)} style={{ background: "#10b981", color: "white", border: "none", padding: "6px 12px", borderRadius: "6px", cursor: "pointer", fontWeight: "bold", fontSize: "0.8rem" }}>
+                          โอนสำเร็จ
+                        </button>
+                        <button onClick={() => setRejectId(w.id)} style={{ background: "#ef4444", color: "white", border: "none", padding: "6px 12px", borderRadius: "6px", cursor: "pointer", fontWeight: "bold", fontSize: "0.8rem" }}>
+                          ปฏิเสธ
+                        </button>
                       </div>
                     )}
                   </td>
+
                 </tr>
               ))}
             </tbody>
