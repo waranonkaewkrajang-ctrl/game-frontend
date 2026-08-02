@@ -92,6 +92,7 @@ const menuItems = [
   { title: "ข้อมูลเว็บ & ติดต่อ", href: "/dashboard/settings/contact", permissionKey: "settings" },
   { title: "แจ้งเตือน Telegram", href: "/dashboard/settings/telegram", permissionKey: "settings" },
   { title: "แรงค์สมาชิก", href: "/dashboard/settings/ranks", permissionKey: "settings" },
+  { title: "วงล้อนำโชค", href: "/dashboard/spin-wheel", permissionKey: "settings" },
 ],
   },
 ];
