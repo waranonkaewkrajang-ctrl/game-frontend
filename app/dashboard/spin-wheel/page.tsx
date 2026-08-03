@@ -383,14 +383,14 @@ export default function SpinWheelAdminPage() {
       {/* Tabs */}
       <div style={{ display: "flex", gap: "4px", background: "#f3f4f6", padding: "4px", borderRadius: "10px", width: "fit-content" }}>
         {[
-          { v: "prizes" as const, l: "🎁 รางวัล" },
-          { v: "multipliers" as const, l: "✖️ ตัวคูณ" },
-          { v: "settings" as const, l: "⚙️ ตั้งค่า" },
-          { v: "history" as const, l: "📋 ประวัติ" },
+          { v: "prizes" as const, l: "รางวัล" },
+          { v: "multipliers" as const, l: "ตัวคูณ" },
+          { v: "settings" as const, l: "ตั้งค่า" },
+          { v: "history" as const, l: "ประวัติ" },
         ].map((t) => (
           <button key={t.v} onClick={() => setTab(t.v)} style={{
             padding: "8px 20px", borderRadius: "8px", fontSize: "0.85rem", fontWeight: 500, border: "none", cursor: "pointer",
-            background: tab === t.v ? "#fff" : "transparent", color: tab === t.v ? "#111827" : "#6b7280",
+            background: tab === t.v ? "#dbeafe" : "transparent", color: tab === t.v ? "#1d4ed8" : "#6b7280",
             boxShadow: tab === t.v ? "0 1px 3px rgba(0,0,0,0.08)" : "none",
           }}>{t.l}</button>
         ))}
