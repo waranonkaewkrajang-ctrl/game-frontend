@@ -301,7 +301,9 @@ export default function PromotionsPage() {
                 <div style={{ gridColumn: "span 2" }}>
                   <label style={labelStyle}>รูปภาพโปรโมชัน (อัพโหลด หรือ ใส่ URL)</label>
                   <div style={{ display: "flex", gap: "8px", marginTop: "6px" }}>
-                    <input type="file" accept=".jpg,.jpeg,.png,.webp,.gif" style={{ flex: 1, fontSize: "0.8rem", padding: "6px" }}
+                    <label style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", padding: "10px", background: "#2563eb", color: "white", borderRadius: "8px", cursor: "pointer", fontSize: "0.8rem", fontWeight: 600 }}>
+                       อัพโหลดภาพ
+                      <input type="file" accept=".jpg,.jpeg,.png,.webp,.gif" style={{ display: "none" }}
                       onChange={async (e) => {
                         const file = e.target.files?.[0];
                         if (!file) return;
@@ -314,6 +316,7 @@ export default function PromotionsPage() {
                         } catch { Swal.fire({ icon: "error", title: "อัพโหลดไม่สำเร็จ" }); }
                       }}
                     />
+                    </label>
                   </div>
                   <input type="url" style={{ ...inputStyle, marginTop: "6px" }} placeholder="หรือวาง URL รูปภาพ https://..." value={formData.image_url} onChange={(e) => setFormData({ ...formData, image_url: e.target.value })} />
                   {formData.image_url && (
