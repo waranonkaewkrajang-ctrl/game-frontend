@@ -187,7 +187,7 @@ export default function PromotionsPage() {
 
               {/* รูปภาพ (ถ้ามี) */}
               {p.image_url && (
-                <img src={p.image_url} alt={p.title} style={{ width: "100%", height: "140px", objectFit: "contain", backgroundColor: "#0f172a" }} />
+                <img src={p.image_url} alt={p.title} style={{ width: "100%", height: "140px", objectFit: "contain", backgroundColor: "transparent" }} />
               )}
 
               <div style={{ padding: "1.25rem" }}>
