@@ -131,7 +131,8 @@ export default function BannersPage() {
                     });
                     const data = await res.json();
                     if (data.status === "success" && data.url) {
-                      setImageUrl(data.url);
+                      const fullUrl = data.url.startsWith("http") ? data.url : `https://admintg289.sbs${data.url}`;
+                      setImageUrl(fullUrl);
                       Swal.fire("สำเร็จ", "อัพโหลดภาพเรียบร้อย", "success");
                     } else {
                       Swal.fire("ผิดพลาด", data.message || "อัพโหลดไม่สำเร็จ", "error");
@@ -146,8 +147,8 @@ export default function BannersPage() {
           {/* หรือใส่ URL */}
           <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
             <input 
-              type="url" 
-              placeholder="หรือวาง URL รูปภาพ https://..." 
+              type="text" 
+              placeholder="หรือวาง URL รูปภาพ https://..."
               value={imageUrl}
               onChange={(e) => setImageUrl(e.target.value)}
               style={{ flex: 1, padding: "12px 16px", border: "1px solid #cbd5e1", borderRadius: "8px", outline: "none", fontSize: "14px" }}
