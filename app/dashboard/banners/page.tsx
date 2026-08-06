@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import Swal from "sweetalert2";
+import api from "@/lib/api";
 
 export default function BannersPage() {
   const [banners, setBanners] = useState<any[]>([]);
@@ -119,14 +120,10 @@ export default function BannersPage() {
                   const fd = new FormData();
                   fd.append("image", file);
                   try {
-                    const token = localStorage.getItem("admin_token");
-                    const res = await fetch(`${API_URL}/admin/banners/upload-image`, {
-                      method: "POST",
-                      headers: { "Authorization": `Bearer ${token}`, "Accept": "application/json" },
-                      body: fd,
+                    const res = await api.post("/admin/banners/upload-image", fd, {
+                      headers: { "Content-Type": "multipart/form-data" },
                     });
-                    const data = await res.json();
-                    if (data.url) { setImageUrl(data.url); Swal.fire("สำเร็จ", "อัพโหลดภาพเรียบร้อย", "success"); }
+                    if (res.data.url) { setImageUrl(res.data.url); Swal.fire("สำเร็จ", "อัพโหลดภาพเรียบร้อย", "success"); }
                   } catch { Swal.fire("ผิดพลาด", "อัพโหลดไม่สำเร็จ", "error"); }
                 }}
               />
