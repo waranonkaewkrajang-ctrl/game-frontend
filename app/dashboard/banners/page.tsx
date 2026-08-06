@@ -9,7 +9,7 @@ export default function BannersPage() {
   const [imageUrl, setImageUrl] = useState("");
 
   // ดึง URL ของ API จาก Environment หรือกำหนดค่าตรงๆ
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://31.97.220.103/api";
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || "/api";
 
   const fetchBanners = async () => {
     try {
