@@ -110,7 +110,7 @@ export default function BannersPage() {
           {/* อัพโหลดไฟล์ */}
           <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
             <label style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", padding: "12px 24px", background: "#2563eb", color: "white", borderRadius: "8px", cursor: "pointer", fontSize: "14px", fontWeight: 600 }}>
-              📷 อัพโหลดภาพ
+               อัพโหลดภาพ
               <input type="file" accept=".jpg,.jpeg,.png,.webp,.gif" style={{ display: "none" }}
                 onChange={async (e) => {
                   const file = e.target.files?.[0];
