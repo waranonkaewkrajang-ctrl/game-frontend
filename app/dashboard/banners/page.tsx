@@ -106,20 +106,55 @@ export default function BannersPage() {
       {/* ฟอร์มเพิ่มแบนเนอร์ */}
       <div style={{ background: "white", padding: "24px", borderRadius: "12px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)", marginBottom: "24px" }}>
         <h2 style={{ fontSize: "16px", fontWeight: "600", marginBottom: "16px", color: "#334155" }}>เพิ่มแบนเนอร์ใหม่</h2>
-        <form onSubmit={handleAddBanner} style={{ display: "flex", gap: "12px", alignItems: "center" }}>
-          <input 
-            type="url" 
-            placeholder="วางลิงก์รูปภาพ (URL) เช่น https://example.com/banner.jpg" 
-            value={imageUrl}
-            onChange={(e) => setImageUrl(e.target.value)}
-            style={{ flex: 1, padding: "12px 16px", border: "1px solid #cbd5e1", borderRadius: "8px", outline: "none", fontSize: "14px" }}
-          />
-          <button type="submit" style={{ padding: "12px 24px", background: "#4f46e5", color: "white", border: "none", borderRadius: "8px", cursor: "pointer", fontWeight: "600", transition: "0.2s" }}
-            onMouseEnter={(e) => e.currentTarget.style.background = "#4338ca"}
-            onMouseLeave={(e) => e.currentTarget.style.background = "#4f46e5"}
-          >
-            + เพิ่มแบนเนอร์
-          </button>
+        <form onSubmit={handleAddBanner} style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+          {/* อัพโหลดไฟล์ */}
+          <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
+            <label style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", padding: "12px 24px", background: "#2563eb", color: "white", borderRadius: "8px", cursor: "pointer", fontSize: "14px", fontWeight: 600 }}>
+              📷 อัพโหลดภาพ
+              <input type="file" accept=".jpg,.jpeg,.png,.webp,.gif" style={{ display: "none" }}
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  if (file.size > 5 * 1024 * 1024) { Swal.fire("แจ้งเตือน", "ไฟล์ใหญ่เกิน 5MB", "warning"); return; }
+                  const fd = new FormData();
+                  fd.append("image", file);
+                  try {
+                    const token = localStorage.getItem("admin_token");
+                    const res = await fetch(`${API_URL}/admin/banners/upload-image`, {
+                      method: "POST",
+                      headers: { "Authorization": `Bearer ${token}` },
+                      body: fd,
+                    });
+                    const data = await res.json();
+                    if (data.url) { setImageUrl(data.url); Swal.fire("สำเร็จ", "อัพโหลดภาพเรียบร้อย", "success"); }
+                  } catch { Swal.fire("ผิดพลาด", "อัพโหลดไม่สำเร็จ", "error"); }
+                }}
+              />
+            </label>
+            <span style={{ fontSize: "13px", color: "#94a3b8" }}>รองรับ .jpg .png .webp สูงสุด 5MB</span>
+          </div>
+
+          {/* หรือใส่ URL */}
+          <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
+            <input 
+              type="url" 
+              placeholder="หรือวาง URL รูปภาพ https://..." 
+              value={imageUrl}
+              onChange={(e) => setImageUrl(e.target.value)}
+              style={{ flex: 1, padding: "12px 16px", border: "1px solid #cbd5e1", borderRadius: "8px", outline: "none", fontSize: "14px" }}
+            />
+            <button type="submit" style={{ padding: "12px 24px", background: "#4f46e5", color: "white", border: "none", borderRadius: "8px", cursor: "pointer", fontWeight: "600", whiteSpace: "nowrap" }}>
+              + เพิ่มแบนเนอร์
+            </button>
+          </div>
+
+          {/* พรีวิว */}
+          {imageUrl && (
+            <div style={{ position: "relative", display: "inline-block" }}>
+              <img src={imageUrl} alt="preview" style={{ maxHeight: "120px", borderRadius: "8px", border: "1px solid #e2e8f0" }} onError={(e) => { e.currentTarget.style.display = "none"; }} />
+              <button type="button" onClick={() => setImageUrl("")} style={{ position: "absolute", top: "4px", right: "4px", background: "#ef4444", color: "white", border: "none", borderRadius: "50%", width: "20px", height: "20px", cursor: "pointer", fontSize: "12px" }}>✕</button>
+            </div>
+          )}
         </form>
       </div>
 
