@@ -122,7 +122,7 @@ export default function BannersPage() {
                     const token = localStorage.getItem("admin_token");
                     const res = await fetch(`${API_URL}/admin/banners/upload-image`, {
                       method: "POST",
-                      headers: { "Authorization": `Bearer ${token}` },
+                      headers: { "Authorization": `Bearer ${token}`, "Accept": "application/json" },
                       body: fd,
                     });
                     const data = await res.json();
