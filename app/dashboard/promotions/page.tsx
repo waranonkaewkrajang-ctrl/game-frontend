@@ -187,7 +187,7 @@ export default function PromotionsPage() {
 
               {/* รูปภาพ (ถ้ามี) */}
               {p.image_url && (
-                <img src={p.image_url} alt={p.title} style={{ width: "100%", height: "140px", objectFit: "cover" }} />
+                <img src={p.image_url} alt={p.title} style={{ width: "100%", height: "140px", objectFit: "contain", backgroundColor: "#0f172a" }} />
               )}
 
               <div style={{ padding: "1.25rem" }}>
@@ -228,10 +228,10 @@ export default function PromotionsPage() {
 
                 {/* ปุ่ม */}
                 <div style={{ display: "flex", gap: "0.5rem", borderTop: "1px solid #f1f5f9", paddingTop: "0.75rem" }}>
-                  <button onClick={() => openModal(p)} style={{ flex: 1, display: "flex", justifyContent: "center", alignItems: "center", gap: "0.3rem", padding: "0.45rem", border: "1px solid #e2e8f0", background: "#f8fafc", color: "#475569", borderRadius: "0.375rem", cursor: "pointer", fontSize: "0.8rem", fontWeight: 500 }}>
+                  <button onClick={() => openModal(p)} style={{ flex: 1, display: "flex", justifyContent: "center", alignItems: "center", gap: "0.3rem", padding: "0.45rem", border: "1px solid #fdba74", background: "#ffedd5", color: "#ea580c", borderRadius: "0.375rem", cursor: "pointer", fontSize: "0.8rem", fontWeight: 600 }}>
                     <Edit size={14} /> แก้ไข
                   </button>
-                  <button onClick={() => handleDelete(p.id, p.title)} style={{ flex: 1, display: "flex", justifyContent: "center", alignItems: "center", gap: "0.3rem", padding: "0.45rem", border: "1px solid #fecaca", background: "#fef2f2", color: "#ef4444", borderRadius: "0.375rem", cursor: "pointer", fontSize: "0.8rem", fontWeight: 500 }}>
+                  <button onClick={() => handleDelete(p.id, p.title)} style={{ flex: 1, display: "flex", justifyContent: "center", alignItems: "center", gap: "0.3rem", padding: "0.45rem", border: "1px solid #dc2626", background: "#ef4444", color: "white", borderRadius: "0.375rem", cursor: "pointer", fontSize: "0.8rem", fontWeight: 600 }}>
                     <Trash2 size={14} /> ลบ
                   </button>
                 </div>
