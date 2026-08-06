@@ -120,10 +120,22 @@ export default function BannersPage() {
                   const fd = new FormData();
                   fd.append("image", file);
                   try {
-                    const res = await api.post("/admin/banners/upload-image", fd, {
-                      headers: { "Content-Type": "multipart/form-data" },
+                    const token = localStorage.getItem("admin_token");
+                    const res = await fetch(`${API_URL}/admin/banners/upload-image`, {
+                      method: "POST",
+                      headers: {
+                        "Authorization": `Bearer ${token}`,
+                        "Accept": "application/json",
+                      },
+                      body: fd,
                     });
-                    if (res.data.url) { setImageUrl(res.data.url); Swal.fire("สำเร็จ", "อัพโหลดภาพเรียบร้อย", "success"); }
+                    const data = await res.json();
+                    if (data.status === "success" && data.url) {
+                      setImageUrl(data.url);
+                      Swal.fire("สำเร็จ", "อัพโหลดภาพเรียบร้อย", "success");
+                    } else {
+                      Swal.fire("ผิดพลาด", data.message || "อัพโหลดไม่สำเร็จ", "error");
+                    }
                   } catch { Swal.fire("ผิดพลาด", "อัพโหลดไม่สำเร็จ", "error"); }
                 }}
               />
