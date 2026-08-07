@@ -50,7 +50,7 @@ export default function DepositsPage() {
         <div style={{ display: "flex", gap: "0.5rem" }}>
           {[{ v: "pending", l: "รอดำเนินการ" }, { v: "approved", l: "อนุมัติแล้ว" }, { v: "rejected", l: "ปฏิเสธ" }, { v: "", l: "ทั้งหมด" }].map((s) => (
             <button key={s.v} onClick={() => setFilter(s.v)}
-              style={{ padding: "0.5rem 1rem", borderRadius: "0.75rem", fontSize: "0.875rem", fontWeight: 500, border: "none", cursor: "pointer", background: filter === s.v ? "#4f46e5" : "#1f2937", color: filter === s.v ? "white" : "#9ca3af" }}>
+              style={{ padding: "0.5rem 1rem", borderRadius: "0.75rem", fontSize: "0.875rem", fontWeight: 500, border: "none", cursor: "pointer", background: filter === s.v ? "#34d399" : "#f1f5f9", color: filter === s.v ? "white" : "#64748b" }}>
               {s.l}
             </button>
           ))}
