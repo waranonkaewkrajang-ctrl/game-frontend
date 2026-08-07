@@ -59,9 +59,9 @@ export default function DepositsPage() {
         {loading ? <p style={{ textAlign: "center", padding: "3rem", color: "#9ca3af" }}>⏳ กำลังโหลด...</p> : deposits.length === 0 ? <p style={{ textAlign: "center", padding: "3rem", color: "#6b7280" }}>ไม่มีรายการ</p> : (
           <table style={{ width: "100%", fontSize: "0.875rem", borderCollapse: "collapse" }}>
             <thead>
-              <tr style={{ background: "rgba(31,41,55,0.5)" }}>
+              <tr style={{ background: "#dbeafe" }}>
                 {["เลขอ้างอิง", "สมาชิก", "จำนวนเงิน", "ช่องทาง", "สถานะ", "วันที่", "จัดการ"].map((h) => (
-                  <th key={h} style={{ textAlign: "left", padding: "1rem", color: "#9ca3af", fontWeight: 500 }}>{h}</th>
+                  <th key={h} style={{ textAlign: "left", padding: "1rem", color: "#1e40af", fontWeight: 700 }}>{h}</th>
                 ))}
               </tr>
             </thead>
