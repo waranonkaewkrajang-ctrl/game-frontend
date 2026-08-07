@@ -155,7 +155,7 @@ export default function UserProfilePage() {
       </div>
 
       {/* Tab: รายการฝาก / ถอน */}
-      <div style={{ maxWidth: "900px", margin: "0 auto", width: "100%", background: "white", border: "1px solid #e2e8f0", borderRadius: "0.5rem", overflow: "hidden" }}>
+      <div style={{ maxWidth: "900px", margin: "0", width: "100%", background: "white", border: "1px solid #e2e8f0", borderRadius: "0.5rem", overflow: "hidden" }}>
         <div style={{ display: "flex", borderBottom: "1px solid #e2e8f0" }}>
           {[
             { key: "deposits" as const, label: `รายการฝาก (${deposits.length})` },
