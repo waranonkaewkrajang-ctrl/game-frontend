@@ -133,7 +133,7 @@ export default function UserProfilePage() {
                         <td style={{ padding: "0.75rem 1rem" }}>
                           <span style={{ padding: "0.2rem 0.6rem", borderRadius: "9999px", fontSize: "0.7rem", fontWeight: 600, background: sc.bg, color: sc.color }}>{d.status}</span>
                         </td>
-                        <td style={{ padding: "0.75rem 1rem", color: "#6366f1", fontSize: "0.8rem", fontWeight: 500 }}>{d.approved_by ? (d.approved_by?.username || `Admin #${d.approved_by}`) : "-"}</td>
+                        <td style={{ padding: "0.75rem 1rem", color: "#6366f1", fontSize: "0.8rem", fontWeight: 500 }}>{d.approved_method === "auto" ? "🤖 AUTO" : d.approved_by ? (d.approved_by?.username || `Admin #${d.approved_by}`) : "-"}</td>
                         <td style={{ padding: "0.75rem 1rem", color: "#64748b", fontSize: "0.8rem" }}>{new Date(d.created_at).toLocaleString("th-TH")}</td>
                       </tr>
                     );
