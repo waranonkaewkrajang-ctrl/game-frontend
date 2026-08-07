@@ -188,7 +188,7 @@ export default function UserProfilePage() {
           { label: "คะแนน", key: "point", value: user.wallet?.point_balance ?? 0, color: "#f59e0b" },
           { label: "วงล้อ", key: "spin", value: user.wallet?.ticket_balance ?? 0, color: "#7c3aed", unit: "ใบ" },
         ].map((item) => (
-          <div key={item.key} style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.75rem", paddingBottom: "0.75rem", borderBottom: item.key !== "spin" ? "1px solid #f1f5f9" : "none" }}>
+          <div key={item.key} style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.75rem", paddingBottom: "0.75rem", borderBottom: "none" }}>
             <span style={{ width: "60px", fontSize: "0.9rem", color: "#374151", fontWeight: 500, textAlign: "right" }}>{item.label} :</span>
             <button onClick={async () => {
               const { value: amt } = await Swal.fire({ title: `เพิ่ม${item.label}`, input: "number", inputPlaceholder: "ใส่จำนวน", showCancelButton: true, confirmButtonText: "ยืนยัน", cancelButtonText: "ยกเลิก", confirmButtonColor: "#22c55e" });
@@ -198,7 +198,7 @@ export default function UserProfilePage() {
                 .then(() => { Swal.fire({ icon: "success", title: `เพิ่ม${item.label}สำเร็จ`, timer: 1500, showConfirmButton: false }); window.location.reload(); })
                 .catch((e) => Swal.fire({ icon: "error", title: e.response?.data?.message || "เกิดข้อผิดพลาด" }));
             }} style={{ padding: "0.5rem 0.75rem", background: "#22c55e", color: "white", border: "none", borderRadius: "0.375rem", cursor: "pointer", fontWeight: 700, fontSize: "0.9rem" }}>+</button>
-            <input readOnly value={item.key === "credit" ? fmt(item.value) : `${item.value}${item.unit ? ` ${item.unit}` : ""}`} style={{ textAlign: "center", width: "40%", borderRadius: "0.375rem", border: "1px solid #d1d5db", padding: "0.3rem 0.5rem", fontSize: "0.85rem", fontWeight: 600, color: "#0f172a", background: "white" }} />
+            <input readOnly value={item.key === "credit" ? fmt(item.value) : `${item.value}${item.unit ? ` ${item.unit}` : ""}`} style={{ textAlign: "center", width: "30%", borderRadius: "0.375rem", border: "1px solid #d1d5db", padding: "0.25rem 0.4rem", fontSize: "0.8rem", fontWeight: 600, color: "#0f172a", background: "white" }} />
             <button onClick={async () => {
               const { value: amt } = await Swal.fire({ title: `ลด${item.label}`, input: "number", inputPlaceholder: "ใส่จำนวน", showCancelButton: true, confirmButtonText: "ยืนยัน", cancelButtonText: "ยกเลิก", confirmButtonColor: "#ef4444" });
               if (!amt || isNaN(Number(amt))) return;
