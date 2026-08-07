@@ -116,9 +116,9 @@ export default function UserProfilePage() {
             ) : (
               <table style={{ width: "100%", fontSize: "0.85rem", borderCollapse: "collapse" }}>
                 <thead>
-                  <tr style={{ background: "#f8fafc", borderBottom: "1px solid #e2e8f0" }}>
+                  <tr style={{ background: "#dbeafe", borderBottom: "1px solid #93c5fd" }}>
                     {["ID", "จำนวน", "ช่องทาง", "สถานะ", "ทำรายการโดย", "วันที่"].map((h) => (
-                      <th key={h} style={{ padding: "0.75rem 1rem", color: "#475569", fontWeight: 600, textAlign: "left" }}>{h}</th>
+                      <th key={h} style={{ padding: "0.5rem 0.75rem", color: "#1e40af", fontWeight: 700, textAlign: "left", fontSize: "0.8rem" }}>{h}</th>
                     ))}
                   </tr>
                 </thead>
@@ -147,9 +147,9 @@ export default function UserProfilePage() {
             ) : (
               <table style={{ width: "100%", fontSize: "0.85rem", borderCollapse: "collapse" }}>
                 <thead>
-                  <tr style={{ background: "#f8fafc", borderBottom: "1px solid #e2e8f0" }}>
+                  <tr style={{ background: "#dbeafe", borderBottom: "1px solid #93c5fd" }}>
                     {["ID", "จำนวน", "สถานะ", "ทำรายการโดย", "วันที่"].map((h) => (
-                      <th key={h} style={{ padding: "0.75rem 1rem", color: "#475569", fontWeight: 600, textAlign: "left" }}>{h}</th>
+                      <th key={h} style={{ padding: "0.5rem 0.75rem", color: "#1e40af", fontWeight: 700, textAlign: "left", fontSize: "0.8rem" }}>{h}</th>
                     ))}
                   </tr>
                 </thead>
