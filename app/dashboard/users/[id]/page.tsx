@@ -31,45 +31,12 @@ export default function UserProfilePage() {
     ? { bg: "#fef9c3", color: "#854d0e" }
     : { bg: "#fee2e2", color: "#991b1b" };
 
-  // ฟังก์ชันจัดการเพิ่ม/ลด (API)
-  const handleAdjust = async (type: "credit" | "point" | "spin", action: "add" | "sub") => {
-    const labels = { credit: "เครดิต", point: "คะแนน", spin: "วงล้อ" };
-    const label = labels[type];
-    const act = action === "add" ? "เพิ่ม" : "ลด";
-    const color = action === "add" ? "#22c55e" : "#ef4444";
-    
-    const { value: amt } = await Swal.fire({ 
-      title: `${act}${label}`, 
-      input: "number", 
-      inputPlaceholder: "ใส่จำนวน", 
-      showCancelButton: true, 
-      confirmButtonText: "ยืนยัน", 
-      cancelButtonText: "ยกเลิก", 
-      confirmButtonColor: color 
-    });
-
-    if (!amt || isNaN(Number(amt))) return;
-
-    let amount = Number(amt);
-    if (action === "sub") amount = -amount;
-
-    const endpoint = type === "spin" ? `/admin/users/${user.id}/adjust-tickets` 
-                   : type === "point" ? `/admin/users/${user.id}/adjust-points` 
-                   : `/admin/users/${user.id}/adjust`;
-
-    api.post(endpoint, { amount, description: `Admin ${act}${label}` })
-      .then(() => { 
-        Swal.fire({ icon: "success", title: `${act}${label}สำเร็จ`, timer: 1500, showConfirmButton: false }); 
-        window.location.reload(); 
-      })
-      .catch((e) => Swal.fire({ icon: "error", title: e.response?.data?.message || "เกิดข้อผิดพลาด" }));
-  };
-
   if (loading) return <div style={{ textAlign: "center", padding: "4rem", color: "#64748b" }}>กำลังโหลดข้อมูล...</div>;
   if (!user) return <div style={{ textAlign: "center", padding: "4rem", color: "#64748b" }}>ไม่พบข้อมูลสมาชิก</div>;
 
   const deposits = user.deposits || [];
   const withdrawals = user.withdrawals || [];
+  const transactions = user.wallet?.transactions || [];
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
@@ -126,60 +93,70 @@ export default function UserProfilePage() {
           ))}
         </div>
 
-        {/* 🌟 Card: ปรับเครดิต / คะแนน / วงล้อ (ดีไซน์ Tailwind เต็มรูปแบบ) */}
-        <div className="flex flex-col divide-y divide-gray-200 rounded-lg bg-white shadow p-4 border border-gray-200">
-          
-          {/* เครดิต */}
-          <dl className="grid grid-cols-12 gap-2 mb-3 pt-2">
-            <dd className="col-span-3 text-right"><span className="inline-block pt-1.5 text-gray-700 text-sm font-medium">เครดิต :</span></dd>
-            <dd className="col-span-9 flex items-center justify-start gap-2">
-              <button title="เพิ่ม" onClick={() => handleAdjust("credit", "add")} className="rounded-lg bg-green-500 h-8 px-4 text-white transition-colors duration-150 hover:bg-gray-500 flex items-center justify-center font-bold text-lg leading-none cursor-pointer border-none shadow-sm">
-                +
-              </button>
-              <input type="text" value={fmt(user.wallet?.balance)} readOnly className="text-center w-3/6 rounded-md border border-gray-300 py-1.5 px-3 text-emerald-500 font-bold focus:outline-none md:text-md sm:text-sm bg-gray-50 shadow-inner" />
-              <button title="ลบ" onClick={() => handleAdjust("credit", "sub")} className="rounded-lg bg-red-500 h-8 px-4 text-white transition-colors duration-150 hover:bg-gray-500 flex items-center justify-center font-bold text-lg leading-none cursor-pointer border-none shadow-sm">
-                −
-              </button>
-            </dd>
-          </dl>
+        {/* Card: ปรับเครดิต / คะแนน / วงล้อ (ดีไซน์ Tailwind ตามต้นฉบับเป๊ะๆ) */}
+        <div className="flex flex-col divide-y divide-gray-200 rounded-lg bg-white shadow p-4 mt-4" style={{ border: "1px solid #e2e8f0" }}>
+          {[
+            { label: "เครดิต", key: "credit", value: user.wallet?.balance || 0 },
+            { label: "คะแนน", key: "point", value: user.wallet?.point_balance || 0 },
+            { label: "วงล้อ", key: "spin", value: user.wallet?.ticket_balance || 0 },
+            { label: "สูตร", key: "formula", value: 0 }, // สูตรยังไม่มี API รับรอง
+          ].map((item, index) => (
+            <dl key={item.key} className={`grid grid-cols-12 gap-2 mb-3 ${index !== 0 ? 'pt-3' : ''}`} style={{ borderBottom: index !== 3 ? '1px solid #f1f5f9' : 'none', paddingBottom: index !== 3 ? '0.75rem' : '0' }}>
+              
+              <dd className="col-span-3 text-right">
+                <span className="inline-block pt-2 text-gray-700 font-medium" style={{ fontSize: "0.9rem" }}> {item.label} : </span>
+              </dd>
+              
+              <dd className="col-span-9 flex gap-2 items-center">
+                
+                {/* ปุ่มเพิ่ม (+) ใช้คลาสตามที่คุณส่งมาเป๊ะๆ */}
+                <button 
+                  title="เพิ่ม" 
+                  onClick={async () => {
+                    if (item.key === "formula") return Swal.fire({ icon: "info", title: "ยังไม่มีระบบสูตร" });
+                    const { value: amt } = await Swal.fire({ title: `เพิ่ม${item.label}`, input: "number", inputPlaceholder: "ใส่จำนวน", showCancelButton: true, confirmButtonText: "ยืนยัน", cancelButtonText: "ยกเลิก", confirmButtonColor: "#22c55e" });
+                    if (!amt || isNaN(Number(amt))) return;
+                    const endpoint = item.key === "spin" ? `/admin/users/${user.id}/adjust-tickets` : item.key === "point" ? `/admin/users/${user.id}/adjust-points` : `/admin/users/${user.id}/adjust`;
+                    api.post(endpoint, { amount: Number(amt), description: `Admin เพิ่ม${item.label}` })
+                      .then(() => { Swal.fire({ icon: "success", title: `เพิ่ม${item.label}สำเร็จ`, timer: 1500, showConfirmButton: false }); window.location.reload(); })
+                      .catch((e) => Swal.fire({ icon: "error", title: e.response?.data?.message || "เกิดข้อผิดพลาด" }));
+                  }}
+                  className="rounded-lg pt-2 pb-2 bg-green-400 h-8 px-4 text-sm text-white transition-colors duration-150 focus:shadow-outline hover:bg-gray-500 flex items-center justify-center"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                </button>
+                
+                {/* กล่อง Input (ใช้คลาสและขนาด w-3/6 ตามที่คุณต้องการ) */}
+                <input 
+                  type="text" 
+                  value={item.key === "credit" ? fmt(item.value) : item.value} 
+                  readOnly
+                  className="text-center w-3/6 rounded-md border border-gray-300 py-2 px-3 text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:ring focus:ring-indigo-500 focus:ring-opacity-50 md:text-xl sm:text-sm"
+                />
+                
+                {/* ปุ่มลด (-) ใช้คลาสตามที่คุณส่งมาเป๊ะๆ */}
+                <button 
+                  title="ลด" 
+                  onClick={async () => {
+                    if (item.key === "formula") return Swal.fire({ icon: "info", title: "ยังไม่มีระบบสูตร" });
+                    const { value: amt } = await Swal.fire({ title: `ลด${item.label}`, input: "number", inputPlaceholder: "ใส่จำนวน", showCancelButton: true, confirmButtonText: "ยืนยัน", cancelButtonText: "ยกเลิก", confirmButtonColor: "#ef4444" });
+                    if (!amt || isNaN(Number(amt))) return;
+                    const endpoint = item.key === "spin" ? `/admin/users/${user.id}/adjust-tickets` : item.key === "point" ? `/admin/users/${user.id}/adjust-points` : `/admin/users/${user.id}/adjust`;
+                    api.post(endpoint, { amount: -Number(amt), description: `Admin ลด${item.label}` })
+                      .then(() => { Swal.fire({ icon: "success", title: `ลด${item.label}สำเร็จ`, timer: 1500, showConfirmButton: false }); window.location.reload(); })
+                      .catch((e) => Swal.fire({ icon: "error", title: e.response?.data?.message || "เกิดข้อผิดพลาด" }));
+                  }}
+                  className="pt-2 pb-2 bg-red-400 h-8 px-4 text-sm text-white transition-colors duration-150 rounded-lg focus:shadow-outline hover:bg-gray-500 flex items-center justify-center"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                </button>
 
-          {/* คะแนน */}
-          <dl className="grid grid-cols-12 gap-2 mb-3 pt-4">
-            <dd className="col-span-3 text-right"><span className="inline-block pt-1.5 text-gray-700 text-sm font-medium">คะแนน :</span></dd>
-            <dd className="col-span-9 flex items-center justify-start gap-2">
-              <button title="เพิ่ม" onClick={() => handleAdjust("point", "add")} className="rounded-lg bg-green-500 h-8 px-4 text-white transition-colors duration-150 hover:bg-gray-500 flex items-center justify-center font-bold text-lg leading-none cursor-pointer border-none shadow-sm">
-                +
-              </button>
-              <input type="text" value={fmt(user.wallet?.point_balance ?? 0)} readOnly className="text-center w-3/6 rounded-md border border-gray-300 py-1.5 px-3 text-amber-500 font-bold focus:outline-none md:text-md sm:text-sm bg-gray-50 shadow-inner" />
-              <button title="ลบ" onClick={() => handleAdjust("point", "sub")} className="rounded-lg bg-red-500 h-8 px-4 text-white transition-colors duration-150 hover:bg-gray-500 flex items-center justify-center font-bold text-lg leading-none cursor-pointer border-none shadow-sm">
-                −
-              </button>
-            </dd>
-          </dl>
+              </dd>
 
-          {/* วงล้อ */}
-          <dl className="grid grid-cols-12 gap-2 mb-3 pt-4">
-            <dd className="col-span-3 text-right"><span className="inline-block pt-1.5 text-gray-700 text-sm font-medium">วงล้อ :</span></dd>
-            <dd className="col-span-9 flex items-center justify-start gap-2">
-              <button title="เพิ่ม" onClick={() => handleAdjust("spin", "add")} className="rounded-lg bg-green-500 h-8 px-4 text-white transition-colors duration-150 hover:bg-gray-500 flex items-center justify-center font-bold text-lg leading-none cursor-pointer border-none shadow-sm">
-                +
-              </button>
-              <input type="text" value={`${user.wallet?.ticket_balance ?? 0} ใบ`} readOnly className="text-center w-3/6 rounded-md border border-gray-300 py-1.5 px-3 text-purple-600 font-bold focus:outline-none md:text-md sm:text-sm bg-gray-50 shadow-inner" />
-              <button title="ลบ" onClick={() => handleAdjust("spin", "sub")} className="rounded-lg bg-red-500 h-8 px-4 text-white transition-colors duration-150 hover:bg-gray-500 flex items-center justify-center font-bold text-lg leading-none cursor-pointer border-none shadow-sm">
-                −
-              </button>
-            </dd>
-          </dl>
-
-          {/* สูตร */}
-          <dl className="grid grid-cols-12 gap-2 mb-1 pt-4">
-            <dd className="col-span-3 text-right"><span className="inline-block pt-1.5 text-gray-700 text-sm font-medium">สูตร :</span></dd>
-            <dd className="col-span-9 flex items-center justify-start gap-2">
-              <input type="text" value="0" readOnly className="text-center w-3/6 rounded-md border border-gray-300 py-1.5 px-3 text-gray-500 font-bold focus:outline-none md:text-md sm:text-sm bg-gray-100 shadow-inner" />
-            </dd>
-          </dl>
-
+            </dl>
+          ))}
         </div>
+
       </div>
 
       {/* Tab: รายการฝาก / ถอน */}
