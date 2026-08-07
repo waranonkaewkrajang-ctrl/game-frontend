@@ -195,7 +195,7 @@ export default function UserProfilePage() {
               if (!amt || isNaN(Number(amt))) return;
               const endpoint = item.key === "spin" ? `/admin/users/${user.id}/adjust-tickets` : item.key === "point" ? `/admin/users/${user.id}/adjust-points` : `/admin/users/${user.id}/adjust`;
               api.post(endpoint, { amount: Number(amt), description: `Admin เพิ่ม${item.label}` })
-                .then(() => { Swal.fire({ icon: "success", title: `เพิ่ม${item.label}สำเร็จ`, timer: 1500, showConfirmButton: false }); window.location.reload(); })
+                .then(() => { Swal.fire({ icon: "success", title: `เพิ่ม${item.label}สำเร็จ`, timer: 1500, showConfirmButton: false }); api.get(`/admin/users/${userId}`).then((res) => setUser(res.data.data)); })
                 .catch((e) => Swal.fire({ icon: "error", title: e.response?.data?.message || "เกิดข้อผิดพลาด" }));
             }} style={{ padding: "0.5rem 0.75rem", background: "#22c55e", color: "white", border: "none", borderRadius: "0.375rem", cursor: "pointer", fontWeight: 700, fontSize: "0.9rem" }}>+</button>
             <input readOnly value={item.key === "credit" ? fmt(item.value) : `${item.value}${item.unit ? ` ${item.unit}` : ""}`} style={{ textAlign: "center", width: "30%", borderRadius: "0.375rem", border: "1px solid #d1d5db", padding: "0.25rem 0.4rem", fontSize: "0.8rem", fontWeight: 600, color: "#0f172a", background: "white" }} />
@@ -204,7 +204,7 @@ export default function UserProfilePage() {
               if (!amt || isNaN(Number(amt))) return;
               const endpoint = item.key === "spin" ? `/admin/users/${user.id}/adjust-tickets` : item.key === "point" ? `/admin/users/${user.id}/adjust-points` : `/admin/users/${user.id}/adjust`;
               api.post(endpoint, { amount: -Number(amt), description: `Admin ลด${item.label}` })
-                .then(() => { Swal.fire({ icon: "success", title: `ลด${item.label}สำเร็จ`, timer: 1500, showConfirmButton: false }); window.location.reload(); })
+                .then(() => { Swal.fire({ icon: "success", title: `ลด${item.label}สำเร็จ`, timer: 1500, showConfirmButton: false }); api.get(`/admin/users/${userId}`).then((res) => setUser(res.data.data)); })
                 .catch((e) => Swal.fire({ icon: "error", title: e.response?.data?.message || "เกิดข้อผิดพลาด" }));
             }} style={{ padding: "0.5rem 0.75rem", background: "#ef4444", color: "white", border: "none", borderRadius: "0.375rem", cursor: "pointer", fontWeight: 700, fontSize: "0.9rem" }}>−</button>
           </div>
