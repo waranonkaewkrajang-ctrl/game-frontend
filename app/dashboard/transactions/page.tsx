@@ -143,7 +143,7 @@ export default function TransactionsPage() {
                       {new Date(t.created_at).toLocaleString("th-TH", { dateStyle: "short", timeStyle: "medium" })}
                     </td>
                     <td style={{ padding: "1rem", color: "#94a3b8", fontSize: "0.75rem" }}>{t.reference_id}</td>
-                    <td style={{ padding: "1rem", fontWeight: 600, color: "#0f172a" }}>{t.user?.username || "-"}</td>
+                    <td style={{ padding: "1rem", fontWeight: 600, color: "#0f172a" }}>{t.username || t.user?.username || "-"}</td>
                     <td style={{ padding: "1rem" }}>{getTypeBadge(t.type)}</td>
                     <td style={{ padding: "1rem", fontWeight: 700, color: t.direction === 'in' ? "#10b981" : "#ef4444" }}>
                       {t.direction === 'in' ? "+" : "-"}฿{fmt(t.amount)}
