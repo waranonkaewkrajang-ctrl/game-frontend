@@ -62,6 +62,8 @@ export default function TransactionsPage() {
       win: { label: "ชนะเดิมพัน", color: "#1d4ed8", bg: "#dbeafe" },
       bonus: { label: "โบนัส", color: "#6b21a8", bg: "#f3e8ff" },
       adjustment: { label: "ปรับยอด", color: "#475569", bg: "#f1f5f9" },
+      ticket_adjust: { label: "ปรับตั๋ววงล้อ", color: "#7c3aed", bg: "#f3e8ff" },
+      point_adjust: { label: "ปรับคะแนน", color: "#d97706", bg: "#fef3c7" },
     };
     const t = types[type] || { label: type, color: "#475569", bg: "#f1f5f9" };
     
@@ -97,6 +99,8 @@ export default function TransactionsPage() {
             <option value="win">ชนะเดิมพัน</option>
             <option value="bonus">โบนัส</option>
             <option value="adjustment">ปรับยอด</option>
+            <option value="ticket_adjust">ปรับตั๋ววงล้อ</option>
+            <option value="point_adjust">ปรับคะแนน</option>
           </select>
 
           <input 
