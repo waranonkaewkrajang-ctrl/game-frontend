@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import api from "@/lib/api";
+import Swal from "sweetalert2";
 
 interface Deposit {
   id: number; reference_id: string; amount: string; channel: string; status: string; created_at: string;
@@ -25,9 +26,10 @@ export default function DepositsPage() {
   useEffect(() => { fetchDeposits(); }, [filter]);
 
   const handleApprove = async (id: number) => {
-    if (!confirm("ยืนยันอนุมัติ?")) return;
-    try { await api.post(`/admin/deposits/${id}/approve`); fetchDeposits(); }
-    catch (err: any) { alert(err.response?.data?.message || "ไม่สำเร็จ"); }
+    const result = await Swal.fire({ title: "ยืนยันอนุมัติ?", icon: "question", showCancelButton: true, confirmButtonText: "อนุมัติ", cancelButtonText: "ยกเลิก", confirmButtonColor: "#10b981" });
+    if (!result.isConfirmed) return;
+    try { await api.post(`/admin/deposits/${id}/approve`); Swal.fire({ icon: "success", title: "อนุมัติสำเร็จ", timer: 1500, showConfirmButton: false }); fetchDeposits(); }
+    catch (err: any) { Swal.fire({ icon: "error", title: err.response?.data?.message || "ไม่สำเร็จ" }); }
   };
 
   const handleReject = async () => {
