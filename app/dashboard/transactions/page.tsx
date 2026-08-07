@@ -13,6 +13,8 @@ interface Transaction {
   balance_after: string;
   description: string;
   admin_name?: string;
+  username?: string;
+  phone?: string;
   created_at: string;
 }
 
