@@ -93,94 +93,8 @@ export default function UserProfilePage() {
           ))}
         </div>
 
-        {/* 🌟 เลย์เอาต์จัดให้อยู่ข้างกัน: ซ้าย ฝาก-ถอน / ขวา ปรับเครดิต */}
-      <div style={{ display: "flex", gap: "1.5rem", alignItems: "flex-start", marginTop: "0.5rem", flexWrap: "wrap" }}>
-        
-        {/* ⬅️ กล่องซ้าย: รายการฝาก / ถอน (ยืดเต็มพื้นที่ที่เหลือ) */}
-        <div style={{ flex: "1 1 500px", background: "white", border: "1px solid #e2e8f0", borderRadius: "0.5rem", overflow: "hidden" }}>
-          <div style={{ display: "flex", borderBottom: "1px solid #e2e8f0" }}>
-            {[
-              { key: "deposits" as const, label: `รายการฝาก (${deposits.length})` },
-              { key: "withdrawals" as const, label: `รายการถอน (${withdrawals.length})` },
-            ].map((t) => (
-              <button key={t.key} onClick={() => setTab(t.key)}
-                style={{
-                  flex: 1, padding: "0.75rem", border: "none", cursor: "pointer",
-                  fontSize: "0.85rem", fontWeight: 600,
-                  background: tab === t.key ? "#2563eb" : "#f8fafc",
-                  color: tab === t.key ? "white" : "#64748b",
-                }}>{t.label}</button>
-            ))}
-          </div>
-
-          <div style={{ overflowX: "auto" }}>
-            {tab === "deposits" ? (
-              deposits.length === 0 ? (
-                <div style={{ textAlign: "center", padding: "2rem", color: "#94a3b8" }}>ยังไม่มีรายการฝาก</div>
-              ) : (
-                <table style={{ width: "100%", fontSize: "0.85rem", borderCollapse: "collapse" }}>
-                  <thead>
-                    <tr style={{ background: "#dbeafe", borderBottom: "1px solid #93c5fd" }}>
-                      {["ID", "จำนวน", "ช่องทาง", "สถานะ", "ทำรายการโดย", "วันที่"].map((h) => (
-                        <th key={h} style={{ padding: "0.5rem 0.75rem", color: "#1e40af", fontWeight: 700, textAlign: "left", fontSize: "0.8rem" }}>{h}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {deposits.map((d: any) => {
-                      const sc = statusColor(d.status);
-                      return (
-                        <tr key={d.id} style={{ borderBottom: "1px solid #f1f5f9" }}>
-                          <td style={{ padding: "0.75rem 1rem", color: "#64748b" }}>{d.id}</td>
-                          <td style={{ padding: "0.75rem 1rem", color: "#10b981", fontWeight: 600 }}>+฿{fmt(d.amount)}</td>
-                          <td style={{ padding: "0.75rem 1rem", color: "#64748b", fontSize: "0.8rem" }}>{d.channel || "-"}</td>
-                          <td style={{ padding: "0.75rem 1rem" }}>
-                            <span style={{ padding: "0.2rem 0.6rem", borderRadius: "9999px", fontSize: "0.7rem", fontWeight: 600, background: sc.bg, color: sc.color }}>{d.status}</span>
-                          </td>
-                          <td style={{ padding: "0.75rem 1rem", color: "#6366f1", fontSize: "0.8rem", fontWeight: 500 }}>{d.approved_method === "auto" ? "🤖 AUTO" : d.approved_by ? (d.approved_by?.username || `Admin #${d.approved_by}`) : "-"}</td>
-                          <td style={{ padding: "0.75rem 1rem", color: "#64748b", fontSize: "0.8rem" }}>{new Date(d.created_at).toLocaleString("th-TH")}</td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              )
-            ) : (
-              withdrawals.length === 0 ? (
-                <div style={{ textAlign: "center", padding: "2rem", color: "#94a3b8" }}>ยังไม่มีรายการถอน</div>
-              ) : (
-                <table style={{ width: "100%", fontSize: "0.85rem", borderCollapse: "collapse" }}>
-                  <thead>
-                    <tr style={{ background: "#dbeafe", borderBottom: "1px solid #93c5fd" }}>
-                      {["ID", "จำนวน", "สถานะ", "ทำรายการโดย", "วันที่"].map((h) => (
-                        <th key={h} style={{ padding: "0.5rem 0.75rem", color: "#1e40af", fontWeight: 700, textAlign: "left", fontSize: "0.8rem" }}>{h}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {withdrawals.map((w: any) => {
-                      const sc = statusColor(w.status);
-                      return (
-                        <tr key={w.id} style={{ borderBottom: "1px solid #f1f5f9" }}>
-                          <td style={{ padding: "0.75rem 1rem", color: "#64748b" }}>{w.id}</td>
-                          <td style={{ padding: "0.75rem 1rem", color: "#ef4444", fontWeight: 600 }}>-฿{fmt(w.amount)}</td>
-                          <td style={{ padding: "0.75rem 1rem" }}>
-                            <span style={{ padding: "0.2rem 0.6rem", borderRadius: "9999px", fontSize: "0.7rem", fontWeight: 600, background: sc.bg, color: sc.color }}>{w.status}</span>
-                          </td>
-                          <td style={{ padding: "0.75rem 1rem", color: "#6366f1", fontSize: "0.8rem", fontWeight: 500 }}>{w.approver ? w.approver.username : w.approved_by ? `Admin #${w.approved_by}` : "-"}</td>
-                          <td style={{ padding: "0.75rem 1rem", color: "#64748b", fontSize: "0.8rem" }}>{new Date(w.created_at).toLocaleString("th-TH")}</td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              )
-            )}
-          </div>
-        </div>
-
-        {/* ➡️ กล่องขวา: ปรับเครดิต / คะแนน / วงล้อ (ล็อกความกว้างไว้ที่ 420px) */}
-        <div className="flex flex-col divide-y divide-gray-200 rounded-lg bg-white shadow p-4" style={{ width: "420px", flexShrink: 0, border: "1px solid #e2e8f0" }}>
+        {/* Card: ปรับเครดิต / คะแนน / วงล้อ */}
+        <div className="flex flex-col divide-y divide-gray-200 rounded-lg bg-white shadow p-4 mt-4" style={{ border: "1px solid #e2e8f0" }}>
           {[
             { label: "เครดิต", key: "credit", value: user.wallet?.balance || 0 },
             { label: "คะแนน", key: "point", value: user.wallet?.point_balance || 0 },
@@ -188,11 +102,14 @@ export default function UserProfilePage() {
           ].map((item, index) => (
             <dl key={item.key} className={`grid grid-cols-12 gap-2 mb-3 ${index !== 0 ? 'pt-3' : ''}`} style={{ borderBottom: index !== 2 ? '1px solid #f1f5f9' : 'none', paddingBottom: index !== 2 ? '0.75rem' : '0' }}>
               
-              <dd className="col-span-3 text-right">
+              {/* ฝั่งข้อความ */}
+              <dd className="col-span-3 md:col-span-2 text-right">
                 <span className="inline-block pt-2 text-gray-700 font-medium" style={{ fontSize: "0.9rem" }}> {item.label} : </span>
               </dd>
               
-              <dd className="col-span-9 flex gap-2 items-center">
+              {/* ฝั่ง Input และ ปุ่ม (แก้ไขไม่ให้โดนบีบ) */}
+              <dd className="col-span-9 md:col-span-10 flex gap-2 items-center">
+                
                 <button 
                   title="เพิ่ม" 
                   onClick={async () => {
@@ -203,7 +120,7 @@ export default function UserProfilePage() {
                       .then(() => { Swal.fire({ icon: "success", title: `เพิ่ม${item.label}สำเร็จ`, timer: 1500, showConfirmButton: false }); window.location.reload(); })
                       .catch((e) => Swal.fire({ icon: "error", title: e.response?.data?.message || "เกิดข้อผิดพลาด" }));
                   }}
-                  className="rounded-lg bg-green-400 h-10 w-12 text-sm text-white transition-colors duration-150 focus:shadow-outline hover:bg-gray-500 flex items-center justify-center flex-shrink-0 border-none cursor-pointer"
+                  className="rounded-lg bg-green-400 h-10 w-12 text-sm text-white transition-colors duration-150 focus:shadow-outline hover:bg-gray-500 flex items-center justify-center flex-shrink-0"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                 </button>
@@ -212,7 +129,7 @@ export default function UserProfilePage() {
                   type="text" 
                   value={item.key === "credit" ? fmt(item.value) : item.value} 
                   readOnly
-                  className="text-center w-full rounded-md border border-gray-300 py-2 px-3 text-gray-900 focus:outline-none bg-gray-50 font-semibold"
+                  className="text-center w-3/6 rounded-md border border-gray-300 py-2 px-3 text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:ring focus:ring-indigo-500 focus:ring-opacity-50 md:text-xl sm:text-sm font-semibold"
                 />
                 
                 <button 
@@ -225,14 +142,98 @@ export default function UserProfilePage() {
                       .then(() => { Swal.fire({ icon: "success", title: `ลด${item.label}สำเร็จ`, timer: 1500, showConfirmButton: false }); window.location.reload(); })
                       .catch((e) => Swal.fire({ icon: "error", title: e.response?.data?.message || "เกิดข้อผิดพลาด" }));
                   }}
-                  className="rounded-lg bg-red-400 h-10 w-12 text-sm text-white transition-colors duration-150 focus:shadow-outline hover:bg-gray-500 flex items-center justify-center flex-shrink-0 border-none cursor-pointer"
+                  className="rounded-lg bg-red-400 h-10 w-12 text-sm text-white transition-colors duration-150 focus:shadow-outline hover:bg-gray-500 flex items-center justify-center flex-shrink-0"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                 </button>
+
               </dd>
             </dl>
           ))}
         </div>
+
+      </div>
+
+      {/* Tab: รายการฝาก / ถอน */}
+      <div style={{ maxWidth: "900px", margin: "0", width: "100%", background: "white", border: "1px solid #e2e8f0", borderRadius: "0.5rem", overflow: "hidden" }}>
+        <div style={{ display: "flex", borderBottom: "1px solid #e2e8f0" }}>
+          {[
+            { key: "deposits" as const, label: `รายการฝาก (${deposits.length})` },
+            { key: "withdrawals" as const, label: `รายการถอน (${withdrawals.length})` },
+          ].map((t) => (
+            <button key={t.key} onClick={() => setTab(t.key)}
+              style={{
+                flex: 1, padding: "0.75rem", border: "none", cursor: "pointer",
+                fontSize: "0.85rem", fontWeight: 600,
+                background: tab === t.key ? "#2563eb" : "#f8fafc",
+                color: tab === t.key ? "white" : "#64748b",
+              }}>{t.label}</button>
+          ))}
+        </div>
+
+        <div style={{ overflowX: "auto" }}>
+          {tab === "deposits" ? (
+            deposits.length === 0 ? (
+              <div style={{ textAlign: "center", padding: "2rem", color: "#94a3b8" }}>ยังไม่มีรายการฝาก</div>
+            ) : (
+              <table style={{ width: "100%", fontSize: "0.85rem", borderCollapse: "collapse" }}>
+                <thead>
+                  <tr style={{ background: "#dbeafe", borderBottom: "1px solid #93c5fd" }}>
+                    {["ID", "จำนวน", "ช่องทาง", "สถานะ", "ทำรายการโดย", "วันที่"].map((h) => (
+                      <th key={h} style={{ padding: "0.5rem 0.75rem", color: "#1e40af", fontWeight: 700, textAlign: "left", fontSize: "0.8rem" }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {deposits.map((d: any) => {
+                    const sc = statusColor(d.status);
+                    return (
+                      <tr key={d.id} style={{ borderBottom: "1px solid #f1f5f9" }}>
+                        <td style={{ padding: "0.75rem 1rem", color: "#64748b" }}>{d.id}</td>
+                        <td style={{ padding: "0.75rem 1rem", color: "#10b981", fontWeight: 600 }}>+฿{fmt(d.amount)}</td>
+                        <td style={{ padding: "0.75rem 1rem", color: "#64748b", fontSize: "0.8rem" }}>{d.channel || "-"}</td>
+                        <td style={{ padding: "0.75rem 1rem" }}>
+                          <span style={{ padding: "0.2rem 0.6rem", borderRadius: "9999px", fontSize: "0.7rem", fontWeight: 600, background: sc.bg, color: sc.color }}>{d.status}</span>
+                        </td>
+                        <td style={{ padding: "0.75rem 1rem", color: "#6366f1", fontSize: "0.8rem", fontWeight: 500 }}>{d.approved_method === "auto" ? "🤖 AUTO" : d.approved_by ? (d.approved_by?.username || `Admin #${d.approved_by}`) : "-"}</td>
+                        <td style={{ padding: "0.75rem 1rem", color: "#64748b", fontSize: "0.8rem" }}>{new Date(d.created_at).toLocaleString("th-TH")}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            )
+          ) : (
+            withdrawals.length === 0 ? (
+              <div style={{ textAlign: "center", padding: "2rem", color: "#94a3b8" }}>ยังไม่มีรายการถอน</div>
+            ) : (
+              <table style={{ width: "100%", fontSize: "0.85rem", borderCollapse: "collapse" }}>
+                <thead>
+                  <tr style={{ background: "#dbeafe", borderBottom: "1px solid #93c5fd" }}>
+                    {["ID", "จำนวน", "สถานะ", "ทำรายการโดย", "วันที่"].map((h) => (
+                      <th key={h} style={{ padding: "0.5rem 0.75rem", color: "#1e40af", fontWeight: 700, textAlign: "left", fontSize: "0.8rem" }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {withdrawals.map((w: any) => {
+                    const sc = statusColor(w.status);
+                    return (
+                      <tr key={w.id} style={{ borderBottom: "1px solid #f1f5f9" }}>
+                        <td style={{ padding: "0.75rem 1rem", color: "#64748b" }}>{w.id}</td>
+                        <td style={{ padding: "0.75rem 1rem", color: "#ef4444", fontWeight: 600 }}>-฿{fmt(w.amount)}</td>
+                        <td style={{ padding: "0.75rem 1rem" }}>
+                          <span style={{ padding: "0.2rem 0.6rem", borderRadius: "9999px", fontSize: "0.7rem", fontWeight: 600, background: sc.bg, color: sc.color }}>{w.status}</span>
+                        </td>
+                        <td style={{ padding: "0.75rem 1rem", color: "#6366f1", fontSize: "0.8rem", fontWeight: 500 }}>{w.approver ? w.approver.username : w.approved_by ? `Admin #${w.approved_by}` : "-"}</td>
+                        <td style={{ padding: "0.75rem 1rem", color: "#64748b", fontSize: "0.8rem" }}>{new Date(w.created_at).toLocaleString("th-TH")}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            )
+          )}
         </div>
       </div>
     </div>
