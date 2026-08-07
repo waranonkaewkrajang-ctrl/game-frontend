@@ -93,29 +93,23 @@ export default function UserProfilePage() {
           ))}
         </div>
 
-        {/* Card: ปรับเครดิต / คะแนน / วงล้อ (ดีไซน์ใหม่) */}
-        <div className="flex flex-col divide-y divide-gray-200 rounded-lg bg-white shadow p-4" style={{ border: "1px solid #e2e8f0" }}>
+        {/* Card: ปรับเครดิต / คะแนน / วงล้อ (ดีไซน์ Tailwind ตามต้นฉบับเป๊ะๆ) */}
+        <div className="flex flex-col divide-y divide-gray-200 rounded-lg bg-white shadow p-4 mt-4" style={{ border: "1px solid #e2e8f0" }}>
           {[
-            { label: "เครดิต", key: "credit", value: fmt(user.wallet?.balance), rawValue: user.wallet?.balance },
-            { label: "คะแนน", key: "point", value: user.wallet?.point_balance ?? 0, rawValue: user.wallet?.point_balance ?? 0 },
-            { label: "วงล้อ", key: "spin", value: user.wallet?.ticket_balance ?? 0, rawValue: user.wallet?.ticket_balance ?? 0 },
-            { label: "สูตร", key: "formula", value: 0, rawValue: 0 }, // สูตรยังไม่มี API รับรอง ใส่หลอกไว้ก่อนตามต้นฉบับ
-          ].map((item) => (
-            <dl key={item.key} className="grid grid-cols-12 gap-2 mb-3" style={{ paddingBottom: "0.75rem", marginBottom: "0.75rem", borderBottom: item.key !== "formula" ? "1px solid #f1f5f9" : "none" }}>
+            { label: "เครดิต", key: "credit", value: user.wallet?.balance || 0 },
+            { label: "คะแนน", key: "point", value: user.wallet?.point_balance || 0 },
+            { label: "วงล้อ", key: "spin", value: user.wallet?.ticket_balance || 0 },
+            { label: "สูตร", key: "formula", value: 0 }, // สูตรยังไม่มี API รับรอง
+          ].map((item, index) => (
+            <dl key={item.key} className={`grid grid-cols-12 gap-2 mb-3 ${index !== 0 ? 'pt-3' : ''}`} style={{ borderBottom: index !== 3 ? '1px solid #f1f5f9' : 'none', paddingBottom: index !== 3 ? '0.75rem' : '0' }}>
               
-              {/* ข้อความซ้ายมือ */}
               <dd className="col-span-3 text-right">
-                <span className="inline-block pt-2" style={{ fontSize: "0.9rem", color: "#64748b", fontWeight: 500 }}>
-                  {item.label} :
-                </span>
+                <span className="inline-block pt-2 text-gray-700 font-medium" style={{ fontSize: "0.9rem" }}> {item.label} : </span>
               </dd>
               
-              {/* ปุ่มเพิ่มลด + ช่องกรอกตัวเลข */}
-              <dd className="col-span-9 flex items-center gap-2">
-                
-                {/* ปุ่มบวก (+) */}
-                <button
-                  title="เพิ่ม"
+              <dd className="col-span-9 flex gap-2">
+                <button 
+                  title="เพิ่ม" 
                   onClick={async () => {
                     if (item.key === "formula") return Swal.fire({ icon: "info", title: "ยังไม่มีระบบสูตร" });
                     const { value: amt } = await Swal.fire({ title: `เพิ่ม${item.label}`, input: "number", inputPlaceholder: "ใส่จำนวน", showCancelButton: true, confirmButtonText: "ยืนยัน", cancelButtonText: "ยกเลิก", confirmButtonColor: "#22c55e" });
@@ -125,24 +119,22 @@ export default function UserProfilePage() {
                       .then(() => { Swal.fire({ icon: "success", title: `เพิ่ม${item.label}สำเร็จ`, timer: 1500, showConfirmButton: false }); window.location.reload(); })
                       .catch((e) => Swal.fire({ icon: "error", title: e.response?.data?.message || "เกิดข้อผิดพลาด" }));
                   }}
-                  className="rounded-lg bg-green-400 h-8 px-4 text-sm text-white transition-colors duration-150 focus:shadow-outline hover:bg-green-500 flex items-center justify-center cursor-pointer border-none"
+                  className="rounded-lg bg-green-500 hover:bg-green-600 h-8 px-3 text-sm text-white transition-colors duration-150 flex items-center justify-center cursor-pointer border-none shadow-sm"
                   style={{ minWidth: "40px" }}
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                 </button>
-
-                {/* กล่องแสดงตัวเลข (อ่านอย่างเดียว) */}
-                <input
-                  type="text"
-                  value={item.value}
+                
+                <input 
+                  type="text" 
+                  value={item.key === "credit" ? fmt(item.value) : item.value} 
                   readOnly
-                  className="text-center w-full rounded-md border border-gray-300 py-1.5 px-3 text-gray-900 bg-gray-50 focus:outline-none md:text-md sm:text-sm"
+                  className="text-center w-full rounded-md border border-gray-300 py-1.5 px-3 text-gray-900 bg-gray-50 focus:outline-none shadow-sm"
                   style={{ flex: 1, fontWeight: 600, color: item.key === "credit" ? "#10b981" : item.key === "point" ? "#f59e0b" : "#7c3aed" }}
                 />
-
-                {/* ปุ่มลบ (-) */}
-                <button
-                  title="ลด"
+                
+                <button 
+                  title="ลด" 
                   onClick={async () => {
                     if (item.key === "formula") return Swal.fire({ icon: "info", title: "ยังไม่มีระบบสูตร" });
                     const { value: amt } = await Swal.fire({ title: `ลด${item.label}`, input: "number", inputPlaceholder: "ใส่จำนวน", showCancelButton: true, confirmButtonText: "ยืนยัน", cancelButtonText: "ยกเลิก", confirmButtonColor: "#ef4444" });
@@ -152,13 +144,13 @@ export default function UserProfilePage() {
                       .then(() => { Swal.fire({ icon: "success", title: `ลด${item.label}สำเร็จ`, timer: 1500, showConfirmButton: false }); window.location.reload(); })
                       .catch((e) => Swal.fire({ icon: "error", title: e.response?.data?.message || "เกิดข้อผิดพลาด" }));
                   }}
-                  className="rounded-lg bg-red-400 h-8 px-4 text-sm text-white transition-colors duration-150 focus:shadow-outline hover:bg-red-500 flex items-center justify-center cursor-pointer border-none"
+                  className="rounded-lg bg-red-500 hover:bg-red-600 h-8 px-3 text-sm text-white transition-colors duration-150 flex items-center justify-center cursor-pointer border-none shadow-sm"
                   style={{ minWidth: "40px" }}
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                 </button>
-
               </dd>
+
             </dl>
           ))}
         </div>
