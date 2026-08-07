@@ -41,7 +41,8 @@ const menuItems = [
     subItems: [
       { title: "รายการฝากเงิน", href: "/dashboard/deposits", permissionKey: "deposits" },
       { title: "รายการถอนเงิน", href: "/dashboard/withdrawals", permissionKey: "withdrawals" },
-      { title: "ประวัติธุรกรรม", href: "/dashboard/transactions", permissionKey: "deposits" }, 
+      { title: "ประวัติธุรกรรม", href: "/dashboard/transactions", permissionKey: "deposits" },
+      { title: "ยอดค้าง", href: "/dashboard/unmatched-deposits", permissionKey: "deposits" },
     ],
   },
   {
