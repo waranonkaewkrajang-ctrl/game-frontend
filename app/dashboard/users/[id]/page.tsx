@@ -182,7 +182,7 @@ export default function UserProfilePage() {
       </div>
 
       {/* Card: ปรับเครดิต / คะแนน / วงล้อ */}
-      <div style={{ background: "white", border: "1px solid #e2e8f0", borderRadius: "0.5rem", padding: "1.25rem", alignSelf: "start" }}>
+      <div style={{ background: "white", border: "1px solid #e2e8f0", borderRadius: "0.5rem", padding: "1.25rem", alignSelf: "start", maxWidth: "320px" }}>
         {[
           { label: "เครดิต", key: "credit", value: user.wallet?.balance, color: "#10b981" },
           { label: "คะแนน", key: "point", value: user.wallet?.point_balance ?? 0, color: "#f59e0b" },
