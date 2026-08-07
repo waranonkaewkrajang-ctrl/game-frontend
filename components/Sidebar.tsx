@@ -39,10 +39,10 @@ const menuItems = [
     icon: <WalletCards size={20} />,
     id: "finance",
     subItems: [
+      { title: "ยอดค้าง", href: "/dashboard/unmatched-deposits", permissionKey: "deposits" },
       { title: "รายการฝากเงิน", href: "/dashboard/deposits", permissionKey: "deposits" },
       { title: "รายการถอนเงิน", href: "/dashboard/withdrawals", permissionKey: "withdrawals" },
       { title: "ประวัติธุรกรรม", href: "/dashboard/transactions", permissionKey: "deposits" },
-      { title: "ยอดค้าง", href: "/dashboard/unmatched-deposits", permissionKey: "deposits" },
     ],
   },
   {
