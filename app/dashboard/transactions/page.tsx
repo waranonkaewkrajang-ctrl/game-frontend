@@ -12,6 +12,7 @@ interface Transaction {
   balance_before: string;
   balance_after: string;
   description: string;
+  admin_name?: string;
   created_at: string;
 }
 
@@ -130,7 +131,7 @@ export default function TransactionsPage() {
             <table style={{ width: "100%", fontSize: "0.85rem", borderCollapse: "collapse", textAlign: "left" }}>
               <thead>
                 <tr style={{ background: "#f8fafc", borderBottom: "1px solid #e2e8f0" }}>
-                  {["เวลา", "Ref ID", "Username", "ประเภท", "จำนวนเงิน", "ก่อนหน้า", "คงเหลือ", "หมายเหตุ"].map((h) => (
+                  {["เวลา", "Ref ID", "Username", "ประเภท", "จำนวนเงิน", "ก่อนหน้า", "คงเหลือ", "ทำโดย", "หมายเหตุ"].map((h) => (
                     <th key={h} style={{ padding: "1rem", color: "#475569", fontWeight: 600, whiteSpace: "nowrap" }}>{h}</th>
                   ))}
                 </tr>
@@ -149,6 +150,7 @@ export default function TransactionsPage() {
                     </td>
                     <td style={{ padding: "1rem", color: "#64748b" }}>฿{fmt(t.balance_before)}</td>
                     <td style={{ padding: "1rem", color: "#0f172a", fontWeight: 600 }}>฿{fmt(t.balance_after)}</td>
+                    <td style={{ padding: "1rem", color: "#6366f1", fontSize: "0.8rem", fontWeight: 500 }}>{t.admin_name || "-"}</td>
                     <td style={{ padding: "1rem", color: "#64748b", fontSize: "0.8rem" }}>{t.description || "-"}</td>
                   </tr>
                 )) : (
