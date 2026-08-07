@@ -77,8 +77,8 @@ export default function DepositsPage() {
                   <td style={{ padding: "1rem" }}>
                     {d.status === "pending" && (
                       <div style={{ display: "flex", gap: "0.5rem" }}>
-                        <button onClick={() => handleApprove(d.id)} className="btn-success" style={{ fontSize: "0.75rem", padding: "0.375rem 0.75rem" }}>✅ อนุมัติ</button>
-                        <button onClick={() => setRejectId(d.id)} className="btn-danger" style={{ fontSize: "0.75rem", padding: "0.375rem 0.75rem" }}>❌ ปฏิเสธ</button>
+                        <button onClick={() => handleApprove(d.id)} className="btn-success" style={{ fontSize: "0.75rem", padding: "0.375rem 0.75rem" }}>อนุมัติ</button>
+                        <button onClick={() => setRejectId(d.id)} className="btn-danger" style={{ fontSize: "0.75rem", padding: "0.375rem 0.75rem" }}>ปฏิเสธ</button>
                       </div>
                     )}
                   </td>
