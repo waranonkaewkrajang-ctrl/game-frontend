@@ -69,7 +69,7 @@ export default function DepositsPage() {
             </thead>
             <tbody>
               {deposits.map((d) => (
-                <tr key={d.id} style={{ borderBottom: "1px solid #1f2937" }}>
+                <tr key={d.id} style={{ borderBottom: "1px solid #f1f5f9" }}>
                   <td style={{ padding: "1rem", fontFamily: "monospace", fontSize: "0.75rem" }}>{d.reference_id}</td>
                   <td style={{ padding: "1rem", fontWeight: 500 }}>{d.user?.username}</td>
                   <td style={{ padding: "1rem", color: "#34d399", fontWeight: 500 }}>฿{fmt(d.amount)}</td>
