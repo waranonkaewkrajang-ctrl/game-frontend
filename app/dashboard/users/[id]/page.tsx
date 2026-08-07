@@ -117,7 +117,7 @@ export default function UserProfilePage() {
               <table style={{ width: "100%", fontSize: "0.85rem", borderCollapse: "collapse" }}>
                 <thead>
                   <tr style={{ background: "#f8fafc", borderBottom: "1px solid #e2e8f0" }}>
-                    {["ID", "จำนวน", "สถานะ", "วันที่"].map((h) => (
+                    {["ID", "จำนวน", "ช่องทาง", "สถานะ", "ทำรายการโดย", "วันที่"].map((h) => (
                       <th key={h} style={{ padding: "0.75rem 1rem", color: "#475569", fontWeight: 600, textAlign: "left" }}>{h}</th>
                     ))}
                   </tr>
@@ -129,9 +129,11 @@ export default function UserProfilePage() {
                       <tr key={d.id} style={{ borderBottom: "1px solid #f1f5f9" }}>
                         <td style={{ padding: "0.75rem 1rem", color: "#64748b" }}>{d.id}</td>
                         <td style={{ padding: "0.75rem 1rem", color: "#10b981", fontWeight: 600 }}>+฿{fmt(d.amount)}</td>
+                        <td style={{ padding: "0.75rem 1rem", color: "#64748b", fontSize: "0.8rem" }}>{d.channel || "-"}</td>
                         <td style={{ padding: "0.75rem 1rem" }}>
                           <span style={{ padding: "0.2rem 0.6rem", borderRadius: "9999px", fontSize: "0.7rem", fontWeight: 600, background: sc.bg, color: sc.color }}>{d.status}</span>
                         </td>
+                        <td style={{ padding: "0.75rem 1rem", color: "#6366f1", fontSize: "0.8rem", fontWeight: 500 }}>{d.approved_by ? (d.approved_by?.username || `Admin #${d.approved_by}`) : "-"}</td>
                         <td style={{ padding: "0.75rem 1rem", color: "#64748b", fontSize: "0.8rem" }}>{new Date(d.created_at).toLocaleString("th-TH")}</td>
                       </tr>
                     );
@@ -146,7 +148,7 @@ export default function UserProfilePage() {
               <table style={{ width: "100%", fontSize: "0.85rem", borderCollapse: "collapse" }}>
                 <thead>
                   <tr style={{ background: "#f8fafc", borderBottom: "1px solid #e2e8f0" }}>
-                    {["ID", "จำนวน", "สถานะ", "วันที่"].map((h) => (
+                    {["ID", "จำนวน", "สถานะ", "ทำรายการโดย", "วันที่"].map((h) => (
                       <th key={h} style={{ padding: "0.75rem 1rem", color: "#475569", fontWeight: 600, textAlign: "left" }}>{h}</th>
                     ))}
                   </tr>
@@ -161,6 +163,7 @@ export default function UserProfilePage() {
                         <td style={{ padding: "0.75rem 1rem" }}>
                           <span style={{ padding: "0.2rem 0.6rem", borderRadius: "9999px", fontSize: "0.7rem", fontWeight: 600, background: sc.bg, color: sc.color }}>{w.status}</span>
                         </td>
+                        <td style={{ padding: "0.75rem 1rem", color: "#6366f1", fontSize: "0.8rem", fontWeight: 500 }}>{w.approver ? w.approver.username : w.approved_by ? `Admin #${w.approved_by}` : "-"}</td>
                         <td style={{ padding: "0.75rem 1rem", color: "#64748b", fontSize: "0.8rem" }}>{new Date(w.created_at).toLocaleString("th-TH")}</td>
                       </tr>
                     );
