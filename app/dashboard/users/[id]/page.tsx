@@ -53,7 +53,7 @@ export default function UserProfilePage() {
       </div>
 
       {/* ข้อมูลส่วนตัว + การเงิน */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "1rem" }}>
 
         {/* Card: ข้อมูลส่วนตัว */}
         <div style={{ background: "white", border: "1px solid #e2e8f0", borderRadius: "0.5rem", padding: "1.25rem" }}>
@@ -80,6 +80,8 @@ export default function UserProfilePage() {
             ["ยอดเงินคงเหลือ", `฿${fmt(user.wallet?.balance)}`],
             ["ฝากรวม", `฿${fmt(user.wallet?.total_deposit)}`],
             ["ถอนรวม", `฿${fmt(user.wallet?.total_withdraw)}`],
+            ["ตั๋ววงล้อ", `${user.wallet?.ticket_balance ?? 0} ใบ`],
+            ["คะแนน", `${user.wallet?.point_balance ?? 0} คะแนน`],
             ["ธนาคาร", user.bank_code || "-"],
             ["เลขบัญชี", user.bank_account || "-"],
             ["ชื่อบัญชี", user.bank_name || "-"],
@@ -90,6 +92,40 @@ export default function UserProfilePage() {
             </div>
           ))}
         </div>
+
+        {/* Card: ปรับเครดิต / คะแนน / วงล้อ — แทรกตรงนี้ */}
+        <div style={{ background: "white", border: "1px solid #e2e8f0", borderRadius: "0.5rem", padding: "1.25rem" }}>
+          <h3 style={{ fontSize: "0.95rem", fontWeight: 700, color: "#0f172a", margin: "0 0 1rem", borderBottom: "1px solid #f1f5f9", paddingBottom: "0.5rem" }}>ปรับเครดิต / คะแนน / วงล้อ</h3>
+          {[
+            { label: "เครดิต", key: "credit", value: user.wallet?.balance, color: "#10b981" },
+            { label: "คะแนน", key: "point", value: user.wallet?.point_balance ?? 0, color: "#f59e0b" },
+            { label: "วงล้อ", key: "spin", value: user.wallet?.ticket_balance ?? 0, color: "#7c3aed", unit: "ใบ" },
+          ].map((item) => (
+            <div key={item.key} style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.75rem" }}>
+              <span style={{ width: "60px", fontSize: "0.85rem", color: "#64748b", textAlign: "right" }}>{item.label} :</span>
+              <button onClick={() => {
+                const amt = prompt(`เพิ่ม${item.label}จำนวน?`);
+                if (!amt || isNaN(Number(amt))) return;
+                const endpoint = item.key === "spin" ? `/admin/users/${user.id}/adjust-tickets` : `/admin/users/${user.id}/adjust`;
+                api.post(endpoint, { amount: Number(amt), description: `Admin เพิ่ม${item.label}` })
+                  .then(() => { Swal.fire({ icon: "success", title: `เพิ่ม${item.label}สำเร็จ`, timer: 1500, showConfirmButton: false }); window.location.reload(); })
+                  .catch((e) => Swal.fire({ icon: "error", title: e.response?.data?.message || "เกิดข้อผิดพลาด" }));
+              }} style={{ padding: "0.4rem 0.75rem", background: "#22c55e", color: "white", border: "none", borderRadius: "0.375rem", cursor: "pointer", fontWeight: 700, fontSize: "0.85rem" }}>+</button>
+              <span style={{ padding: "0.4rem 1rem", background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: "0.375rem", fontSize: "0.95rem", fontWeight: 600, color: item.color, minWidth: "80px", textAlign: "center" }}>
+                {item.key === "credit" ? fmt(item.value) : item.value} {item.unit || ""}
+              </span>
+              <button onClick={() => {
+                const amt = prompt(`ลด${item.label}จำนวน?`);
+                if (!amt || isNaN(Number(amt))) return;
+                const endpoint = item.key === "spin" ? `/admin/users/${user.id}/adjust-tickets` : `/admin/users/${user.id}/adjust`;
+                api.post(endpoint, { amount: -Number(amt), description: `Admin ลด${item.label}` })
+                  .then(() => { Swal.fire({ icon: "success", title: `ลด${item.label}สำเร็จ`, timer: 1500, showConfirmButton: false }); window.location.reload(); })
+                  .catch((e) => Swal.fire({ icon: "error", title: e.response?.data?.message || "เกิดข้อผิดพลาด" }));
+              }} style={{ padding: "0.4rem 0.75rem", background: "#ef4444", color: "white", border: "none", borderRadius: "0.375rem", cursor: "pointer", fontWeight: 700, fontSize: "0.85rem" }}>−</button>
+            </div>
+          ))}
+        </div>
+
       </div>
 
       {/* Tab: รายการฝาก / ถอน */}
