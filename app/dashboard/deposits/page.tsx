@@ -14,10 +14,12 @@ export default function DepositsPage() {
   const [filter, setFilter] = useState("pending");
   const [rejectId, setRejectId] = useState<number | null>(null);
   const [rejectReason, setRejectReason] = useState("");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
 
   const fetchDeposits = () => {
     setLoading(true);
-    api.get("/admin/deposits", { params: { status: filter || undefined } }).then((res) => {
+    api.get("/admin/deposits", { params: { status: filter || undefined, date_from: dateFrom || undefined, date_to: dateTo || undefined } }).then((res) => {
       setDeposits(res.data.data.data || res.data.data);
       setLoading(false);
     });
@@ -47,13 +49,20 @@ export default function DepositsPage() {
           <h1 style={{ fontSize: "1.5rem", fontWeight: "bold" }}>จัดการฝากเงิน</h1>
           <p style={{ color: "#6b7280" }}>อนุมัติหรือปฏิเสธคำขอฝากเงิน</p>
         </div>
-        <div style={{ display: "flex", gap: "0.5rem" }}>
-          {[{ v: "pending", l: "รอดำเนินการ" }, { v: "approved", l: "อนุมัติแล้ว" }, { v: "rejected", l: "ปฏิเสธ" }, { v: "", l: "ทั้งหมด" }].map((s) => (
-            <button key={s.v} onClick={() => setFilter(s.v)}
-              style={{ padding: "0.5rem 1rem", borderRadius: "0.75rem", fontSize: "0.875rem", fontWeight: 500, border: "none", cursor: "pointer", background: filter === s.v ? "#34d399" : "#f1f5f9", color: filter === s.v ? "white" : "#64748b" }}>
-              {s.l}
-            </button>
-          ))}
+        <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+          <select value={filter} onChange={(e) => setFilter(e.target.value)}
+            style={{ padding: "0.5rem 1rem", borderRadius: "0.375rem", border: "1px solid #d1d5db", fontSize: "0.85rem", background: "white", color: "#0f172a", cursor: "pointer" }}>
+            <option value="pending">รอดำเนินการ</option>
+            <option value="approved">อนุมัติแล้ว</option>
+            <option value="rejected">ปฏิเสธ</option>
+            <option value="">ทั้งหมด</option>
+          </select>
+          <input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)}
+            style={{ padding: "0.5rem", borderRadius: "0.375rem", border: "1px solid #d1d5db", fontSize: "0.85rem" }} />
+          <span style={{ color: "#64748b" }}>→</span>
+          <input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)}
+            style={{ padding: "0.5rem", borderRadius: "0.375rem", border: "1px solid #d1d5db", fontSize: "0.85rem" }} />
+          <button onClick={() => fetchDeposits()} style={{ padding: "0.5rem 1rem", borderRadius: "0.375rem", border: "none", background: "#2563eb", color: "white", fontSize: "0.85rem", fontWeight: 600, cursor: "pointer" }}>ค้นหา</button>
         </div>
       </div>
 
