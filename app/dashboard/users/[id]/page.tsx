@@ -53,7 +53,7 @@ export default function UserProfilePage() {
       </div>
 
       {/* ข้อมูลส่วนตัว + การเงิน */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "1rem" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
 
         {/* Card: ข้อมูลส่วนตัว */}
         <div style={{ background: "white", border: "1px solid #e2e8f0", borderRadius: "0.5rem", padding: "1.25rem" }}>
@@ -93,69 +93,13 @@ export default function UserProfilePage() {
           ))}
         </div>
 
-        {/* Card: ปรับเครดิต / คะแนน / วงล้อ */}
-        <div className="flex flex-col divide-y divide-gray-200 rounded-lg bg-white shadow p-4 mt-4" style={{ border: "1px solid #e2e8f0" }}>
-          {[
-            { label: "เครดิต", key: "credit", value: user.wallet?.balance || 0 },
-            { label: "คะแนน", key: "point", value: user.wallet?.point_balance || 0 },
-            { label: "วงล้อ", key: "spin", value: user.wallet?.ticket_balance || 0 },
-          ].map((item, index) => (
-            <dl key={item.key} className={`grid grid-cols-12 gap-2 mb-3 ${index !== 0 ? 'pt-3' : ''}`} style={{ borderBottom: index !== 2 ? '1px solid #f1f5f9' : 'none', paddingBottom: index !== 2 ? '0.75rem' : '0' }}>
-              
-              {/* ฝั่งข้อความ */}
-              <dd className="col-span-3 md:col-span-2 text-right">
-                <span className="inline-block pt-2 text-gray-700 font-medium" style={{ fontSize: "0.9rem" }}> {item.label} : </span>
-              </dd>
-              
-              {/* ฝั่ง Input และ ปุ่ม (แก้ไขไม่ให้โดนบีบ) */}
-              <dd className="col-span-9 md:col-span-10 flex gap-2 items-center">
-                
-                <button 
-                  title="เพิ่ม" 
-                  onClick={async () => {
-                    const { value: amt } = await Swal.fire({ title: `เพิ่ม${item.label}`, input: "number", inputPlaceholder: "ใส่จำนวน", showCancelButton: true, confirmButtonText: "ยืนยัน", cancelButtonText: "ยกเลิก", confirmButtonColor: "#22c55e" });
-                    if (!amt || isNaN(Number(amt))) return;
-                    const endpoint = item.key === "spin" ? `/admin/users/${user.id}/adjust-tickets` : item.key === "point" ? `/admin/users/${user.id}/adjust-points` : `/admin/users/${user.id}/adjust`;
-                    api.post(endpoint, { amount: Number(amt), description: `Admin เพิ่ม${item.label}` })
-                      .then(() => { Swal.fire({ icon: "success", title: `เพิ่ม${item.label}สำเร็จ`, timer: 1500, showConfirmButton: false }); window.location.reload(); })
-                      .catch((e) => Swal.fire({ icon: "error", title: e.response?.data?.message || "เกิดข้อผิดพลาด" }));
-                  }}
-                  className="rounded-lg bg-green-400 h-10 w-12 text-sm text-white transition-colors duration-150 focus:shadow-outline hover:bg-gray-500 flex items-center justify-center flex-shrink-0"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                </button>
-                
-                <input 
-                  type="text" 
-                  value={item.key === "credit" ? fmt(item.value) : item.value} 
-                  readOnly
-                  className="text-center w-3/6 rounded-md border border-gray-300 py-2 px-3 text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:ring focus:ring-indigo-500 focus:ring-opacity-50 md:text-xl sm:text-sm font-semibold"
-                />
-                
-                <button 
-                  title="ลด" 
-                  onClick={async () => {
-                    const { value: amt } = await Swal.fire({ title: `ลด${item.label}`, input: "number", inputPlaceholder: "ใส่จำนวน", showCancelButton: true, confirmButtonText: "ยืนยัน", cancelButtonText: "ยกเลิก", confirmButtonColor: "#ef4444" });
-                    if (!amt || isNaN(Number(amt))) return;
-                    const endpoint = item.key === "spin" ? `/admin/users/${user.id}/adjust-tickets` : item.key === "point" ? `/admin/users/${user.id}/adjust-points` : `/admin/users/${user.id}/adjust`;
-                    api.post(endpoint, { amount: -Number(amt), description: `Admin ลด${item.label}` })
-                      .then(() => { Swal.fire({ icon: "success", title: `ลด${item.label}สำเร็จ`, timer: 1500, showConfirmButton: false }); window.location.reload(); })
-                      .catch((e) => Swal.fire({ icon: "error", title: e.response?.data?.message || "เกิดข้อผิดพลาด" }));
-                  }}
-                  className="rounded-lg bg-red-400 h-10 w-12 text-sm text-white transition-colors duration-150 focus:shadow-outline hover:bg-gray-500 flex items-center justify-center flex-shrink-0"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                </button>
-
-              </dd>
-            </dl>
-          ))}
-        </div>
+        
 
       </div>
 
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
       {/* Tab: รายการฝาก / ถอน */}
-      <div style={{ maxWidth: "900px", margin: "0", width: "100%", background: "white", border: "1px solid #e2e8f0", borderRadius: "0.5rem", overflow: "hidden" }}>
+      <div style={{ background: "white", border: "1px solid #e2e8f0", borderRadius: "0.5rem", overflow: "hidden" }}>
         <div style={{ display: "flex", borderBottom: "1px solid #e2e8f0" }}>
           {[
             { key: "deposits" as const, label: `รายการฝาก (${deposits.length})` },
@@ -235,6 +179,38 @@ export default function UserProfilePage() {
             )
           )}
         </div>
+      </div>
+
+      {/* Card: ปรับเครดิต / คะแนน / วงล้อ */}
+      <div style={{ background: "white", border: "1px solid #e2e8f0", borderRadius: "0.5rem", padding: "1.25rem", alignSelf: "start" }}>
+        {[
+          { label: "เครดิต", key: "credit", value: user.wallet?.balance, color: "#10b981" },
+          { label: "คะแนน", key: "point", value: user.wallet?.point_balance ?? 0, color: "#f59e0b" },
+          { label: "วงล้อ", key: "spin", value: user.wallet?.ticket_balance ?? 0, color: "#7c3aed", unit: "ใบ" },
+        ].map((item) => (
+          <div key={item.key} style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.75rem", paddingBottom: "0.75rem", borderBottom: item.key !== "spin" ? "1px solid #f1f5f9" : "none" }}>
+            <span style={{ width: "60px", fontSize: "0.9rem", color: "#374151", fontWeight: 500, textAlign: "right" }}>{item.label} :</span>
+            <button onClick={async () => {
+              const { value: amt } = await Swal.fire({ title: `เพิ่ม${item.label}`, input: "number", inputPlaceholder: "ใส่จำนวน", showCancelButton: true, confirmButtonText: "ยืนยัน", cancelButtonText: "ยกเลิก", confirmButtonColor: "#22c55e" });
+              if (!amt || isNaN(Number(amt))) return;
+              const endpoint = item.key === "spin" ? `/admin/users/${user.id}/adjust-tickets` : item.key === "point" ? `/admin/users/${user.id}/adjust-points` : `/admin/users/${user.id}/adjust`;
+              api.post(endpoint, { amount: Number(amt), description: `Admin เพิ่ม${item.label}` })
+                .then(() => { Swal.fire({ icon: "success", title: `เพิ่ม${item.label}สำเร็จ`, timer: 1500, showConfirmButton: false }); window.location.reload(); })
+                .catch((e) => Swal.fire({ icon: "error", title: e.response?.data?.message || "เกิดข้อผิดพลาด" }));
+            }} style={{ padding: "0.5rem 0.75rem", background: "#22c55e", color: "white", border: "none", borderRadius: "0.375rem", cursor: "pointer", fontWeight: 700, fontSize: "0.9rem" }}>+</button>
+            <input readOnly value={item.key === "credit" ? fmt(item.value) : `${item.value}${item.unit ? ` ${item.unit}` : ""}`} style={{ textAlign: "center", width: "50%", borderRadius: "0.375rem", border: "1px solid #d1d5db", padding: "0.5rem 0.75rem", fontSize: "1.1rem", fontWeight: 600, color: item.color, background: "white" }} />
+            <button onClick={async () => {
+              const { value: amt } = await Swal.fire({ title: `ลด${item.label}`, input: "number", inputPlaceholder: "ใส่จำนวน", showCancelButton: true, confirmButtonText: "ยืนยัน", cancelButtonText: "ยกเลิก", confirmButtonColor: "#ef4444" });
+              if (!amt || isNaN(Number(amt))) return;
+              const endpoint = item.key === "spin" ? `/admin/users/${user.id}/adjust-tickets` : item.key === "point" ? `/admin/users/${user.id}/adjust-points` : `/admin/users/${user.id}/adjust`;
+              api.post(endpoint, { amount: -Number(amt), description: `Admin ลด${item.label}` })
+                .then(() => { Swal.fire({ icon: "success", title: `ลด${item.label}สำเร็จ`, timer: 1500, showConfirmButton: false }); window.location.reload(); })
+                .catch((e) => Swal.fire({ icon: "error", title: e.response?.data?.message || "เกิดข้อผิดพลาด" }));
+            }} style={{ padding: "0.5rem 0.75rem", background: "#ef4444", color: "white", border: "none", borderRadius: "0.375rem", cursor: "pointer", fontWeight: 700, fontSize: "0.9rem" }}>−</button>
+          </div>
+        ))}
+      </div>
+
       </div>
     </div>
   );
