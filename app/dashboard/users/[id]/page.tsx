@@ -95,7 +95,6 @@ export default function UserProfilePage() {
 
         {/* Card: ปรับเครดิต / คะแนน / วงล้อ — แทรกตรงนี้ */}
         <div style={{ background: "white", border: "1px solid #e2e8f0", borderRadius: "0.5rem", padding: "1.25rem" }}>
-          <h3 style={{ fontSize: "0.95rem", fontWeight: 700, color: "#0f172a", margin: "0 0 1rem", borderBottom: "1px solid #f1f5f9", paddingBottom: "0.5rem" }}>ปรับเครดิต / คะแนน / วงล้อ</h3>
           {[
             { label: "เครดิต", key: "credit", value: user.wallet?.balance, color: "#10b981" },
             { label: "คะแนน", key: "point", value: user.wallet?.point_balance ?? 0, color: "#f59e0b" },
@@ -103,21 +102,21 @@ export default function UserProfilePage() {
           ].map((item) => (
             <div key={item.key} style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.75rem" }}>
               <span style={{ width: "60px", fontSize: "0.85rem", color: "#64748b", textAlign: "right" }}>{item.label} :</span>
-              <button onClick={() => {
-                const amt = prompt(`เพิ่ม${item.label}จำนวน?`);
+              <button onClick={async () => {
+                const { value: amt } = await Swal.fire({ title: `เพิ่ม${item.label}`, input: "number", inputPlaceholder: "ใส่จำนวน", showCancelButton: true, confirmButtonText: "ยืนยัน", cancelButtonText: "ยกเลิก", confirmButtonColor: "#22c55e" });
                 if (!amt || isNaN(Number(amt))) return;
-                const endpoint = item.key === "spin" ? `/admin/users/${user.id}/adjust-tickets` : `/admin/users/${user.id}/adjust`;
+                const endpoint = item.key === "spin" ? `/admin/users/${user.id}/adjust-tickets` : item.key === "point" ? `/admin/users/${user.id}/adjust-points` : `/admin/users/${user.id}/adjust`;
                 api.post(endpoint, { amount: Number(amt), description: `Admin เพิ่ม${item.label}` })
                   .then(() => { Swal.fire({ icon: "success", title: `เพิ่ม${item.label}สำเร็จ`, timer: 1500, showConfirmButton: false }); window.location.reload(); })
                   .catch((e) => Swal.fire({ icon: "error", title: e.response?.data?.message || "เกิดข้อผิดพลาด" }));
-              }} style={{ padding: "0.4rem 0.75rem", background: "#22c55e", color: "white", border: "none", borderRadius: "0.375rem", cursor: "pointer", fontWeight: 700, fontSize: "0.85rem" }}>+</button>
+              }}style={{ padding: "0.4rem 0.75rem", background: "#22c55e", color: "white", border: "none", borderRadius: "0.375rem", cursor: "pointer", fontWeight: 700, fontSize: "0.85rem" }}>+</button>
               <span style={{ padding: "0.4rem 1rem", background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: "0.375rem", fontSize: "0.95rem", fontWeight: 600, color: item.color, minWidth: "80px", textAlign: "center" }}>
                 {item.key === "credit" ? fmt(item.value) : item.value} {item.unit || ""}
               </span>
-              <button onClick={() => {
-                const amt = prompt(`ลด${item.label}จำนวน?`);
+              <button onClick={async () => {
+                const { value: amt } = await Swal.fire({ title: `ลด${item.label}`, input: "number", inputPlaceholder: "ใส่จำนวน", showCancelButton: true, confirmButtonText: "ยืนยัน", cancelButtonText: "ยกเลิก", confirmButtonColor: "#ef4444" });
                 if (!amt || isNaN(Number(amt))) return;
-                const endpoint = item.key === "spin" ? `/admin/users/${user.id}/adjust-tickets` : `/admin/users/${user.id}/adjust`;
+                const endpoint = item.key === "spin" ? `/admin/users/${user.id}/adjust-tickets` : item.key === "point" ? `/admin/users/${user.id}/adjust-points` : `/admin/users/${user.id}/adjust`;
                 api.post(endpoint, { amount: -Number(amt), description: `Admin ลด${item.label}` })
                   .then(() => { Swal.fire({ icon: "success", title: `ลด${item.label}สำเร็จ`, timer: 1500, showConfirmButton: false }); window.location.reload(); })
                   .catch((e) => Swal.fire({ icon: "error", title: e.response?.data?.message || "เกิดข้อผิดพลาด" }));
