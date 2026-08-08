@@ -134,7 +134,16 @@ export default function UserProfilePage() {
               <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
                 {editing === item.field ? (
                   <>
-                    <input value={editValue} onChange={(e) => setEditValue(e.target.value)} style={{ padding: "0.25rem 0.5rem", border: "1px solid #d1d5db", borderRadius: "0.25rem", fontSize: "0.85rem", width: "150px" }} autoFocus />
+                    {item.field === "bank_code" ? (
+                      <select value={editValue} onChange={(e) => setEditValue(e.target.value)} style={{ padding: "0.25rem 0.5rem", border: "1px solid #d1d5db", borderRadius: "0.25rem", fontSize: "0.85rem", width: "180px" }} autoFocus>
+                        <option value="">-- เลือกธนาคาร --</option>
+                        {Object.entries(bankIcons).map(([code, icon]) => (
+                          <option key={code} value={code}>{code}</option>
+                        ))}
+                      </select>
+                    ) : (
+                      <input value={editValue} onChange={(e) => setEditValue(e.target.value)} style={{ padding: "0.25rem 0.5rem", border: "1px solid #d1d5db", borderRadius: "0.25rem", fontSize: "0.85rem", width: "150px" }} autoFocus />
+                    )}
                     <button onClick={() => handleSave(item.field)} style={{ background: "#22c55e", color: "white", border: "none", borderRadius: "0.25rem", padding: "0.25rem 0.5rem", cursor: "pointer", fontSize: "0.75rem", fontWeight: 600 }}>✓</button>
                     <button onClick={() => setEditing(null)} style={{ background: "#ef4444", color: "white", border: "none", borderRadius: "0.25rem", padding: "0.25rem 0.5rem", cursor: "pointer", fontSize: "0.75rem", fontWeight: 600 }}>✕</button>
                   </>
