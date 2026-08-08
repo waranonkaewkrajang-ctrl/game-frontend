@@ -22,6 +22,15 @@ export default function UserProfilePage() {
     UOBT: "/logos/UOBT.webp", TRUEWALLET: "/logos/TRUEWALLET.webp",
   };
 
+  const bankNames: Record<string, string> = {
+    KBANK: "กสิกรไทย", SCB: "ไทยพาณิชย์", KTB: "กรุงไทย", BBL: "กรุงเทพ",
+    BAY: "กรุงศรี", GSB: "ออมสิน", BAAC: "ธ.ก.ส.", CIMBT: "ซีไอเอ็มบี",
+    GHB: "อาคารสงเคราะห์", KKP: "เกียรตินาคินภัทร", LHFG: "แลนด์แอนด์เฮ้าส์",
+    TISCO: "ทิสโก้", TTB: "ทีทีบี", TCD: "ไทยเครดิต", EXIM: "เอ็กซิมแบงก์",
+    UOBT: "ยูโอบี", TRUEWALLET: "TrueMoney Wallet",
+  };
+  const [bankDropdownOpen, setBankDropdownOpen] = useState(false);
+
   const [editing, setEditing] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
 
@@ -135,12 +144,26 @@ export default function UserProfilePage() {
                 {editing === item.field ? (
                   <>
                     {item.field === "bank_code" ? (
-                      <select value={editValue} onChange={(e) => setEditValue(e.target.value)} style={{ padding: "0.25rem 0.5rem", border: "1px solid #d1d5db", borderRadius: "0.25rem", fontSize: "0.85rem", width: "180px" }} autoFocus>
-                        <option value="">-- เลือกธนาคาร --</option>
-                        {Object.entries(bankIcons).map(([code, icon]) => (
-                          <option key={code} value={code}>{code}</option>
-                        ))}
-                      </select>
+                      <div style={{ position: "relative", width: "200px" }}>
+                        <div onClick={() => setBankDropdownOpen(!bankDropdownOpen)} style={{ padding: "0.3rem 0.5rem", border: "1px solid #d1d5db", borderRadius: "0.25rem", fontSize: "0.85rem", background: "white", cursor: "pointer", display: "flex", alignItems: "center", gap: "0.4rem" }}>
+                          {editValue && bankIcons[editValue] && <img src={bankIcons[editValue]} alt="" width={18} height={18} style={{ borderRadius: "3px" }} />}
+                          {editValue ? `${editValue} - ${bankNames[editValue] || ""}` : "-- เลือกธนาคาร --"}
+                        </div>
+                        {bankDropdownOpen && (
+                          <div style={{ position: "absolute", top: "100%", left: 0, width: "100%", background: "white", border: "1px solid #d1d5db", borderRadius: "0.25rem", maxHeight: "200px", overflowY: "auto", zIndex: 50, boxShadow: "0 4px 12px rgba(0,0,0,0.15)" }}>
+                            {Object.entries(bankIcons).map(([code, icon]) => (
+                              <div key={code} onClick={() => { setEditValue(code); setBankDropdownOpen(false); }}
+                                style={{ padding: "0.4rem 0.5rem", cursor: "pointer", display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "0.8rem", borderBottom: "1px solid #f1f5f9" }}
+                                onMouseEnter={(e) => e.currentTarget.style.background = "#f1f5f9"}
+                                onMouseLeave={(e) => e.currentTarget.style.background = "white"}>
+                                <img src={icon} alt="" width={20} height={20} style={{ borderRadius: "3px" }} />
+                                <span style={{ fontWeight: 600 }}>{code}</span>
+                                <span style={{ color: "#64748b" }}>{bankNames[code]}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                     ) : (
                       <input value={editValue} onChange={(e) => setEditValue(e.target.value)} style={{ padding: "0.25rem 0.5rem", border: "1px solid #d1d5db", borderRadius: "0.25rem", fontSize: "0.85rem", width: "150px" }} autoFocus />
                     )}
