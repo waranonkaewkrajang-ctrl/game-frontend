@@ -13,6 +13,15 @@ export default function UserProfilePage() {
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<"deposits" | "withdrawals" | "transactions">("transactions");
 
+  const bankIcons: Record<string, string> = {
+    KBANK: "/logos/KBANK.webp", SCB: "/logos/SCB.webp", KTB: "/logos/KTB.webp",
+    BBL: "/logos/BBL.webp", BAY: "/logos/BAY.webp", GSB: "/logos/GSB.webp",
+    BAAC: "/logos/BAAC.webp", CIMBT: "/logos/CIMBT.webp", GHB: "/logos/GHB.webp",
+    KKP: "/logos/KKP.webp", LHFG: "/logos/LHFG.webp", TISCO: "/logos/TISCO.webp",
+    TTB: "/logos/TTB.webp", TCD: "/logos/TCD.webp", EXIM: "/logos/EXIM.webp",
+    UOBT: "/logos/UOBT.webp", TRUEWALLET: "/logos/TRUEWALLET.webp",
+  };
+
   const [editing, setEditing] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
 
@@ -131,7 +140,10 @@ export default function UserProfilePage() {
                   </>
                 ) : (
                   <>
-                    <span style={{ color: item.label.includes("ยอด") ? "#10b981" : "#0f172a", fontSize: "0.85rem", fontWeight: item.label.includes("ยอด") ? 700 : 500 }}>{item.value}</span>
+                    <span style={{ display: "flex", alignItems: "center", gap: "0.4rem", color: item.label.includes("ยอด") ? "#10b981" : "#0f172a", fontSize: "0.85rem", fontWeight: item.label.includes("ยอด") ? 700 : 500 }}>
+                      {item.field === "bank_code" && bankIcons[item.value] && <img src={bankIcons[item.value]} alt="" width={18} height={18} style={{ borderRadius: "3px" }} />}
+                      {item.value}
+                    </span>
                     {item.field && (
                       <button onClick={() => handleEdit(item.field, item.field === "bank_code" ? user.bank_code : item.field === "bank_account" ? user.bank_account : user.bank_name)} style={{ background: "none", border: "none", cursor: "pointer", color: "#d97706", fontSize: "0.85rem", padding: "0" }} title="แก้ไข">✏️</button>
                     )}
