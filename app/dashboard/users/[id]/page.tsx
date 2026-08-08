@@ -13,6 +13,25 @@ export default function UserProfilePage() {
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<"deposits" | "withdrawals" | "transactions">("transactions");
 
+  const [editing, setEditing] = useState<string | null>(null);
+  const [editValue, setEditValue] = useState("");
+
+  const handleEdit = (field: string, currentValue: string) => {
+    setEditing(field);
+    setEditValue(currentValue || "");
+  };
+
+  const handleSave = async (field: string) => {
+    try {
+      await api.put(`/admin/users/${user.id}`, { [field]: editValue });
+      Swal.fire({ icon: "success", title: "บันทึกสำเร็จ", timer: 1500, showConfirmButton: false });
+      api.get(`/admin/users/${userId}`).then((res) => setUser(res.data.data));
+      setEditing(null);
+    } catch (e: any) {
+      Swal.fire({ icon: "error", title: e.response?.data?.message || "เกิดข้อผิดพลาด" });
+    }
+  };
+
   useEffect(() => {
     api.get(`/admin/users/${userId}`).then((res) => {
       setUser(res.data.data);
@@ -59,16 +78,31 @@ export default function UserProfilePage() {
         <div style={{ background: "white", border: "1px solid #e2e8f0", borderRadius: "0.5rem", padding: "1.25rem" }}>
           <h3 style={{ fontSize: "0.95rem", fontWeight: 700, color: "#0f172a", margin: "0 0 1rem", borderBottom: "1px solid #f1f5f9", paddingBottom: "0.5rem" }}>ข้อมูลส่วนตัว</h3>
           {[
-            ["ชื่อ-นามสกุล", user.full_name || "-"],
-            ["เบอร์โทร", user.phone || "-"],
-            ["สถานะ", user.status === "active" ? "ใช้งาน" : "ระงับ"],
-            ["รหัสแนะนำ", user.referral_code || "-"],
-            ["Login ล่าสุด", user.last_login_at ? new Date(user.last_login_at).toLocaleString("th-TH") : "-"],
-            ["IP ล่าสุด", user.last_login_ip || "-"],
-          ].map(([label, value]) => (
-            <div key={label} style={{ display: "flex", justifyContent: "space-between", padding: "0.5rem 0", borderBottom: "1px solid #f8fafc" }}>
-              <span style={{ color: "#64748b", fontSize: "0.85rem" }}>{label}</span>
-              <span style={{ color: "#0f172a", fontSize: "0.85rem", fontWeight: 500 }}>{value}</span>
+            { label: "ชื่อ-นามสกุล", value: user.full_name || "-", field: "full_name" },
+            { label: "เบอร์โทร", value: user.phone || "-", field: "phone" },
+            { label: "สถานะ", value: user.status === "active" ? "ใช้งาน" : "ระงับ", field: "" },
+            { label: "รหัสแนะนำ", value: user.referral_code || "-", field: "" },
+            { label: "Login ล่าสุด", value: user.last_login_at ? new Date(user.last_login_at).toLocaleString("th-TH") : "-", field: "" },
+            { label: "IP ล่าสุด", value: user.last_login_ip || "-", field: "" },
+          ].map((item) => (
+            <div key={item.label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "0.5rem 0", borderBottom: "1px solid #f8fafc" }}>
+              <span style={{ color: "#64748b", fontSize: "0.85rem" }}>{item.label}</span>
+              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                {editing === item.field ? (
+                  <>
+                    <input value={editValue} onChange={(e) => setEditValue(e.target.value)} style={{ padding: "0.25rem 0.5rem", border: "1px solid #d1d5db", borderRadius: "0.25rem", fontSize: "0.85rem", width: "150px" }} autoFocus />
+                    <button onClick={() => handleSave(item.field)} style={{ background: "#22c55e", color: "white", border: "none", borderRadius: "0.25rem", padding: "0.25rem 0.5rem", cursor: "pointer", fontSize: "0.75rem", fontWeight: 600 }}>✓</button>
+                    <button onClick={() => setEditing(null)} style={{ background: "#ef4444", color: "white", border: "none", borderRadius: "0.25rem", padding: "0.25rem 0.5rem", cursor: "pointer", fontSize: "0.75rem", fontWeight: 600 }}>✕</button>
+                  </>
+                ) : (
+                  <>
+                    <span style={{ color: "#0f172a", fontSize: "0.85rem", fontWeight: 500 }}>{item.value}</span>
+                    {item.field && (
+                      <button onClick={() => handleEdit(item.field, item.field === "full_name" ? user.full_name : user.phone)} style={{ background: "none", border: "none", cursor: "pointer", color: "#d97706", fontSize: "0.85rem", padding: "0" }} title="แก้ไข">✏️</button>
+                    )}
+                  </>
+                )}
+              </div>
             </div>
           ))}
         </div>
@@ -77,18 +111,33 @@ export default function UserProfilePage() {
         <div style={{ background: "white", border: "1px solid #e2e8f0", borderRadius: "0.5rem", padding: "1.25rem" }}>
           <h3 style={{ fontSize: "0.95rem", fontWeight: 700, color: "#0f172a", margin: "0 0 1rem", borderBottom: "1px solid #f1f5f9", paddingBottom: "0.5rem" }}>การเงิน & ธนาคาร</h3>
           {[
-            ["ยอดเงินคงเหลือ", `฿${fmt(user.wallet?.balance)}`],
-            ["ฝากรวม", `฿${fmt(user.wallet?.total_deposit)}`],
-            ["ถอนรวม", `฿${fmt(user.wallet?.total_withdraw)}`],
-            ["ตั๋ววงล้อ", `${user.wallet?.ticket_balance ?? 0} ใบ`],
-            ["คะแนน", `${user.wallet?.point_balance ?? 0} คะแนน`],
-            ["ธนาคาร", user.bank_code || "-"],
-            ["เลขบัญชี", user.bank_account || "-"],
-            ["ชื่อบัญชี", user.bank_name || "-"],
-          ].map(([label, value]) => (
-            <div key={label} style={{ display: "flex", justifyContent: "space-between", padding: "0.5rem 0", borderBottom: "1px solid #f8fafc" }}>
-              <span style={{ color: "#64748b", fontSize: "0.85rem" }}>{label}</span>
-              <span style={{ color: label.includes("ยอด") ? "#10b981" : "#0f172a", fontSize: "0.85rem", fontWeight: label.includes("ยอด") ? 700 : 500 }}>{value}</span>
+            { label: "ยอดเงินคงเหลือ", value: `฿${fmt(user.wallet?.balance)}`, field: "" },
+            { label: "ฝากรวม", value: `฿${fmt(user.wallet?.total_deposit)}`, field: "" },
+            { label: "ถอนรวม", value: `฿${fmt(user.wallet?.total_withdraw)}`, field: "" },
+            { label: "ตั๋ววงล้อ", value: `${user.wallet?.ticket_balance ?? 0} ใบ`, field: "" },
+            { label: "คะแนน", value: `${user.wallet?.point_balance ?? 0} คะแนน`, field: "" },
+            { label: "ธนาคาร", value: user.bank_code || "-", field: "bank_code" },
+            { label: "เลขบัญชี", value: user.bank_account || "-", field: "bank_account" },
+            { label: "ชื่อบัญชี", value: user.bank_name || "-", field: "bank_name" },
+          ].map((item) => (
+            <div key={item.label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "0.5rem 0", borderBottom: "1px solid #f8fafc" }}>
+              <span style={{ color: "#64748b", fontSize: "0.85rem" }}>{item.label}</span>
+              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                {editing === item.field ? (
+                  <>
+                    <input value={editValue} onChange={(e) => setEditValue(e.target.value)} style={{ padding: "0.25rem 0.5rem", border: "1px solid #d1d5db", borderRadius: "0.25rem", fontSize: "0.85rem", width: "150px" }} autoFocus />
+                    <button onClick={() => handleSave(item.field)} style={{ background: "#22c55e", color: "white", border: "none", borderRadius: "0.25rem", padding: "0.25rem 0.5rem", cursor: "pointer", fontSize: "0.75rem", fontWeight: 600 }}>✓</button>
+                    <button onClick={() => setEditing(null)} style={{ background: "#ef4444", color: "white", border: "none", borderRadius: "0.25rem", padding: "0.25rem 0.5rem", cursor: "pointer", fontSize: "0.75rem", fontWeight: 600 }}>✕</button>
+                  </>
+                ) : (
+                  <>
+                    <span style={{ color: item.label.includes("ยอด") ? "#10b981" : "#0f172a", fontSize: "0.85rem", fontWeight: item.label.includes("ยอด") ? 700 : 500 }}>{item.value}</span>
+                    {item.field && (
+                      <button onClick={() => handleEdit(item.field, item.field === "bank_code" ? user.bank_code : item.field === "bank_account" ? user.bank_account : user.bank_name)} style={{ background: "none", border: "none", cursor: "pointer", color: "#d97706", fontSize: "0.85rem", padding: "0" }} title="แก้ไข">✏️</button>
+                    )}
+                  </>
+                )}
+              </div>
             </div>
           ))}
         </div>
