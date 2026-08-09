@@ -9,6 +9,8 @@ export default function ContactSettingsPage() {
     site_url: "",
     contact_line: "",
     contact_tel: "",
+    line_url: "",
+    telegram_url: "",
   });
   const [saving, setSaving] = useState(false);
 
@@ -63,6 +65,14 @@ export default function ContactSettingsPage() {
             <div>
               <label style={labelStyle}>เบอร์โทรศัพท์</label>
               <input className="input" value={settings.contact_tel} onChange={(e) => setSettings({ ...settings, contact_tel: e.target.value })} placeholder="0812345678" />
+            </div>
+            <div>
+              <label style={labelStyle}>ลิงก์ LINE (หน้า Login)</label>
+              <input className="input" value={settings.line_url} onChange={(e) => setSettings({ ...settings, line_url: e.target.value })} placeholder="https://lin.ee/xxxxx" />
+            </div>
+            <div>
+              <label style={labelStyle}>ลิงก์ Telegram (หน้า Login)</label>
+              <input className="input" value={settings.telegram_url} onChange={(e) => setSettings({ ...settings, telegram_url: e.target.value })} placeholder="https://t.me/xxxxx" />
             </div>
           </div>
         </div>
