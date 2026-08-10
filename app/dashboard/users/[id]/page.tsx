@@ -39,6 +39,45 @@ export default function UserProfilePage() {
     setEditValue(currentValue || "");
   };
 
+  const handleResetPassword = async () => {
+    const { value: newPass } = await Swal.fire({
+      title: "รีเซ็ตรหัสผ่าน",
+      html: `<p style="font-size:14px;color:#64748b;margin:0 0 12px">ตั้งรหัสผ่านใหม่ให้ <b>${user.username}</b></p>`,
+      input: "text",
+      inputPlaceholder: "รหัสผ่านใหม่ (อย่างน้อย 6 ตัว)",
+      inputValue: Math.random().toString(36).slice(-8),
+      showCancelButton: true,
+      confirmButtonText: "รีเซ็ต",
+      cancelButtonText: "ยกเลิก",
+      confirmButtonColor: "#f59e0b",
+      inputValidator: (v) => (!v || v.length < 6 ? "รหัสผ่านอย่างน้อย 6 ตัว" : null),
+    });
+    if (!newPass) return;
+    try {
+      await api.post(`/admin/users/${user.id}/reset-password`, { password: newPass });
+      await Swal.fire({
+        title: "รีเซ็ตสำเร็จ!",
+        html: `<div style="text-align:left;background:#f8fafc;border-radius:8px;padding:16px;font-size:14px">
+          <p style="margin:0 0 8px"><b>Username:</b> <span style="color:#0f172a">${user.username}</span></p>
+          <p style="margin:0"><b>รหัสผ่านใหม่:</b> <span style="color:#dc2626;font-weight:700">${newPass}</span></p>
+        </div>
+        <p style="font-size:12px;color:#94a3b8;margin:12px 0 0">คัดลอกส่งให้ลูกค้าได้เลย</p>`,
+        icon: "success",
+        confirmButtonText: "คัดลอกข้อมูล",
+        confirmButtonColor: "#22c55e",
+        showCancelButton: true,
+        cancelButtonText: "ปิด",
+      }).then((r) => {
+        if (r.isConfirmed) {
+          navigator.clipboard.writeText(`Username: ${user.username}\nรหัสผ่าน: ${newPass}`);
+          Swal.fire({ text: "คัดลอกแล้ว", toast: true, position: "top", timer: 1500, showConfirmButton: false });
+        }
+      });
+    } catch (err: any) {
+      Swal.fire({ icon: "error", title: "ไม่สำเร็จ", text: err.response?.data?.message || "ลองใหม่" });
+    }
+  };
+
   const handleSave = async (field: string) => {
     try {
       await api.put(`/admin/users/${user.id}`, { [field]: editValue });
@@ -122,7 +161,13 @@ export default function UserProfilePage() {
                 )}
               </div>
             </div>
-          ))}
+
+        ))}
+          <div style={{ marginTop: "1rem", paddingTop: "1rem", borderTop: "1px solid #f1f5f9" }}>
+            <button onClick={handleResetPassword} style={{ width: "100%", padding: "0.6rem", background: "#f59e0b", color: "white", border: "none", borderRadius: "0.5rem", cursor: "pointer", fontSize: "0.85rem", fontWeight: 700 }}>
+              🔑 รีเซ็ตรหัสผ่าน
+            </button>
+          </div>
         </div>
 
         {/* Card: การเงิน + ธนาคาร */}
