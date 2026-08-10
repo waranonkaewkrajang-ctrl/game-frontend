@@ -40,9 +40,9 @@ const menuItems = [
     icon: <WalletCards size={20} />,
     id: "finance",
     subItems: [
-      { title: "ยอดค้าง", href: "/dashboard/unmatched-deposits", permissionKey: "deposits" },
-      { title: "รายการฝากเงิน", href: "/dashboard/deposits", permissionKey: "deposits" },
-      { title: "รายการถอนเงิน", href: "/dashboard/withdrawals", permissionKey: "withdrawals" },
+      { title: "ยอดค้าง", href: "/dashboard/unmatched-deposits", permissionKey: "deposits", badgeKey: "unmatched" },
+      { title: "รายการฝากเงิน", href: "/dashboard/deposits", permissionKey: "deposits", badgeKey: "deposit" },
+      { title: "รายการถอนเงิน", href: "/dashboard/withdrawals", permissionKey: "withdrawals", badgeKey: "withdrawal" },
       { title: "ประวัติธุรกรรม", href: "/dashboard/transactions", permissionKey: "deposits" },
     ],
   },
@@ -119,6 +119,9 @@ export default function Sidebar() {
   // State เก็บข้อมูล Admin ที่ Login อยู่
   const [currentAdmin, setCurrentAdmin] = useState<any>(null);
   const [bankChangeCount, setBankChangeCount] = useState(0);
+  const [withdrawalCount, setWithdrawalCount] = useState(0);
+  const [depositCount, setDepositCount] = useState(0);
+  const [unmatchedCount, setUnmatchedCount] = useState(0);
 
   // ดึงข้อมูล Admin จาก LocalStorage ตอนโหลดหน้าต่าง
   useEffect(() => {
@@ -132,12 +135,13 @@ export default function Sidebar() {
   }, [router]);
 
 useEffect(() => {
-    const fetchCount = () => {
-      api.get("/admin/bank-changes", { params: { status: "pending" } })
-        .then((res) => setBankChangeCount(res.data.total ?? res.data.data?.length ?? 0))
-        .catch(() => {});
+    const fetchAll = () => {
+      api.get("/admin/bank-changes", { params: { status: "pending" } }).then((r) => setBankChangeCount(r.data.total ?? r.data.data?.length ?? 0)).catch(() => {});
+      api.get("/admin/withdrawals", { params: { status: "pending" } }).then((r) => setWithdrawalCount(r.data.data?.total ?? r.data.data?.data?.length ?? 0)).catch(() => {});
+      api.get("/admin/deposits", { params: { status: "pending" } }).then((r) => setDepositCount(r.data.data?.total ?? r.data.data?.data?.length ?? 0)).catch(() => {});
+      api.get("/admin/unmatched-deposits", { params: { status: "pending" } }).then((r) => setUnmatchedCount(r.data.data?.total ?? r.data.data?.length ?? r.data.total ?? 0)).catch(() => {});
     };
-    fetchCount();
+    fetchAll();
 
     let echo: any = null;
     (async () => {
@@ -154,8 +158,12 @@ useEffect(() => {
           forceTLS: true,
           enabledTransports: ["ws", "wss"],
         });
-        echo.channel("admin-notifications").listen(".bank-change", (e: any) => {
-          setBankChangeCount(e.pendingCount);
+        const ch = echo.channel("admin-notifications");
+        ch.listen(".bank-change", (e: any) => setBankChangeCount(e.pendingCount));
+        ch.listen(".badge-update", (e: any) => {
+          if (e.type === "withdrawal") setWithdrawalCount(e.count);
+          if (e.type === "deposit") setDepositCount(e.count);
+          if (e.type === "unmatched") setUnmatchedCount(e.count);
         });
       } catch (err) {
         console.log("WebSocket ไม่พร้อม", err);
@@ -282,7 +290,16 @@ useEffect(() => {
                             fontSize: "0.85rem"
                           }}>
                             <CircleDot size={10} style={{ opacity: isSubActive ? 1 : 0.4 }} />
-                            {subItem.title}
+                            <span style={{ flex: 1 }}>{subItem.title}</span>
+                            {(() => {
+                              const bk = (subItem as any).badgeKey;
+                              const cnt = bk === "withdrawal" ? withdrawalCount : bk === "deposit" ? depositCount : bk === "unmatched" ? unmatchedCount : 0;
+                              return bk && cnt > 0 ? (
+                                <span style={{ background: "#dc2626", color: "#fff", fontSize: "0.65rem", fontWeight: 700, minWidth: "18px", height: "18px", borderRadius: "9px", display: "flex", alignItems: "center", justifyContent: "center", padding: "0 5px" }}>
+                                  {cnt}
+                                </span>
+                              ) : null;
+                            })()}
                           </div>
                         </Link>
                       );
