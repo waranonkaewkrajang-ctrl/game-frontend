@@ -45,6 +45,7 @@ const menuItems = [
       { title: "รายการฝากเงิน", href: "/dashboard/deposits", permissionKey: "deposits", badgeKey: "deposit" },
       { title: "รายการถอนเงิน", href: "/dashboard/withdrawals", permissionKey: "withdrawals", badgeKey: "withdrawal" },
       { title: "ประวัติธุรกรรม", href: "/dashboard/transactions", permissionKey: "deposits" },
+            { title: "รายการเดินบัญชี", href: "/dashboard/statements", permissionKey: "deposits" },
     ],
   },
   {
