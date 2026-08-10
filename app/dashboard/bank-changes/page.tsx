@@ -43,7 +43,7 @@ export default function BankChangesPage() {
     const { value: note } = await Swal.fire({
       title: "ปฏิเสธคำขอ",
       input: "text",
-      inputplaceholder: "เหตุผล (เช่น ชื่อไม่ตรง)",
+      inputPlaceholder: "เหตุผล (เช่น ชื่อไม่ตรง)",
       showCancelButton: true,
       confirmButtonText: "ปฏิเสธ",
       cancelButtonText: "ยกเลิก",
