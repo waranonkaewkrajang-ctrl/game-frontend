@@ -205,15 +205,15 @@ export default function UserProfilePage() {
             <span style={{ color: "#64748b", fontSize: "0.85rem" }}>แก้ไขพาสเวิร์ด</span>
             <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
               {!showPasswordInput ? (
-                <button onClick={openPasswordEdit} title="แก้ไขพาสเวิร์ด" style={{ background: "#dcfce7", color: "#16a34a", border: "none", borderRadius: "0.375rem", padding: "0.3rem 0.7rem", cursor: "pointer", fontSize: "0.85rem", fontWeight: 600 }}>
-                    🔑
+                <button onClick={openPasswordEdit} title="แก้ไขพาสเวิร์ด" style={{ background: "#dcfce7", color: "#16a34a", border: "none", borderRadius: "0.375rem", padding: "0.4rem 0.6rem", cursor: "pointer", display: "flex", alignItems: "center" }}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
                   </button>
               ) : (
                 <>
                   <input value={passwordValue} onChange={(e) => setPasswordValue(e.target.value)} style={{ padding: "0.25rem 0.5rem", border: "1px solid #d1d5db", borderRadius: "0.25rem", fontSize: "0.85rem", width: "130px" }} autoFocus />
-                  <button onClick={randomPassword} title="สุ่มรหัสใหม่" style={{ background: "#dbeafe", color: "#2563eb", border: "none", borderRadius: "0.25rem", padding: "0.25rem 0.5rem", cursor: "pointer", fontSize: "0.75rem" }}>🔄</button>
-                  <button onClick={savePassword} title="บันทึก" style={{ background: "#22c55e", color: "white", border: "none", borderRadius: "0.25rem", padding: "0.25rem 0.5rem", cursor: "pointer", fontSize: "0.75rem", fontWeight: 600 }}>✓</button>
-                  <button onClick={() => setShowPasswordInput(false)} title="ยกเลิก" style={{ background: "#ef4444", color: "white", border: "none", borderRadius: "0.25rem", padding: "0.25rem 0.5rem", cursor: "pointer", fontSize: "0.75rem", fontWeight: 600 }}>✕</button>
+                  <button onClick={randomPassword} title="สุ่มรหัสใหม่" style={{ background: "#dbeafe", color: "#2563eb", border: "none", borderRadius: "0.25rem", padding: "0.35rem", cursor: "pointer", display: "flex", alignItems: "center" }}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></button>
+                  <button onClick={savePassword} title="บันทึก" style={{ background: "#22c55e", color: "white", border: "none", borderRadius: "0.25rem", padding: "0.35rem", cursor: "pointer", display: "flex", alignItems: "center" }}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg></button>
+                  <button onClick={() => setShowPasswordInput(false)} title="ยกเลิก" style={{ background: "#ef4444", color: "white", border: "none", borderRadius: "0.25rem", padding: "0.35rem", cursor: "pointer", display: "flex", alignItems: "center" }}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
                 </>
               )}
             </div>
