@@ -33,6 +33,8 @@ export default function UserProfilePage() {
 
   const [editing, setEditing] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
+  const [showPasswordInput, setShowPasswordInput] = useState(false);
+  const [passwordValue, setPasswordValue] = useState("");
 
   const handleEdit = (field: string, currentValue: string) => {
     setEditing(field);
@@ -70,6 +72,42 @@ export default function UserProfilePage() {
       }).then((r) => {
         if (r.isConfirmed) {
           navigator.clipboard.writeText(`Username: ${user.username}\nรหัสผ่าน: ${newPass}`);
+          Swal.fire({ text: "คัดลอกแล้ว", toast: true, position: "top", timer: 1500, showConfirmButton: false });
+        }
+      });
+    } catch (err: any) {
+      Swal.fire({ icon: "error", title: "ไม่สำเร็จ", text: err.response?.data?.message || "ลองใหม่" });
+    }
+  };
+
+  const randomPassword = () => setPasswordValue(Math.random().toString(36).slice(-8));
+
+  const openPasswordEdit = () => {
+    setPasswordValue(Math.random().toString(36).slice(-8));
+    setShowPasswordInput(true);
+  };
+
+  const savePassword = async () => {
+    if (!passwordValue || passwordValue.length < 6) {
+      Swal.fire({ icon: "warning", title: "รหัสสั้นไป", text: "อย่างน้อย 6 ตัว" });
+      return;
+    }
+    try {
+      await api.post(`/admin/users/${user.id}/reset-password`, { password: passwordValue });
+      setShowPasswordInput(false);
+      Swal.fire({
+        title: "รีเซ็ตสำเร็จ!",
+        html: `<div style="text-align:left;background:#f8fafc;border-radius:8px;padding:16px;font-size:14px">
+          <p style="margin:0 0 8px"><b>Username:</b> ${user.username}</p>
+          <p style="margin:0"><b>รหัสผ่าน:</b> <span style="color:#dc2626;font-weight:700">${passwordValue}</span></p></div>`,
+        icon: "success",
+        confirmButtonText: "คัดลอกส่งลูกค้า",
+        confirmButtonColor: "#22c55e",
+        showCancelButton: true,
+        cancelButtonText: "ปิด",
+      }).then((r) => {
+        if (r.isConfirmed) {
+          navigator.clipboard.writeText(`Username: ${user.username}\nรหัสผ่าน: ${passwordValue}`);
           Swal.fire({ text: "คัดลอกแล้ว", toast: true, position: "top", timer: 1500, showConfirmButton: false });
         }
       });
@@ -163,10 +201,22 @@ export default function UserProfilePage() {
             </div>
 
         ))}
-          <div style={{ marginTop: "1rem", paddingTop: "1rem", borderTop: "1px solid #f1f5f9" }}>
-            <button onClick={handleResetPassword} style={{ width: "100%", padding: "0.6rem", background: "#f59e0b", color: "white", border: "none", borderRadius: "0.5rem", cursor: "pointer", fontSize: "0.85rem", fontWeight: 700 }}>
-              🔑 รีเซ็ตรหัสผ่าน
-            </button>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "0.5rem 0" }}>
+            <span style={{ color: "#64748b", fontSize: "0.85rem" }}>แก้ไขพาสเวิร์ด</span>
+            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+              {!showPasswordInput ? (
+                <button onClick={openPasswordEdit} title="แก้ไขพาสเวิร์ด" style={{ background: "#dcfce7", color: "#16a34a", border: "none", borderRadius: "0.375rem", padding: "0.3rem 0.7rem", cursor: "pointer", fontSize: "0.85rem", fontWeight: 600 }}>
+                    🔑
+                  </button>
+              ) : (
+                <>
+                  <input value={passwordValue} onChange={(e) => setPasswordValue(e.target.value)} style={{ padding: "0.25rem 0.5rem", border: "1px solid #d1d5db", borderRadius: "0.25rem", fontSize: "0.85rem", width: "130px" }} autoFocus />
+                  <button onClick={randomPassword} title="สุ่มรหัสใหม่" style={{ background: "#dbeafe", color: "#2563eb", border: "none", borderRadius: "0.25rem", padding: "0.25rem 0.5rem", cursor: "pointer", fontSize: "0.75rem" }}>🔄</button>
+                  <button onClick={savePassword} title="บันทึก" style={{ background: "#22c55e", color: "white", border: "none", borderRadius: "0.25rem", padding: "0.25rem 0.5rem", cursor: "pointer", fontSize: "0.75rem", fontWeight: 600 }}>✓</button>
+                  <button onClick={() => setShowPasswordInput(false)} title="ยกเลิก" style={{ background: "#ef4444", color: "white", border: "none", borderRadius: "0.25rem", padding: "0.25rem 0.5rem", cursor: "pointer", fontSize: "0.75rem", fontWeight: 600 }}>✕</button>
+                </>
+              )}
+            </div>
           </div>
         </div>
 
