@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import api from "@/lib/api";
 import { usePathname, useRouter } from "next/navigation";
 import { 
   LayoutDashboard, 
@@ -63,6 +64,13 @@ const menuItems = [
     ],
   },
   {
+    title: "แจ้งเปลี่ยนบัญชี",
+    icon: <WalletCards size={20} />,
+    href: "/dashboard/bank-changes",
+    permissionKey: "users",
+    showBadge: true
+  },
+  {
     title: "จัดการเกม",
     icon: <LayoutDashboard size={20} />,
     href: "/dashboard/games",
@@ -110,6 +118,7 @@ export default function Sidebar() {
 
   // State เก็บข้อมูล Admin ที่ Login อยู่
   const [currentAdmin, setCurrentAdmin] = useState<any>(null);
+  const [bankChangeCount, setBankChangeCount] = useState(0);
 
   // ดึงข้อมูล Admin จาก LocalStorage ตอนโหลดหน้าต่าง
   useEffect(() => {
@@ -121,6 +130,39 @@ export default function Sidebar() {
       router.push("/login");
     }
   }, [router]);
+
+useEffect(() => {
+    const fetchCount = () => {
+      api.get("/admin/bank-changes", { params: { status: "pending" } })
+        .then((res) => setBankChangeCount(res.data.total ?? res.data.data?.length ?? 0))
+        .catch(() => {});
+    };
+    fetchCount();
+
+    let echo: any = null;
+    (async () => {
+      try {
+        const { default: Echo } = await import("laravel-echo");
+        const { default: Pusher } = await import("pusher-js");
+        (window as any).Pusher = Pusher;
+        echo = new Echo({
+          broadcaster: "reverb",
+          key: process.env.NEXT_PUBLIC_REVERB_KEY,
+          wsHost: process.env.NEXT_PUBLIC_REVERB_HOST,
+          wsPort: 443,
+          wssPort: 443,
+          forceTLS: true,
+          enabledTransports: ["ws", "wss"],
+        });
+        echo.channel("admin-notifications").listen(".bank-change", (e: any) => {
+          setBankChangeCount(e.pendingCount);
+        });
+      } catch (err) {
+        console.log("WebSocket ไม่พร้อม", err);
+      }
+    })();
+    return () => { if (echo) echo.disconnect(); };
+  }, []);
 
   const toggleMenu = (id: string) => {
     setOpenMenus((prev) => ({ ...prev, [id]: !prev[id] }));
@@ -181,7 +223,12 @@ export default function Sidebar() {
                   borderLeft: isActive ? "3px solid #4f46e5" : "3px solid transparent",
                 }}>
                   {menu.icon}
-                  <span style={{ fontSize: "0.875rem" }}>{menu.title}</span>
+                  <span style={{ fontSize: "0.875rem", flex: 1 }}>{menu.title}</span>
+                  {(menu as any).showBadge && bankChangeCount > 0 && (
+                    <span style={{ background: "#dc2626", color: "#fff", fontSize: "0.7rem", fontWeight: 700, minWidth: "20px", height: "20px", borderRadius: "10px", display: "flex", alignItems: "center", justifyContent: "center", padding: "0 6px" }}>
+                      {bankChangeCount}
+                    </span>
+                  )}
                 </div>
               </Link>
             );
