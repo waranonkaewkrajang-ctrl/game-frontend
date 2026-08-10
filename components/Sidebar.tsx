@@ -31,6 +31,7 @@ const menuItems = [
     id: "users",
     subItems: [
       { title: "ข้อมูลสมาชิกทั้งหมด", href: "/dashboard/users", permissionKey: "users" },
+      { title: "สมัครสมาชิก", href: "/dashboard/users/create", permissionKey: "users" },
       { title: "ประวัติเดิมพัน", href: "/dashboard/bets", permissionKey: "users" },   
       { title: "ตรวจสอบ IP", href: "/dashboard/ip-check", permissionKey: "users" },
     ],
