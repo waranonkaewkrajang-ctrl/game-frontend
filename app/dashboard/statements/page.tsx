@@ -1,8 +1,6 @@
 "use client";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import api from "@/lib/api";
-import { getEcho } from "@/lib/echo";
-import Swal from "sweetalert2";
 
 interface Statement {
   id: number;
@@ -32,8 +30,6 @@ export default function BankStatementsPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [methodFilter, setMethodFilter] = useState<"all" | "auto" | "manual">("all");
-  const [newRowIds, setNewRowIds] = useState<Set<number>>(new Set());
-  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const fetchStatements = async () => {
     try {
@@ -55,67 +51,9 @@ export default function BankStatementsPage() {
     }
   };
 
-  // Fetch ครั้งแรก + ตอน filter เปลี่ยน
   useEffect(() => {
     fetchStatements();
   }, [search, methodFilter]);
-
-  // WebSocket subscribe
-  useEffect(() => {
-    const echo = getEcho();
-    if (!echo) return;
-
-    const channel = echo.channel("admin-bank-statements");
-    channel.listen(".statement.received", (data: any) => {
-      // เพิ่ม row ใหม่บนสุด (ไม่ต้อง fetch ทั้งหมด)
-      setStatements((prev) => {
-        // กันซ้ำ
-        if (prev.some((s) => s.id === data.id)) return prev;
-
-        const newStmt: Statement = {
-          id: data.id,
-          deposit_id: data.deposit_id,
-          user_id: data.user_id,
-          amount: String(data.amount),
-          bank_code: data.bank_code,
-          from_name: data.from_name,
-          reference_id: data.reference_id,
-          approved_method: data.approved_method,
-          approved_by: data.approved_by ?? null,
-          transaction_time: data.transaction_time,
-          created_at: data.created_at,
-          user: data.username ? { id: data.user_id, username: data.username } : null,
-          admin: data.admin_username ? { id: data.approved_by, username: data.admin_username } : null,
-        };
-        return [newStmt, ...prev].slice(0, 100); // เก็บ 100 rows ล่าสุด
-      });
-
-      // Highlight row ใหม่
-      setNewRowIds((prev) => new Set([...prev, data.id]));
-      setTimeout(() => {
-        setNewRowIds((prev) => {
-          const next = new Set(prev);
-          next.delete(data.id);
-          return next;
-        });
-      }, 4000);
-
-      // Update summary
-      setSummary((s) => ({
-        ...s,
-        today_count: s.today_count + 1,
-        today_sum: s.today_sum + Number(data.amount),
-        total_count: s.total_count + 1,
-      }));
-
-      // เสียง notify
-      audioRef.current?.play().catch(() => {});
-    });
-
-    return () => {
-      echo.leave("admin-bank-statements");
-    };
-  }, []);
 
   const formatDateTime = (dt: string | null) => {
     if (!dt) return "-";
@@ -132,15 +70,14 @@ export default function BankStatementsPage() {
           รายการเดินบัญชี (Bank Statement)
         </h1>
         <p style={{ color: "#64748b", fontSize: "0.85rem", marginTop: "4px" }}>
-          บันทึกทุกยอดที่เข้าบัญชีสำเร็จ · อัพเดท Realtime
+          บันทึกทุกยอดที่เข้าบัญชีสำเร็จ · เก็บย้อนหลัง 30 วัน
         </p>
       </div>
 
       {/* Summary Cards */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "14px", marginBottom: "20px" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "14px", marginBottom: "20px" }}>
         <SummaryCard title="วันนี้" value={`${summary.today_count} รายการ`} sub={`฿${summary.today_sum.toLocaleString()}`} color="#16a34a" />
         <SummaryCard title="ทั้งหมด" value={`${summary.total_count} รายการ`} sub="เก็บย้อนหลัง 30 วัน" color="#7c3aed" />
-        <SummaryCard title="Realtime" value="🟢 กำลังฟัง..." sub="รับการแจ้งเตือนอัตโนมัติ" color="#0891b2" />
       </div>
 
       {/* Filters */}
@@ -191,71 +128,59 @@ export default function BankStatementsPage() {
               ) : statements.length === 0 ? (
                 <tr><td colSpan={8} style={{ padding: "40px", textAlign: "center", color: "#94a3b8" }}>ไม่มีข้อมูล</td></tr>
               ) : (
-                statements.map((s) => {
-                  const isNew = newRowIds.has(s.id);
-                  return (
-                    <tr key={s.id} style={{
-                      borderBottom: "1px solid #f1f5f9",
-                      background: isNew ? "linear-gradient(90deg, #dcfce7, transparent)" : "white",
-                      transition: "background 1s ease-out",
-                    }}>
-                      <Td>
-                        <div style={{ color: "#334155", fontWeight: 600 }}>{formatDateTime(s.created_at)}</div>
-                      </Td>
-                      <Td>{s.from_name || <span style={{ color: "#94a3b8" }}>-</span>}</Td>
-                      <Td>
-                        <span style={{ color: "#16a34a", fontWeight: 800, fontSize: "0.95rem" }}>
-                          +{Number(s.amount).toLocaleString()}
-                        </span>
-                      </Td>
-                      <Td>
-                        {s.bank_code && (
-                          <img
-                            src={`/logos/${s.bank_code}.webp`}
-                            alt={s.bank_code}
-                            style={{ width: "24px", height: "24px", objectFit: "contain", verticalAlign: "middle", marginRight: "6px" }}
-                            onError={(e) => { e.currentTarget.style.display = "none"; }}
-                          />
-                        )}
-                        {s.bank_code}
-                      </Td>
-                      <Td>
-                        {s.user?.username ? (
-                          <span style={{ color: "#0891b2", fontWeight: 600 }}>{s.user.username}</span>
-                        ) : <span style={{ color: "#94a3b8" }}>-</span>}
-                      </Td>
-                      <Td>
-                        <span style={{
-                          fontSize: "0.72rem", fontWeight: 700, padding: "3px 10px", borderRadius: "12px",
-                          background: s.approved_method === "auto" ? "#dcfce7" : "#fef3c7",
-                          color: s.approved_method === "auto" ? "#16a34a" : "#d97706",
-                        }}>
-                          {s.approved_method === "auto" ? "Auto" : "Manual"}
-                        </span>
-                      </Td>
-                      <Td>
-                        <span style={{ color: "#64748b", fontSize: "0.8rem" }}>
-                          {s.admin?.username || "-"}
-                        </span>
-                      </Td>
-                      <Td>
-                        <span style={{ color: "#64748b", fontSize: "0.75rem", fontFamily: "monospace" }}>
-                          {s.reference_id || "-"}
-                        </span>
-                      </Td>
-                    </tr>
-                  );
-                })
+                statements.map((s) => (
+                  <tr key={s.id} style={{ borderBottom: "1px solid #f1f5f9" }}>
+                    <Td>
+                      <div style={{ color: "#334155", fontWeight: 600 }}>{formatDateTime(s.created_at)}</div>
+                    </Td>
+                    <Td>{s.from_name || <span style={{ color: "#94a3b8" }}>-</span>}</Td>
+                    <Td>
+                      <span style={{ color: "#16a34a", fontWeight: 800, fontSize: "0.95rem" }}>
+                        +{Number(s.amount).toLocaleString()}
+                      </span>
+                    </Td>
+                    <Td>
+                      {s.bank_code && (
+                        <img
+                          src={`/logos/${s.bank_code}.webp`}
+                          alt={s.bank_code}
+                          style={{ width: "24px", height: "24px", objectFit: "contain", verticalAlign: "middle", marginRight: "6px" }}
+                          onError={(e) => { e.currentTarget.style.display = "none"; }}
+                        />
+                      )}
+                      {s.bank_code}
+                    </Td>
+                    <Td>
+                      {s.user?.username ? (
+                        <span style={{ color: "#0891b2", fontWeight: 600 }}>{s.user.username}</span>
+                      ) : <span style={{ color: "#94a3b8" }}>-</span>}
+                    </Td>
+                    <Td>
+                      <span style={{
+                        fontSize: "0.72rem", fontWeight: 700, padding: "3px 10px", borderRadius: "12px",
+                        background: s.approved_method === "auto" ? "#dcfce7" : "#fef3c7",
+                        color: s.approved_method === "auto" ? "#16a34a" : "#d97706",
+                      }}>
+                        {s.approved_method === "auto" ? "Auto" : "Manual"}
+                      </span>
+                    </Td>
+                    <Td>
+                      <span style={{ color: "#64748b", fontSize: "0.8rem" }}>
+                        {s.admin?.username || "-"}
+                      </span>
+                    </Td>
+                    <Td>
+                      <span style={{ color: "#64748b", fontSize: "0.75rem", fontFamily: "monospace" }}>
+                        {s.reference_id || "-"}
+                      </span>
+                    </Td>
+                  </tr>
+                ))
               )}
             </tbody>
           </table>
         </div>
       </div>
-
-      {/* Notification sound */}
-      <audio ref={audioRef} preload="auto">
-        <source src="data:audio/wav;base64,UklGRhwMAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YfgLAACBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGB" type="audio/wav" />
-      </audio>
     </div>
   );
 }
