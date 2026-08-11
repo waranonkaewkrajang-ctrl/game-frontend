@@ -8,7 +8,9 @@ interface Statement {
   user_id: number | null;
   amount: string;
   bank_code: string | null;
+  bank_account: string | null;
   from_name: string | null;
+  from_account: string | null;
   reference_id: string | null;
   approved_method: "auto" | "manual";
   approved_by: number | null;
@@ -133,22 +135,40 @@ export default function BankStatementsPage() {
                     <Td>
                       <div style={{ color: "#334155", fontWeight: 600 }}>{formatDateTime(s.created_at)}</div>
                     </Td>
-                    <Td>{s.from_name || <span style={{ color: "#94a3b8" }}>-</span>}</Td>
+                    <Td>
+                      <div style={{ color: "#334155", fontWeight: 600 }}>
+                        {s.from_name || <span style={{ color: "#94a3b8" }}>-</span>}
+                      </div>
+                      {s.from_account && (
+                        <div style={{ color: "#94a3b8", fontSize: "0.72rem", marginTop: "2px", fontFamily: "monospace" }}>
+                          {s.from_account}
+                        </div>
+                      )}
+                    </Td>
                     <Td>
                       <span style={{ color: "#16a34a", fontWeight: 800, fontSize: "0.95rem" }}>
                         +{Number(s.amount).toLocaleString()}
                       </span>
                     </Td>
                     <Td>
-                      {s.bank_code && (
-                        <img
-                          src={`/logos/${s.bank_code}.webp`}
-                          alt={s.bank_code}
-                          style={{ width: "24px", height: "24px", objectFit: "contain", verticalAlign: "middle", marginRight: "6px" }}
-                          onError={(e) => { e.currentTarget.style.display = "none"; }}
-                        />
-                      )}
-                      {s.bank_code}
+                      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                        {s.bank_code && (
+                          <img
+                            src={`/logos/${s.bank_code}.webp`}
+                            alt={s.bank_code}
+                            style={{ width: "28px", height: "28px", objectFit: "contain", flexShrink: 0 }}
+                            onError={(e) => { e.currentTarget.style.display = "none"; }}
+                          />
+                        )}
+                        <div>
+                          <div style={{ color: "#334155", fontWeight: 600 }}>{s.bank_code}</div>
+                          {s.bank_account && (
+                            <div style={{ color: "#94a3b8", fontSize: "0.72rem", marginTop: "2px", fontFamily: "monospace" }}>
+                              {s.bank_account}
+                            </div>
+                          )}
+                        </div>
+                      </div>
                     </Td>
                     <Td>
                       {s.user?.username ? (
