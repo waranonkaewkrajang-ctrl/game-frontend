@@ -244,10 +244,9 @@ export default function GamesPage() {
                 
                 {/* Grid แนวนอน scroll */}
                 <div style={{ 
-                  display: "flex", 
-                  gap: "12px", 
-                  overflowX: "auto", 
-                  paddingBottom: "8px",
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))",
+                  gap: "12px",
                 }}>
                   {sectionProducts.map((p) => {
                     const inactive = p.total - p.active;
@@ -256,7 +255,6 @@ export default function GamesPage() {
                         key={p.product_id}
                         onClick={() => router.push(`/dashboard/games/${p.product_id}`)}
                         style={{
-                          flex: "0 0 150px",
                           background: "white",
                           border: "1px solid #e2e8f0",
                           borderRadius: "12px",
