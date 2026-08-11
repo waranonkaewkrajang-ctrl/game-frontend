@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import api from "@/lib/api";
 import Swal from "sweetalert2";
 
@@ -24,6 +25,7 @@ interface Summary {
 }
 
 export default function GamesPage() {
+  const router = useRouter();
   const [games, setGames] = useState<Game[]>([]);
   const [products, setProducts] = useState<string[]>([]);
   const [summary, setSummary] = useState<Summary | null>(null);
@@ -213,24 +215,100 @@ export default function GamesPage() {
         </div>
       </div>
 
-      {/* ───── Products Chips ───── */}
+      {/* ───── Products แยกตาม Type ───── */}
       {summary && summary.products.length > 0 && (
-        <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
-          {summary.products.map((p) => {
-            const inactive = p.total - p.active;
+        <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+          {[
+            { key: "SLOT", label: "SLOT", providers: ["PRAGMATIC_SLOT","PGSOFT","JOKER","SLOTXO","JILI","HABANERO","REDTIGER","RELAX","NETENT","YGGDRASIL","PLAYNGO","EVOPLAY","BOOMING","SPADE","CG","NINESGAME","NEXTSPIN","ASKMESLOT","ASKMEBET","AMEBA","LIVE22","KAGAME","SEXY_SLOT","FUNTA","DRAGONGAMING","I8","BETGAME","FACHAI","CQ9","RICH88","SIMPLEPLAY","ROYAL"] },
+            { key: "CASINO", label: "CASINO สด", providers: ["PRAGMATIC_LIVECASINO","SAGAME","SEXY","PRETTY","ALLBET","KINGMAKER","BIGGAMING","EBET"] },
+            { key: "FISHING", label: "FISHING", providers: ["FACHAI","JILI","CQ9"] },
+            { key: "SPORT", label: "SPORTS", providers: ["SBO","AMBSPORT","AMBSPORTBOOK"] },
+            { key: "POKER", label: "POKER & อื่นๆ", providers: ["AMBPOKER","KINGPOKER","AMBGAMING"] },
+          ].map((section) => {
+            const sectionProducts = summary.products.filter((p) => 
+              section.providers.some(prov => p.product_id.toUpperCase().includes(prov))
+            );
+            
+            if (sectionProducts.length === 0) return null;
+            
             return (
-              <div key={p.product_id} style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "white", border: "1px solid #e2e8f0", borderRadius: "999px", padding: "5px 6px 5px 6px", fontSize: "0.78rem", fontWeight: 600, color: "#334155" }}>
-                {productImages[p.product_id]?.image_url ? (
-                  <img src={productImages[p.product_id].image_url} alt={p.product_id} style={{ width: "24px", height: "24px", borderRadius: "50%", objectFit: "cover" }} />
-                ) : (
-                  <div style={{ width: "24px", height: "24px", borderRadius: "50%", background: "#f1f5f9", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.6rem", color: "#94a3b8" }}>?</div>
-                )}
-                {p.product_id}
-                <span style={chip("#d1fae5", "#065f46")}>{p.active}</span>
-                {inactive > 0 && <span style={chip("#fee2e2", "#991b1b")}>{inactive}</span>}
-                <button onClick={() => handleToggleProduct(p.product_id, true)} style={{ background: "none", border: "none", cursor: "pointer", fontSize: "0.7rem", color: "#059669", fontWeight: 700, padding: "2px 4px" }}>ON</button>
-                <button onClick={() => handleToggleProduct(p.product_id, false)} style={{ background: "none", border: "none", cursor: "pointer", fontSize: "0.7rem", color: "#dc2626", fontWeight: 700, padding: "2px 4px" }}>OFF</button>
-                <button onClick={() => handleUploadImage(p.product_id)} style={{ background: "#eff6ff", border: "1px solid #bfdbfe", borderRadius: "6px", cursor: "pointer", fontSize: "0.65rem", color: "#2563eb", fontWeight: 700, padding: "3px 8px" }}>เปลี่ยนรูป</button>
+              <div key={section.key}>
+                {/* Section Header */}
+                <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "12px" }}>
+                  <div style={{ height: "2px", flex: 1, background: "linear-gradient(90deg, transparent, #7c3aed)" }} />
+                  <h3 style={{ fontSize: "0.95rem", fontWeight: 800, color: "#0f172a", margin: 0, whiteSpace: "nowrap", letterSpacing: "0.5px" }}>
+                    {section.label} <span style={{ color: "#94a3b8", fontWeight: 500 }}>({sectionProducts.length} ค่าย)</span>
+                  </h3>
+                  <div style={{ height: "2px", flex: 1, background: "linear-gradient(90deg, #7c3aed, transparent)" }} />
+                </div>
+                
+                {/* Grid แนวนอน scroll */}
+                <div style={{ 
+                  display: "flex", 
+                  gap: "12px", 
+                  overflowX: "auto", 
+                  paddingBottom: "8px",
+                }}>
+                  {sectionProducts.map((p) => {
+                    const inactive = p.total - p.active;
+                    return (
+                      <div
+                        key={p.product_id}
+                        onClick={() => router.push(`/dashboard/games/${p.product_id}`)}
+                        style={{
+                          flex: "0 0 150px",
+                          background: "white",
+                          border: "1px solid #e2e8f0",
+                          borderRadius: "12px",
+                          padding: "12px",
+                          cursor: "pointer",
+                          transition: "all 0.3s",
+                          textAlign: "center",
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.transform = "translateY(-4px)";
+                          e.currentTarget.style.boxShadow = "0 8px 20px rgba(124,58,237,0.15)";
+                          e.currentTarget.style.borderColor = "#7c3aed";
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.transform = "";
+                          e.currentTarget.style.boxShadow = "";
+                          e.currentTarget.style.borderColor = "#e2e8f0";
+                        }}
+                      >
+                        {/* Logo */}
+                        <div style={{ height: "48px", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "8px" }}>
+                          {productImages[p.product_id]?.image_url ? (
+                            <img src={productImages[p.product_id].image_url} alt={p.product_id} style={{ maxWidth: "100%", maxHeight: "48px", objectFit: "contain" }} />
+                          ) : (
+                            <div style={{ fontSize: "0.75rem", fontWeight: 800, color: "#94a3b8" }}>{p.product_id}</div>
+                          )}
+                        </div>
+                        
+                        {/* ชื่อค่าย */}
+                        <div style={{ fontSize: "0.8rem", fontWeight: 700, color: "#0f172a", marginBottom: "6px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                          {p.product_id}
+                        </div>
+                        
+                        {/* จำนวนเกม */}
+                        <div style={{ display: "flex", gap: "4px", justifyContent: "center", marginBottom: "8px", flexWrap: "wrap" }}>
+                          <span style={chip("#d1fae5", "#065f46")}>ON {p.active}</span>
+                          {inactive > 0 && <span style={chip("#fee2e2", "#991b1b")}>OFF {inactive}</span>}
+                        </div>
+                        
+                        {/* Buttons */}
+                        <div 
+                          style={{ display: "flex", gap: "4px", justifyContent: "center" }}
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <button onClick={() => handleToggleProduct(p.product_id, true)} style={{ flex: 1, background: "#dcfce7", border: "1px solid #86efac", borderRadius: "6px", cursor: "pointer", fontSize: "0.65rem", color: "#059669", fontWeight: 700, padding: "3px 4px" }}>ON</button>
+                          <button onClick={() => handleToggleProduct(p.product_id, false)} style={{ flex: 1, background: "#fee2e2", border: "1px solid #fca5a5", borderRadius: "6px", cursor: "pointer", fontSize: "0.65rem", color: "#dc2626", fontWeight: 700, padding: "3px 4px" }}>OFF</button>
+                          <button onClick={() => handleUploadImage(p.product_id)} style={{ background: "#eff6ff", border: "1px solid #bfdbfe", borderRadius: "6px", cursor: "pointer", fontSize: "0.65rem", color: "#2563eb", fontWeight: 700, padding: "3px 6px" }}>รูป</button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             );
           })}
