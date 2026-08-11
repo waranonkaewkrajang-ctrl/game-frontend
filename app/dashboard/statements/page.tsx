@@ -9,8 +9,10 @@ interface Statement {
   amount: string;
   bank_code: string | null;
   bank_account: string | null;
+  bank_name: string | null;
   from_name: string | null;
   from_account: string | null;
+  from_bank_code: string | null;
   reference_id: string | null;
   approved_method: "auto" | "manual";
   approved_by: number | null;
@@ -115,84 +117,112 @@ export default function BankStatementsPage() {
             <thead>
               <tr style={{ background: "#f8fafc", borderBottom: "1px solid #e2e8f0" }}>
                 <Th>เวลา</Th>
-                <Th>ผู้โอน</Th>
-                <Th>ยอดเงิน</Th>
-                <Th>ธนาคาร</Th>
-                <Th>ลูกค้า</Th>
+                <Th>ผู้โอน (ลูกค้า)</Th>
+                <Th>เข้าบัญชีเรา</Th>
+                <Th>ยอด</Th>
                 <Th>วิธี</Th>
-                <Th>แอดมิน</Th>
-                <Th>Reference</Th>
+                <Th>โดย</Th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
-                <tr><td colSpan={8} style={{ padding: "40px", textAlign: "center", color: "#94a3b8" }}>กำลังโหลด...</td></tr>
+                <tr><td colSpan={6} style={{ padding: "40px", textAlign: "center", color: "#94a3b8" }}>กำลังโหลด...</td></tr>
               ) : statements.length === 0 ? (
-                <tr><td colSpan={8} style={{ padding: "40px", textAlign: "center", color: "#94a3b8" }}>ไม่มีข้อมูล</td></tr>
+                <tr><td colSpan={6} style={{ padding: "40px", textAlign: "center", color: "#94a3b8" }}>ไม่มีข้อมูล</td></tr>
               ) : (
                 statements.map((s) => (
                   <tr key={s.id} style={{ borderBottom: "1px solid #f1f5f9" }}>
+                    {/* เวลา + @username */}
                     <Td>
-                      <div style={{ color: "#334155", fontWeight: 600 }}>{formatDateTime(s.created_at)}</div>
-                    </Td>
-                    <Td>
-                      <div style={{ color: "#334155", fontWeight: 600 }}>
-                        {s.from_name || <span style={{ color: "#94a3b8" }}>-</span>}
+                      <div style={{ color: "#334155", fontWeight: 600, fontSize: "0.85rem" }}>
+                        {formatDateTime(s.created_at)}
                       </div>
-                      {s.from_account && (
-                        <div style={{ color: "#94a3b8", fontSize: "0.72rem", marginTop: "2px", fontFamily: "monospace" }}>
-                          {s.from_account}
+                      {s.user?.username && (
+                        <div style={{ color: "#0891b2", fontSize: "0.72rem", fontWeight: 600, marginTop: "2px" }}>
+                          @{s.user.username}
                         </div>
                       )}
                     </Td>
+
+                    {/* ผู้โอน (ลูกค้า) — Logo + ชื่อ + เลขบัญชี */}
                     <Td>
-                      <span style={{ color: "#16a34a", fontWeight: 800, fontSize: "0.95rem" }}>
-                        +{Number(s.amount).toLocaleString()}
-                      </span>
+                      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                        {s.from_bank_code && (
+                          <img
+                            src={`/logos/${s.from_bank_code}.webp`}
+                            alt={s.from_bank_code}
+                            style={{ width: "34px", height: "34px", objectFit: "contain", flexShrink: 0 }}
+                            onError={(e) => { e.currentTarget.style.display = "none"; }}
+                          />
+                        )}
+                        <div style={{ minWidth: 0 }}>
+                          <div style={{ color: "#334155", fontWeight: 600, fontSize: "0.9rem" }}>
+                            {s.from_name || <span style={{ color: "#94a3b8" }}>-</span>}
+                          </div>
+                          {s.from_account && (
+                            <div style={{ color: "#2563eb", fontSize: "0.78rem", marginTop: "2px", fontFamily: "monospace", fontWeight: 600 }}>
+                              {s.from_account}
+                            </div>
+                          )}
+                        </div>
+                      </div>
                     </Td>
+
+                    {/* เข้าบัญชีเรา — Logo + ชื่อบัญชี + เลขบัญชี */}
                     <Td>
-                      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                         {s.bank_code && (
                           <img
                             src={`/logos/${s.bank_code}.webp`}
                             alt={s.bank_code}
-                            style={{ width: "28px", height: "28px", objectFit: "contain", flexShrink: 0 }}
+                            style={{ width: "34px", height: "34px", objectFit: "contain", flexShrink: 0 }}
                             onError={(e) => { e.currentTarget.style.display = "none"; }}
                           />
                         )}
-                        <div>
-                          <div style={{ color: "#334155", fontWeight: 600 }}>{s.bank_code}</div>
+                        <div style={{ minWidth: 0 }}>
+                          <div style={{ color: "#334155", fontWeight: 600, fontSize: "0.9rem" }}>
+                            {s.bank_name || s.bank_code || <span style={{ color: "#94a3b8" }}>-</span>}
+                          </div>
                           {s.bank_account && (
-                            <div style={{ color: "#94a3b8", fontSize: "0.72rem", marginTop: "2px", fontFamily: "monospace" }}>
+                            <div style={{ color: "#2563eb", fontSize: "0.78rem", marginTop: "2px", fontFamily: "monospace", fontWeight: 600 }}>
                               {s.bank_account}
                             </div>
                           )}
                         </div>
                       </div>
                     </Td>
+
+                    {/* ยอด */}
                     <Td>
-                      {s.user?.username ? (
-                        <span style={{ color: "#0891b2", fontWeight: 600 }}>{s.user.username}</span>
-                      ) : <span style={{ color: "#94a3b8" }}>-</span>}
+                      <span style={{ color: "#16a34a", fontWeight: 800, fontSize: "1.05rem" }}>
+                        +{Number(s.amount).toLocaleString()}
+                      </span>
                     </Td>
+
+                    {/* วิธี */}
                     <Td>
                       <span style={{
-                        fontSize: "0.72rem", fontWeight: 700, padding: "3px 10px", borderRadius: "12px",
+                        fontSize: "0.72rem", fontWeight: 700, padding: "4px 10px", borderRadius: "12px",
                         background: s.approved_method === "auto" ? "#dcfce7" : "#fef3c7",
                         color: s.approved_method === "auto" ? "#16a34a" : "#d97706",
+                        border: `1px solid ${s.approved_method === "auto" ? "#86efac" : "#fcd34d"}`,
+                        whiteSpace: "nowrap",
                       }}>
-                        {s.approved_method === "auto" ? "Auto" : "Manual"}
+                        {s.approved_method === "auto" ? "AUTO" : "MANUAL"}
                       </span>
                     </Td>
+
+                    {/* โดย */}
                     <Td>
-                      <span style={{ color: "#64748b", fontSize: "0.8rem" }}>
-                        {s.admin?.username || "-"}
-                      </span>
-                    </Td>
-                    <Td>
-                      <span style={{ color: "#64748b", fontSize: "0.75rem", fontFamily: "monospace" }}>
-                        {s.reference_id || "-"}
-                      </span>
+                      {s.approved_method === "auto" ? (
+                        <span style={{ color: "#64748b", fontSize: "0.8rem", fontStyle: "italic" }}>
+                          ระบบ
+                        </span>
+                      ) : (
+                        <span style={{ color: "#7c3aed", fontSize: "0.85rem", fontWeight: 600 }}>
+                          {s.admin?.username || "-"}
+                        </span>
+                      )}
                     </Td>
                   </tr>
                 ))
