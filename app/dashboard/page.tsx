@@ -52,8 +52,10 @@ export default function DashboardPage() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
+ // 🇹🇭 วันนี้ตามเวลาไทย (Bangkok)
+  const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Bangkok' });
+  const [startDate, setStartDate] = useState(today);
+  const [endDate, setEndDate] = useState(today);
 
   const fetchDashboardData = () => {
     setLoading(true);
