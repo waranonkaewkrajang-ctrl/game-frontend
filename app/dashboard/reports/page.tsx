@@ -3,8 +3,11 @@ import { useEffect, useState } from "react";
 import api from "@/lib/api";
 
 interface ProfitReport {
+  total_deposit: number;
+  total_withdraw: number;
   total_bet: number;
   total_win: number;
+  total_bonus: number;
   profit: number;
 }
 
@@ -13,12 +16,11 @@ export default function ReportsPage() {
   const [loading, setLoading] = useState(true);
 
   // ตั้งค่า Default วันที่เริ่มต้นเป็น 1 เดือนที่แล้ว และสิ้นสุดคือวันนี้
-  const [startDate, setStartDate] = useState(() => {
-    const d = new Date();
-    d.setMonth(d.getMonth() - 1);
-    return d.toISOString().split("T")[0];
-  });
-  const [endDate, setEndDate] = useState(() => new Date().toISOString().split("T")[0]);
+  // 🇹🇭 วันนี้ตามเวลาไทย
+  const bangkokToday = () => new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Bangkok' });
+  
+  const [startDate, setStartDate] = useState(bangkokToday());
+  const [endDate, setEndDate] = useState(bangkokToday());
 
   const fetchReport = async () => {
     setLoading(true);
@@ -80,7 +82,63 @@ export default function ReportsPage() {
       {loading ? (
          <div style={{ textAlign: "center", padding: "4rem", color: "#64748b" }}>กำลังโหลดข้อมูลรายงาน...</div>
       ) : (
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "1rem" }}>
+<div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "1rem" }}>
+          
+          {/* Row 1: ฝาก-ถอน */}
+          <div style={{ background: "white", border: "1px solid #e2e8f0", borderRadius: "0.5rem", padding: "1.5rem", borderTop: "3px solid #10b981" }}>
+            <h3 style={{ fontSize: "0.875rem", color: "#64748b", fontWeight: 600, margin: "0 0 0.5rem 0" }}>ยอดฝากรวม</h3>
+            <p style={{ fontSize: "2rem", fontWeight: 700, color: "#10b981", margin: 0 }}>
+              ฿{fmt(report?.total_deposit ?? 0)}
+            </p>
+          </div>
+
+          <div style={{ background: "white", border: "1px solid #e2e8f0", borderRadius: "0.5rem", padding: "1.5rem", borderTop: "3px solid #f59e0b" }}>
+            <h3 style={{ fontSize: "0.875rem", color: "#64748b", fontWeight: 600, margin: "0 0 0.5rem 0" }}>ยอดถอนรวม</h3>
+            <p style={{ fontSize: "2rem", fontWeight: 700, color: "#f59e0b", margin: 0 }}>
+              ฿{fmt(report?.total_withdraw ?? 0)}
+            </p>
+          </div>
+
+          <div style={{ 
+            background: "white", border: "1px solid #e2e8f0", borderRadius: "0.5rem", padding: "1.5rem", 
+            borderTop: `3px solid ${((report?.total_deposit ?? 0) - (report?.total_withdraw ?? 0)) >= 0 ? "#10b981" : "#ef4444"}` 
+          }}>
+            <h3 style={{ fontSize: "0.875rem", color: "#64748b", fontWeight: 600, margin: "0 0 0.5rem 0" }}>กำไรฝาก-ถอน</h3>
+            <p style={{ 
+              fontSize: "2rem", fontWeight: 700, 
+              color: ((report?.total_deposit ?? 0) - (report?.total_withdraw ?? 0)) >= 0 ? "#10b981" : "#ef4444", 
+              margin: 0 
+            }}>
+              {((report?.total_deposit ?? 0) - (report?.total_withdraw ?? 0)) >= 0 ? "+" : ""}฿{fmt((report?.total_deposit ?? 0) - (report?.total_withdraw ?? 0))}
+            </p>
+          </div>
+
+          {/* Row 2: เดิมพัน-รางวัล-กำไรเกม (เดิม) */}
+          <div style={{ background: "white", border: "1px solid #e2e8f0", borderRadius: "0.5rem", padding: "1.5rem", borderTop: "3px solid #6366f1" }}>
+            <h3 style={{ fontSize: "0.875rem", color: "#64748b", fontWeight: 600, margin: "0 0 0.5rem 0" }}>ยอดเดิมพันสะสมรวม</h3>
+            <p style={{ fontSize: "2rem", fontWeight: 700, color: "#6366f1", margin: 0 }}>
+              ฿{fmt(report?.total_bet ?? 0)}
+            </p>
+          </div>
+
+          <div style={{ background: "white", border: "1px solid #e2e8f0", borderRadius: "0.5rem", padding: "1.5rem", borderTop: "3px solid #ec4899" }}>
+            <h3 style={{ fontSize: "0.875rem", color: "#64748b", fontWeight: 600, margin: "0 0 0.5rem 0" }}>ยอดจ่ายรางวัลสะสม</h3>
+            <p style={{ fontSize: "2rem", fontWeight: 700, color: "#ec4899", margin: 0 }}>
+              ฿{fmt(report?.total_win ?? 0)}
+            </p>
+          </div>
+
+          <div style={{ 
+            background: "white", border: "1px solid #e2e8f0", borderRadius: "0.5rem", padding: "1.5rem", 
+            borderTop: `3px solid ${(report?.profit ?? 0) >= 0 ? "#10b981" : "#ef4444"}` 
+          }}>
+            <h3 style={{ fontSize: "0.875rem", color: "#64748b", fontWeight: 600, margin: "0 0 0.5rem 0" }}>กำไรเกม (Win/Loss)</h3>
+            <p style={{ fontSize: "2rem", fontWeight: 700, color: (report?.profit ?? 0) >= 0 ? "#10b981" : "#ef4444", margin: 0 }}>
+              {(report?.profit ?? 0) >= 0 ? "+" : ""}฿{fmt(report?.profit ?? 0)}
+            </p>
+          </div>
+
+        </div>
           
           <div style={{ background: "white", border: "1px solid #e2e8f0", borderRadius: "0.5rem", padding: "1.5rem", borderTop: "3px solid #6366f1" }}>
             <h3 style={{ fontSize: "0.875rem", color: "#64748b", fontWeight: 600, margin: "0 0 0.5rem 0" }}>ยอดเดิมพันสะสมรวม</h3>
