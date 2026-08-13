@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 interface User {
   id: number;
   username: string;
+  amb_username: string | null;
   phone: string;
   full_name: string | null;
   status: string;
@@ -157,7 +158,14 @@ export default function UsersPage() {
                     onMouseEnter={(e) => e.currentTarget.style.background = "#f8fafc"}
                     onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}>
                     <td style={{ padding: "0.75rem 1rem", color: "#64748b" }}>{u.id}</td>
-                    <td style={{ padding: "0.75rem 1rem", fontWeight: 600, color: "#0f172a" }}>{u.username}</td>
+                    <td style={{ padding: "0.75rem 1rem" }}>
+                      <div style={{ fontWeight: 700, color: "#0f172a" }}>{u.username}</div>
+                      {u.amb_username && (
+                        <div style={{ fontSize: "0.72rem", color: "#6366f1", marginTop: "3px", fontWeight: 600 }}>
+                           {u.amb_username}
+                        </div>
+                      )}
+                    </td>
                     <td style={{ padding: "0.75rem 1rem", color: "#475569" }}>{u.full_name || "-"}</td>
                     <td style={{ padding: "0.75rem 1rem", color: "#475569" }}>{u.phone}</td>
                     <td style={{ padding: "0.75rem 1rem", color: "#10b981", fontWeight: 600 }}>฿{u.wallet ? fmt(u.wallet.balance) : "0.00"}</td>
