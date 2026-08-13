@@ -95,7 +95,7 @@ export default function MarketingPage() {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
       <div>
-        <h1 style={{ fontSize: "1.5rem", fontWeight: 700, color: "#0f172a", margin: 0 }}>📢 การตลาด — Marketing View</h1>
+        <h1 style={{ fontSize: "1.5rem", fontWeight: 700, color: "#0f172a", margin: 0 }}>การตลาด — Marketing View</h1>
         <p style={{ color: "#64748b", fontSize: "0.875rem", marginTop: "0.25rem" }}>วิเคราะห์ user เพื่อการติดต่อกลับ (ยอดฝาก / ถอน / หายไป)</p>
       </div>
 
@@ -179,7 +179,7 @@ export default function MarketingPage() {
                     <tr key={u.id} style={{ borderBottom: "1px solid #f1f5f9" }}>
                       <td style={{ padding: "0.75rem 1rem" }}>
                         <div style={{ fontWeight: 700, color: "#0f172a" }}>{u.username}</div>
-                        {u.amb_username && <div style={{ fontSize: "0.72rem", color: "#6366f1", fontWeight: 600, marginTop: "2px" }}>🆔 {u.amb_username}</div>}
+                        {u.amb_username && <div style={{ fontSize: "0.72rem", color: "#6366f1", fontWeight: 600, marginTop: "2px" }}>{u.amb_username}</div>}
                       </td>
                       <td style={{ padding: "0.75rem 1rem", color: "#475569" }}>
                         <div>{u.full_name || u.bank_name || "-"}</div>
