@@ -32,16 +32,27 @@ export default function UsersPage() {
   const [editUser, setEditUser] = useState<User | null>(null);
   const [editForm, setEditForm] = useState({ full_name: "", phone: "", bank_code: "", bank_account: "", bank_name: "" });
   const router = useRouter();
+  
+  // 🆕 Pagination state
+  const [perPage, setPerPage] = useState(20);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalUsers, setTotalUsers] = useState(0);
+  const [lastPage, setLastPage] = useState(1);
 
-  const fetchUsers = (s?: string) => {
+  const fetchUsers = (s?: string, page: number = 1, pp: number = perPage) => {
     setLoading(true);
-    api.get("/admin/users", { params: { search: s } }).then((res) => {
-      setUsers(res.data.data.data || res.data.data);
+    api.get("/admin/users", { 
+      params: { search: s, per_page: pp, page } 
+    }).then((res) => {
+      const data = res.data.data;
+      setUsers(data.data || data);
+      setTotalUsers(data.total || 0);
+      setLastPage(data.last_page || 1);
+      setCurrentPage(data.current_page || 1);
       setLoading(false);
     }).catch(() => setLoading(false));
   };
-
-  useEffect(() => { fetchUsers(); }, []);
+  useEffect(() => { fetchUsers(search, currentPage, perPage); }, [perPage, currentPage]); // eslint-disable-line
 
   const handleAdjust = async () => {
     if (!selected || !adjustAmount || !adjustDesc) return;
@@ -139,6 +150,36 @@ export default function UsersPage() {
         </form>
       </div>
 
+      {/* 🆕 Dropdown + Info */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "0.5rem 0", flexWrap: "wrap", gap: "0.5rem" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "0.875rem", color: "#475569" }}>
+          <span>แสดง</span>
+          <select 
+            value={perPage} 
+            onChange={(e) => { setPerPage(Number(e.target.value)); setCurrentPage(1); }}
+            style={{ 
+              padding: "0.375rem 0.75rem", 
+              border: "1px solid #cbd5e1", 
+              borderRadius: "0.375rem", 
+              background: "white",
+              cursor: "pointer",
+              fontSize: "0.875rem",
+              fontWeight: 600,
+            }}
+          >
+            <option value={20}>20</option>
+            <option value={50}>50</option>
+            <option value={100}>100</option>
+            <option value={500}>500</option>
+            <option value={9999}>ทั้งหมด</option>
+          </select>
+          <span>รายการต่อหน้า</span>
+        </div>
+        <div style={{ fontSize: "0.875rem", color: "#64748b", fontWeight: 600 }}>
+          ทั้งหมด <span style={{ color: "#0f172a" }}>{totalUsers}</span> คน
+        </div>
+      </div>
+
       <div style={{ background: "white", border: "1px solid #e2e8f0", borderRadius: "0.5rem", overflow: "hidden", boxShadow: "0 1px 2px 0 rgba(0,0,0,0.05)" }}>
         {loading ? (
           <div style={{ textAlign: "center", padding: "4rem", color: "#64748b" }}>กำลังโหลดข้อมูล...</div>
@@ -195,6 +236,48 @@ export default function UsersPage() {
                 )}
               </tbody>
             </table>
+            {/* 🆕 Pagination */}
+      {!loading && lastPage > 1 && (
+        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "0.5rem", padding: "1rem 0" }}>
+          <button 
+            onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+            disabled={currentPage === 1}
+            style={{ 
+              padding: "0.5rem 1rem", 
+              border: "1px solid #cbd5e1", 
+              borderRadius: "0.375rem", 
+              background: currentPage === 1 ? "#f1f5f9" : "white",
+              cursor: currentPage === 1 ? "not-allowed" : "pointer",
+              opacity: currentPage === 1 ? 0.5 : 1,
+              fontSize: "0.875rem",
+              fontWeight: 600,
+            }}
+          >
+            ◀ ก่อนหน้า
+          </button>
+          
+          <span style={{ padding: "0.5rem 1rem", fontSize: "0.875rem", color: "#475569", fontWeight: 600 }}>
+            หน้า {currentPage} / {lastPage}
+          </span>
+          
+          <button 
+            onClick={() => setCurrentPage(Math.min(lastPage, currentPage + 1))}
+            disabled={currentPage === lastPage}
+            style={{ 
+              padding: "0.5rem 1rem", 
+              border: "1px solid #cbd5e1", 
+              borderRadius: "0.375rem", 
+              background: currentPage === lastPage ? "#f1f5f9" : "white",
+              cursor: currentPage === lastPage ? "not-allowed" : "pointer",
+              opacity: currentPage === lastPage ? 0.5 : 1,
+              fontSize: "0.875rem",
+              fontWeight: 600,
+            }}
+          >
+            ถัดไป ▶
+          </button>
+        </div>
+      )}
           </div>
         )}
       </div>
