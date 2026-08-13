@@ -2,6 +2,20 @@
 import { useEffect, useState } from "react";
 import api from "@/lib/api";
 
+interface DailyRow {
+  date: string;
+  date_label: string;
+  total_deposit: number;
+  total_withdraw: number;
+  deposit_count: number;
+  withdraw_count: number;
+  total_bet: number;
+  total_win: number;
+  new_users: number;
+  net_cash: number;
+  game_profit: number;
+}
+
 interface ProfitReport {
   total_deposit: number;
   total_withdraw: number;
@@ -9,6 +23,7 @@ interface ProfitReport {
   total_win: number;
   total_bonus: number;
   profit: number;
+  daily?: DailyRow[];
 }
 
 export default function ReportsPage() {
@@ -138,6 +153,72 @@ export default function ReportsPage() {
             </p>
           </div>
 
+        </div>
+      )}
+
+      {/* 🆕 ตารางแยกรายวัน */}
+      {!loading && report?.daily && report.daily.length > 0 && (
+        <div style={{ background: "white", border: "1px solid #e2e8f0", borderRadius: "0.5rem", overflow: "hidden" }}>
+          <div style={{ padding: "1rem 1.25rem", borderBottom: "1px solid #e2e8f0" }}>
+            <h2 style={{ fontSize: "1rem", fontWeight: 700, color: "#0f172a", margin: 0 }}>สรุปแยกรายวัน</h2>
+            <p style={{ fontSize: "0.8rem", color: "#64748b", margin: "0.2rem 0 0" }}>เวลาไทย (Asia/Bangkok) · เรียงวันล่าสุดก่อน</p>
+          </div>
+          <div style={{ overflowX: "auto" }}>
+            <table style={{ width: "100%", fontSize: "0.85rem", borderCollapse: "collapse", textAlign: "right" }}>
+              <thead>
+                <tr style={{ background: "#f8fafc", borderBottom: "1px solid #e2e8f0" }}>
+                  <th style={{ padding: "0.7rem 1rem", textAlign: "left", color: "#475569", fontWeight: 600, whiteSpace: "nowrap" }}>วันที่</th>
+                  <th style={{ padding: "0.7rem 1rem", color: "#475569", fontWeight: 600, whiteSpace: "nowrap" }}>สมาชิกใหม่</th>
+                  <th style={{ padding: "0.7rem 1rem", color: "#475569", fontWeight: 600, whiteSpace: "nowrap" }}>ยอดฝาก</th>
+                  <th style={{ padding: "0.7rem 1rem", color: "#475569", fontWeight: 600, whiteSpace: "nowrap" }}>ยอดถอน</th>
+                  <th style={{ padding: "0.7rem 1rem", color: "#475569", fontWeight: 600, whiteSpace: "nowrap" }}>ฝาก-ถอน</th>
+                  <th style={{ padding: "0.7rem 1rem", color: "#475569", fontWeight: 600, whiteSpace: "nowrap" }}>ยอดเดิมพัน</th>
+                  <th style={{ padding: "0.7rem 1rem", color: "#475569", fontWeight: 600, whiteSpace: "nowrap" }}>จ่ายรางวัล</th>
+                  <th style={{ padding: "0.7rem 1rem", color: "#475569", fontWeight: 600, whiteSpace: "nowrap" }}>กำไรเกม</th>
+                </tr>
+              </thead>
+              <tbody>
+                {report.daily.map((r) => (
+                  <tr key={r.date} style={{ borderBottom: "1px solid #f1f5f9" }}>
+                    <td style={{ padding: "0.7rem 1rem", textAlign: "left", fontWeight: 600, color: "#0f172a", whiteSpace: "nowrap" }}>{r.date_label}</td>
+                    <td style={{ padding: "0.7rem 1rem", color: "#3b82f6", fontWeight: 600 }}>{r.new_users}</td>
+                    <td style={{ padding: "0.7rem 1rem", color: "#10b981", fontWeight: 600 }}>
+                      ฿{fmt(r.total_deposit)}
+                      <span style={{ display: "block", fontSize: "0.7rem", color: "#94a3b8", fontWeight: 400 }}>{r.deposit_count} บิล</span>
+                    </td>
+                    <td style={{ padding: "0.7rem 1rem", color: "#f59e0b", fontWeight: 600 }}>
+                      ฿{fmt(r.total_withdraw)}
+                      <span style={{ display: "block", fontSize: "0.7rem", color: "#94a3b8", fontWeight: 400 }}>{r.withdraw_count} บิล</span>
+                    </td>
+                    <td style={{ padding: "0.7rem 1rem", fontWeight: 700, color: r.net_cash >= 0 ? "#10b981" : "#ef4444" }}>
+                      {r.net_cash >= 0 ? "+" : ""}฿{fmt(r.net_cash)}
+                    </td>
+                    <td style={{ padding: "0.7rem 1rem", color: "#6366f1" }}>฿{fmt(r.total_bet)}</td>
+                    <td style={{ padding: "0.7rem 1rem", color: "#ec4899" }}>฿{fmt(r.total_win)}</td>
+                    <td style={{ padding: "0.7rem 1rem", fontWeight: 700, color: r.game_profit >= 0 ? "#10b981" : "#ef4444" }}>
+                      {r.game_profit >= 0 ? "+" : ""}฿{fmt(r.game_profit)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+              <tfoot>
+                <tr style={{ background: "#f8fafc", borderTop: "2px solid #e2e8f0", fontWeight: 700 }}>
+                  <td style={{ padding: "0.8rem 1rem", textAlign: "left", color: "#0f172a" }}>รวมทั้งหมด</td>
+                  <td style={{ padding: "0.8rem 1rem", color: "#3b82f6" }}>{report.daily.reduce((s, r) => s + r.new_users, 0)}</td>
+                  <td style={{ padding: "0.8rem 1rem", color: "#10b981" }}>฿{fmt(report.daily.reduce((s, r) => s + r.total_deposit, 0))}</td>
+                  <td style={{ padding: "0.8rem 1rem", color: "#f59e0b" }}>฿{fmt(report.daily.reduce((s, r) => s + r.total_withdraw, 0))}</td>
+                  <td style={{ padding: "0.8rem 1rem", color: depositMinusWithdraw >= 0 ? "#10b981" : "#ef4444" }}>
+                    {depositMinusWithdraw >= 0 ? "+" : ""}฿{fmt(depositMinusWithdraw)}
+                  </td>
+                  <td style={{ padding: "0.8rem 1rem", color: "#6366f1" }}>฿{fmt(report.total_bet ?? 0)}</td>
+                  <td style={{ padding: "0.8rem 1rem", color: "#ec4899" }}>฿{fmt(report.total_win ?? 0)}</td>
+                  <td style={{ padding: "0.8rem 1rem", color: (report.profit ?? 0) >= 0 ? "#10b981" : "#ef4444" }}>
+                    {(report.profit ?? 0) >= 0 ? "+" : ""}฿{fmt(report.profit ?? 0)}
+                  </td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
         </div>
       )}
     </div>
