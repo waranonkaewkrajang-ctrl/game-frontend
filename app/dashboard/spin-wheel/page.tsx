@@ -123,7 +123,7 @@ export default function SpinWheelAdminPage() {
           color: (document.getElementById("swal-color") as HTMLInputElement).value,
           icon: (document.getElementById("swal-icon") as HTMLInputElement).value || "★",
           image_url: (document.getElementById("swal-image") as HTMLInputElement).value || null,
-          probability: parseFloat((document.getElementById("swal-prob") as HTMLInputElement).value) || 10,
+probability: (() => { const v = parseFloat((document.getElementById("swal-prob") as HTMLInputElement).value); return isNaN(v) ? 10 : v; })(),
           sort_order: prizes.length, is_active: true,
         };
       },
@@ -191,7 +191,7 @@ export default function SpinWheelAdminPage() {
         color: (document.getElementById("swal-color") as HTMLInputElement).value,
         icon: (document.getElementById("swal-icon") as HTMLInputElement).value || "★",
         image_url: (document.getElementById("swal-image") as HTMLInputElement).value || null,
-        probability: parseFloat((document.getElementById("swal-prob") as HTMLInputElement).value) || 10,
+        probability: (isNaN(parseFloat((document.getElementById("swal-prob") as HTMLInputElement).value)) ? 10 : parseFloat((document.getElementById("swal-prob") as HTMLInputElement).value)),
       }),
     });
     if (formValues) {
@@ -254,7 +254,7 @@ export default function SpinWheelAdminPage() {
           label,
           value: parseFloat((document.getElementById("swal-value") as HTMLInputElement).value) || 1,
           color: (document.getElementById("swal-color") as HTMLInputElement).value,
-          probability: parseFloat((document.getElementById("swal-prob") as HTMLInputElement).value) || 10,
+probability: (() => { const v = parseFloat((document.getElementById("swal-prob") as HTMLInputElement).value); return isNaN(v) ? 10 : v; })(),
           sort_order: multipliers.length, is_active: true,
         };
       },
@@ -301,7 +301,7 @@ export default function SpinWheelAdminPage() {
         label: (document.getElementById("swal-label") as HTMLInputElement).value,
         value: parseFloat((document.getElementById("swal-value") as HTMLInputElement).value) || 1,
         color: (document.getElementById("swal-color") as HTMLInputElement).value,
-        probability: parseFloat((document.getElementById("swal-prob") as HTMLInputElement).value) || 10,
+        probability: (isNaN(parseFloat((document.getElementById("swal-prob") as HTMLInputElement).value)) ? 10 : parseFloat((document.getElementById("swal-prob") as HTMLInputElement).value)),
       }),
     });
     if (formValues) {
