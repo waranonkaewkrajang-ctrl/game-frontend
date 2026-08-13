@@ -166,7 +166,7 @@ export default function UsersPage() {
                         </div>
                       )}
                     </td>
-                    <td style={{ padding: "0.75rem 1rem", color: "#475569" }}>{u.full_name || "-"}</td>
+                    <td style={{ padding: "0.75rem 1rem", color: "#475569" }}>{u.full_name || u.bank_name || "-"}</td>
                     <td style={{ padding: "0.75rem 1rem", color: "#475569" }}>{u.phone}</td>
                     <td style={{ padding: "0.75rem 1rem", color: "#10b981", fontWeight: 600 }}>฿{u.wallet ? fmt(u.wallet.balance) : "0.00"}</td>
                     <td style={{ padding: "0.75rem 1rem" }}>
