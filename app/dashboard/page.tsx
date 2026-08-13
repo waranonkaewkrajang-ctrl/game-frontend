@@ -201,7 +201,7 @@ export default function DashboardPage() {
         <div style={gridRowStyle}>
           <StatCard title="สมาชิกทั้งหมด" value={fmtCount(data.overall.total_users)} subtext="บัญชีทั้งหมดในระบบ" color="#0ea5e9" Icon={Users} />
           <StatCard title="สมาชิกใหม่" value={fmtCount(data.today.new_users)} subtext="สมัครใหม่ช่วงเวลานี้" color="#3b82f6" Icon={UserPlus} />
-          <StatCard title="ลูกค้าเข้าใช้งาน" value={fmtCount(data.overall.active_users)} subtext="ออนไลน์ในระบบ" color="#14b8a6" Icon={Activity} />
+          <StatCard title="ลูกค้าเข้าใช้งาน" value={fmtCount(data.overall.active_users)} subtext="Login ในช่วงเวลานี้" color="#14b8a6" Icon={Activity} />
           <StatCard title="ยอดฝากแรก (First Deposit)" value={fmtCount(data.today.first_deposit_count)} subtext="จำนวนบิลฝากครั้งแรก" color="#eab308" Icon={Star} />
         </div>
       </div>
