@@ -52,7 +52,7 @@ export default function ReportsPage() {
   };
 
   useEffect(() => {
-    fetchReport();
+    handleChangeDays(showDays);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // เปลี่ยนจำนวนวันย้อนหลัง
