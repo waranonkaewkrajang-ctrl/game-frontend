@@ -23,13 +23,17 @@ export default function TransactionsPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("");
+  const [perPage, setPerPage] = useState(50);
+  const [total, setTotal] = useState(0);
 
-  const fetchTransactions = (searchQuery = search, typeQuery = typeFilter) => {
+  const fetchTransactions = (searchQuery = search, typeQuery = typeFilter, pp = perPage) => {
     setLoading(true);
     api.get("/admin/transactions", { 
-      params: { search: searchQuery, type: typeQuery } 
+      params: { search: searchQuery, type: typeQuery, per_page: pp } 
     }).then((res) => {
-      setTransactions(res.data.data.data || res.data.data);
+      const d = res.data.data;
+      setTransactions(d.data || d);
+      setTotal(d.total ?? (d.data?.length ?? d.length ?? 0));
       setLoading(false);
     }).catch(() => {
       setLoading(false);
@@ -122,6 +126,41 @@ export default function TransactionsPage() {
             ค้นหา
           </button>
         </form>
+      </div>
+
+      {/* Dropdown + Info */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "0.5rem 0", flexWrap: "wrap", gap: "0.5rem" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "0.875rem", color: "#475569" }}>
+          <span>แสดง</span>
+          <select
+            value={perPage}
+            onChange={(e) => {
+              const pp = Number(e.target.value);
+              setPerPage(pp);
+              fetchTransactions(search, typeFilter, pp);
+            }}
+            style={{
+              padding: "0.375rem 0.75rem",
+              border: "1px solid #cbd5e1",
+              borderRadius: "0.375rem",
+              background: "white",
+              cursor: "pointer",
+              fontSize: "0.875rem",
+              fontWeight: 600,
+            }}
+          >
+            <option value={50}>50</option>
+            <option value={100}>100</option>
+            <option value={200}>200</option>
+            <option value={500}>500</option>
+            <option value={1000}>1000</option>
+            <option value={9999}>ทั้งหมด</option>
+          </select>
+          <span>รายการต่อหน้า</span>
+        </div>
+        <div style={{ fontSize: "0.875rem", color: "#64748b", fontWeight: 600 }}>
+          ทั้งหมด <span style={{ color: "#0f172a" }}>{total.toLocaleString()}</span> รายการ
+        </div>
       </div>
 
       {/* Table Section */}
