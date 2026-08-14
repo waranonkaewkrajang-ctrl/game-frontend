@@ -35,7 +35,7 @@ export default function ReportsPage() {
 
   const [startDate, setStartDate] = useState(bangkokToday());
   const [endDate, setEndDate] = useState(bangkokToday());
-  const [showDays, setShowDays] = useState(1);
+  const [showDays, setShowDays] = useState(10);
 
   const fetchReport = async (from?: string, to?: string) => {
     setLoading(true);
@@ -132,13 +132,13 @@ export default function ReportsPage() {
               fontWeight: 600,
             }}
           >
-            <option value={1}>1</option>
-            <option value={3}>3</option>
-            <option value={7}>7</option>
-            <option value={15}>15</option>
+            <option value={10}>10</option>
+            <option value={20}>20</option>
             <option value={30}>30</option>
             <option value={60}>60</option>
             <option value={90}>90</option>
+            <option value={180}>180</option>
+            <option value={365}>365</option>
           </select>
           <span>วันย้อนหลัง</span>
         </div>
