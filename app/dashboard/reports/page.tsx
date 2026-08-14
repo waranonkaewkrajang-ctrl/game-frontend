@@ -35,6 +35,7 @@ export default function ReportsPage() {
   
   const [startDate, setStartDate] = useState(bangkokToday());
   const [endDate, setEndDate] = useState(bangkokToday());
+  const [showDays, setShowDays] = useState(1);
 
   const fetchReport = async () => {
     setLoading(true);
@@ -76,9 +77,7 @@ export default function ReportsPage() {
           <p style={{ color: "#64748b", fontSize: "0.875rem", marginTop: "0.25rem" }}>รายงานกำไร-ขาดทุนจากประวัติการเล่นทั้งหมด</p>
         </div>
         
-        <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
-          <span style={{ fontSize: "0.875rem", color: "#475569" }}>ตั้งแต่:</span>
-          <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} style={inputStyle} />
+        
           <span style={{ fontSize: "0.875rem", color: "#475569", marginLeft: "0.25rem" }}>ถึง:</span>
           <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} style={inputStyle} />
           <button 
@@ -90,6 +89,48 @@ export default function ReportsPage() {
           >
             ค้นหา
           </button>
+        </div>
+      </div>
+
+      {/* Dropdown + Info (เหมือนหน้า users) */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "0.5rem 0", flexWrap: "wrap", gap: "0.5rem" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "0.875rem", color: "#475569" }}>
+          <span>แสดง</span>
+          <select
+            value={showDays}
+            onChange={(e) => {
+              const days = Number(e.target.value);
+              setShowDays(days);
+              const f = (d: Date) => d.toLocaleDateString('en-CA', { timeZone: 'Asia/Bangkok' });
+              const end = new Date();
+              const start = new Date();
+              start.setDate(start.getDate() - (days - 1));
+              setStartDate(f(start));
+              setEndDate(f(end));
+              setTimeout(fetchReport, 50);
+            }}
+            style={{
+              padding: "0.375rem 0.75rem",
+              border: "1px solid #cbd5e1",
+              borderRadius: "0.375rem",
+              background: "white",
+              cursor: "pointer",
+              fontSize: "0.875rem",
+              fontWeight: 600,
+            }}
+          >
+            <option value={1}>1</option>
+            <option value={3}>3</option>
+            <option value={7}>7</option>
+            <option value={15}>15</option>
+            <option value={30}>30</option>
+            <option value={60}>60</option>
+            <option value={90}>90</option>
+          </select>
+          <span>วันย้อนหลัง</span>
+        </div>
+        <div style={{ fontSize: "0.875rem", color: "#64748b", fontWeight: 600 }}>
+          ทั้งหมด <span style={{ color: "#0f172a" }}>{report?.daily?.length ?? 0}</span> วัน
         </div>
       </div>
 
