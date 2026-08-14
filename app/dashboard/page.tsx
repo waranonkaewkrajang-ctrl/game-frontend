@@ -27,7 +27,8 @@ import {
   Gamepad2, 
   Trophy,
   AlertCircle,
-  Calendar
+  Calendar,
+  TrendingUp
 } from "lucide-react";
 
 interface DashboardData {
@@ -96,6 +97,7 @@ export default function DashboardPage() {
 
   const profitToday = data.today.total_bet - data.today.total_win;
   const netToday = data.today.total_deposit - data.today.total_withdraw;
+  const totalProfit = profitToday + netToday;
 
   // ฟังก์ชันช่วยสร้างการ์ดสถิติให้สวยงาม
   const StatCard = ({ title, value, subtext, color, Icon }: { title: string, value: string | number, subtext: string, color: string, Icon: any }) => (
@@ -224,13 +226,14 @@ export default function DashboardPage() {
       <div>
         <h2 style={{ fontSize: "1rem", fontWeight: 700, color: "#1e293b", marginBottom: "1rem", display: "flex", alignItems: "center", gap: "0.5rem" }}>
           <div style={{ width: "4px", height: "16px", background: "#f59e0b", borderRadius: "2px" }}></div>
-          สรุปผลประกอบการและการเล่น
+          สรุปผลประกอบการ (แยกกระแสเงินสด / กำไรเกม)
         </h2>
         <div style={gridRowStyle}>
-          <StatCard title="ฝาก - ถอน" value={`฿${fmtAmt(netToday)}`} subtext={netToday >= 0 ? "เงินเข้ามากกว่าเงินออก" : "เงินออกมากกว่าเงินเข้า"} color={netToday >= 0 ? "#8b5cf6" : "#ef4444"} Icon={Wallet} />
-          <StatCard title="กำไรสุทธิ" value={`฿${fmtAmt(profitToday)}`} subtext="เดิมพันรวม - ชนะรวม" color={profitToday >= 0 ? "#10b981" : "#ef4444"} Icon={CircleDollarSign} />
-          <StatCard title="ยอดเดิมพันสะสม" value={`฿${fmtAmt(data.today.total_bet)}`} subtext="ยอดแทงรวมของสมาชิก" color="#6366f1" Icon={Gamepad2} />
-          <StatCard title="ยอดชนะสะสม" value={`฿${fmtAmt(data.today.total_win)}`} subtext="ยอดที่สมาชิกเล่นชนะ" color="#ec4899" Icon={Trophy} />
+          <StatCard title="กำไรรวมจริง" value={`฿${fmtAmt(totalProfit)}`} subtext="กำไรเกม + (ฝาก-ถอน)" color={totalProfit >= 0 ? "#059669" : "#dc2626"} Icon={TrendingUp} />
+          <StatCard title="กระแสเงินสด (ฝาก-ถอน)" value={`฿${fmtAmt(netToday)}`} subtext={netToday >= 0 ? "รับเข้ามากกว่าจ่ายออก" : "จ่ายออกมากกว่ารับเข้า"} color={netToday >= 0 ? "#8b5cf6" : "#ef4444"} Icon={Wallet} />
+          <StatCard title="กำไรจากเกม" value={`฿${fmtAmt(profitToday)}`} subtext="ยอดเดิมพัน - ยอดจ่ายรางวัล" color={profitToday >= 0 ? "#10b981" : "#ef4444"} Icon={CircleDollarSign} />
+          <StatCard title="ยอดเดิมพันรวม" value={`฿${fmtAmt(data.today.total_bet)}`} subtext="เงินที่สมาชิกแทงทั้งหมด" color="#6366f1" Icon={Gamepad2} />
+          <StatCard title="ยอดจ่ายรางวัล" value={`฿${fmtAmt(data.today.total_win)}`} subtext="เงินที่จ่ายให้สมาชิกที่ชนะ" color="#ec4899" Icon={Trophy} />
         </div>
       </div>
 
