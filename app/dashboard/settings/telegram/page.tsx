@@ -13,6 +13,8 @@ export default function TelegramSettingsPage() {
   });
   const [saving, setSaving] = useState(false);
   const [testing, setTesting] = useState(false);
+  const [fetchingChats, setFetchingChats] = useState(false);
+  const [chatList, setChatList] = useState<{ id: string; type: string; title: string }[]>([]);
 
   useEffect(() => {
     api.get("/admin/settings").then((res) => {
@@ -50,6 +52,32 @@ export default function TelegramSettingsPage() {
     setTesting(false);
   };
 
+  const handleFetchChats = async () => {
+    if (!settings.telegram_bot_token) {
+      Swal.fire({ icon: "warning", title: "กรุณากรอก Bot Token ก่อน" });
+      return;
+    }
+    setFetchingChats(true);
+    try {
+      const res = await api.post("/admin/settings/telegram-fetch-chats", {
+        bot_token: settings.telegram_bot_token,
+      });
+      const d = res.data;
+      if (d.status === "success") {
+        setChatList(d.data);
+        if (d.data.length === 1) {
+          setSettings((prev) => ({ ...prev, telegram_chat_id: d.data[0].id }));
+        }
+        Swal.fire({ icon: "success", title: `พบ ${d.data.length} แชท`, text: "กรุณาเลือกแชทที่ต้องการ", timer: 2000, showConfirmButton: false });
+      } else {
+        Swal.fire({ icon: "info", title: "ไม่พบแชท", text: d.message });
+      }
+    } catch (err: any) {
+      Swal.fire({ icon: "error", title: "ดึงข้อมูลไม่สำเร็จ", text: err.response?.data?.message || "ตรวจสอบ Bot Token อีกครั้ง" });
+    }
+    setFetchingChats(false);
+  };
+
   const labelStyle = { display: "block" as const, fontSize: "0.85rem", fontWeight: 500, color: "#475569", marginBottom: "0.4rem" };
 
   return (
@@ -67,8 +95,8 @@ export default function TelegramSettingsPage() {
           <ol style={{ fontSize: "0.85rem", color: "#7f1d1d", lineHeight: 1.7, margin: 0, paddingLeft: "1.25rem" }}>
             <li>ค้นหา <strong>@BotFather</strong> ใน Telegram และพิมพ์คำสั่ง <code>/newbot</code></li>
             <li>ตั้งชื่อ Bot ให้เรียบร้อย จากนั้นนำ <strong>Bot Token</strong> ที่ได้รับมาใส่ในช่องด้านล่าง</li>
-            <li>ดึง Bot เข้ากลุ่ม (หรือเปิดแชทส่วนตัว) และค้นหา <strong>@userinfobot</strong> เพื่อรับ <strong>Chat ID</strong></li>
-            <li>นำ Chat ID มาใส่ในช่องด้านล่าง แล้วกด <strong>ทดสอบส่งข้อความ</strong></li>
+            <li>ดึง Bot เข้ากลุ่มที่ต้องการ แล้ว <strong>พิมพ์ข้อความอะไรก็ได้ในกลุ่ม</strong> 1 ครั้ง</li>
+            <li>กดปุ่ม <strong>ดึงรายการแชท</strong> → เลือกกลุ่มจากรายการ → กด <strong>ทดสอบส่งข้อความ</strong></li>
           </ol>
         </div>
 
@@ -88,14 +116,61 @@ export default function TelegramSettingsPage() {
           </div>
           
           <div style={{ marginBottom: "1.5rem" }}>
-            <label style={labelStyle}>Chat ID (ID กลุ่มหรือบัญชีส่วนตัว)</label>
-            <input 
-              className="input" 
-              value={settings.telegram_chat_id} 
-              onChange={(e) => setSettings({ ...settings, telegram_chat_id: e.target.value })} 
-              placeholder="e.g. -1001234567890" 
-              style={{ background: "#f8fafc", border: "1px solid #cbd5e1", color: "#0f172a" }}
-            />
+            <label style={labelStyle}>Chat ID (เลือกจากแชทที่ Bot อยู่)</label>
+            <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", flexWrap: "wrap" }}>
+              <select
+                value={settings.telegram_chat_id}
+                onChange={(e) => setSettings({ ...settings, telegram_chat_id: e.target.value })}
+                style={{
+                  flex: 1,
+                  minWidth: "260px",
+                  padding: "0.65rem 0.75rem",
+                  background: "#f8fafc",
+                  border: "1px solid #cbd5e1",
+                  borderRadius: "6px",
+                  color: "#0f172a",
+                  fontSize: "0.9rem",
+                  cursor: "pointer",
+                }}
+              >
+                <option value="">-- ยังไม่ได้เลือกแชท --</option>
+                {settings.telegram_chat_id &&
+                  !chatList.some((c) => c.id === settings.telegram_chat_id) && (
+                    <option value={settings.telegram_chat_id}>
+                      {settings.telegram_chat_id} (ที่บันทึกไว้)
+                    </option>
+                  )}
+                {chatList.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.title} ({c.type}) — {c.id}
+                  </option>
+                ))}
+              </select>
+
+              <button
+                type="button"
+                onClick={handleFetchChats}
+                disabled={fetchingChats}
+                style={{
+                  background: "linear-gradient(135deg, #7c3aed, #6d28d9)",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "6px",
+                  padding: "0.65rem 1.1rem",
+                  fontSize: "0.85rem",
+                  fontWeight: 500,
+                  cursor: fetchingChats ? "not-allowed" : "pointer",
+                  opacity: fetchingChats ? 0.7 : 1,
+                  whiteSpace: "nowrap",
+                  boxShadow: "0 4px 10px rgba(124, 58, 237, 0.3)",
+                }}
+              >
+                {fetchingChats ? "กำลังดึง..." : "ดึงรายการแชท"}
+              </button>
+            </div>
+            <p style={{ fontSize: "0.78rem", color: "#94a3b8", margin: "0.5rem 0 0" }}>
+              เพิ่ม Bot เข้ากลุ่ม → พิมพ์ข้อความในกลุ่ม → กด &quot;ดึงรายการแชท&quot;
+            </p>
           </div>
 
           <button 
