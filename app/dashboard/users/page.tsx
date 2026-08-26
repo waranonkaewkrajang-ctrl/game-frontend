@@ -31,7 +31,15 @@ export default function UsersPage() {
   const [profileUser, setProfileUser] = useState<User | null>(null);
   const [editUser, setEditUser] = useState<User | null>(null);
   const [editForm, setEditForm] = useState({ full_name: "", phone: "", bank_code: "", bank_account: "", bank_name: "" });
-  const router = useRouter();
+const router = useRouter();
+
+// 🆕 ให้เครดิตฟรี
+const [bonusUser, setBonusUser] = useState<User | null>(null);
+const [bonusAmount, setBonusAmount] = useState("");
+const [bonusMultiplier, setBonusMultiplier] = useState("");
+const [bonusExpiry, setBonusExpiry] = useState("168");
+const [bonusNote, setBonusNote] = useState("");
+const [bonusSaving, setBonusSaving] = useState(false);
   
   // 🆕 Pagination state
   const [perPage, setPerPage] = useState(20);
@@ -118,6 +126,44 @@ export default function UsersPage() {
     } catch (err: any) {
       Swal.fire({ icon: "error", title: "บันทึกไม่สำเร็จ", text: err.response?.data?.message || "เกิดข้อผิดพลาด" });
     }
+  };
+
+    // 🆕 ให้เครดิตฟรี
+  const handleOpenBonus = async (user: User) => {
+    // โหลดค่า default multiplier จาก settings
+    try {
+      const res = await api.get("/admin/settings");
+      setBonusMultiplier(res.data.default_turnover_multiplier || "5");
+      setBonusExpiry(res.data.default_turnover_expiry_hours || "168");
+    } catch {
+      setBonusMultiplier("5");
+      setBonusExpiry("168");
+    }
+    setBonusUser(user);
+    setBonusAmount("");
+    setBonusNote("");
+  };
+
+  const handleGiveBonus = async () => {
+    if (!bonusUser || !bonusAmount || parseFloat(bonusAmount) <= 0) {
+      Swal.fire({ icon: "warning", title: "กรุณาใส่จำนวนเงิน" });
+      return;
+    }
+    setBonusSaving(true);
+    try {
+      await api.post(`/admin/users/${bonusUser.id}/bonus`, {
+        amount: parseFloat(bonusAmount),
+        turnover_multiplier: parseFloat(bonusMultiplier) || 0,
+        expired_hours: parseInt(bonusExpiry) || 0,
+        note: bonusNote || "เครดิตฟรี",
+      });
+      Swal.fire({ icon: "success", title: "ให้เครดิตฟรีสำเร็จ", timer: 1500, showConfirmButton: false });
+      setBonusUser(null);
+      fetchUsers(search, currentPage, perPage);
+    } catch (err: any) {
+      Swal.fire({ icon: "error", title: "ไม่สำเร็จ", text: err.response?.data?.message || "เกิดข้อผิดพลาด" });
+    }
+    setBonusSaving(false);
   };
 
   const fmt = (n: string) => parseFloat(n).toLocaleString("th-TH", { minimumFractionDigits: 2 });
@@ -225,6 +271,7 @@ export default function UsersPage() {
                         <button onClick={() => router.push(`/dashboard/users/${u.id}`)} style={btnStyle("#16a34a", "#ffffff", "#16a34a")}>โปรไฟล์</button>
                         <button onClick={() => handleOpenEdit(u)} style={btnStyle("#2563eb", "#ffffff", "#2563eb")}>แก้ไข</button>
                         <button onClick={() => setSelected(u)} style={btnStyle("#f59e0b", "#ffffff", "#f59e0b")}>ปรับยอด</button>
+<button onClick={() => handleOpenBonus(u)} style={btnStyle("#8b5cf6", "#ffffff", "#8b5cf6")}>เครดิตฟรี</button>
                         <button onClick={() => handleToggleStatus(u)} style={btnStyle(u.status === "active" ? "#dc2626" : "#16a34a", "#ffffff", u.status === "active" ? "#dc2626" : "#16a34a")}>
                           {u.status === "active" ? "ระงับ" : "เปิดใช้"}
                         </button>
@@ -370,7 +417,91 @@ export default function UsersPage() {
             </div>
           </div>
         </div>
+
+        
       )}
+
+            {/* ============ 🆕 Modal ให้เครดิตฟรี ============ */}
+      {bonusUser && (
+        <div onClick={() => setBonusUser(null)} style={{ position: "fixed", inset: 0, background: "rgba(15,23,42,0.4)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 50, backdropFilter: "blur(2px)" }}>
+          <div style={{ background: "white", width: "100%", maxWidth: "460px", borderRadius: "0.75rem", padding: "1.75rem", boxShadow: "0 20px 25px -5px rgba(0,0,0,0.1)" }} onClick={(e) => e.stopPropagation()}>
+            <h3 style={{ fontSize: "1.25rem", fontWeight: 700, color: "#0f172a", margin: "0 0 0.5rem" }}>ให้เครดิตฟรี</h3>
+            <p style={{ fontSize: "0.875rem", color: "#64748b", marginBottom: "1.25rem" }}>
+              Username: <strong style={{ color: "#0f172a" }}>{bonusUser.username}</strong>
+              {" "}| ยอดเงิน: <strong style={{ color: "#10b981" }}>฿{bonusUser.wallet ? fmt(bonusUser.wallet.balance) : "0.00"}</strong>
+            </p>
+
+            {/* จำนวนเงิน */}
+            <div style={{ marginBottom: "1rem" }}>
+              <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 600, color: "#475569", marginBottom: "0.375rem" }}>จำนวนเครดิตฟรี (บาท)</label>
+              <input type="number" min="1" step="1" placeholder="เช่น 100" value={bonusAmount} onChange={(e) => setBonusAmount(e.target.value)} style={inputStyle} />
+            </div>
+
+            {/* ตัวคูณเทิร์น */}
+            <div style={{ marginBottom: "1rem" }}>
+              <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 600, color: "#475569", marginBottom: "0.375rem" }}>ตัวคูณเทิร์นโอเวอร์ (เท่า)</label>
+              <input type="number" min="0" step="0.5" placeholder="เช่น 5" value={bonusMultiplier} onChange={(e) => setBonusMultiplier(e.target.value)} style={inputStyle} />
+              <p style={{ fontSize: "0.7rem", color: "#94a3b8", marginTop: "0.25rem" }}>ตั้ง 0 = ไม่ต้องทำเทิร์น ถอนได้เลย</p>
+            </div>
+
+            {/* หมดอายุ */}
+            <div style={{ marginBottom: "1rem" }}>
+              <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 600, color: "#475569", marginBottom: "0.375rem" }}>หมดอายุเทิร์น</label>
+              <div style={{ display: "flex", gap: "0.375rem", flexWrap: "wrap" }}>
+                {[
+                  { label: "1 วัน", value: "24" },
+                  { label: "3 วัน", value: "72" },
+                  { label: "7 วัน", value: "168" },
+                  { label: "14 วัน", value: "336" },
+                  { label: "ไม่หมดอายุ", value: "0" },
+                ].map((opt) => (
+                  <button key={opt.value} onClick={() => setBonusExpiry(opt.value)} style={{
+                    padding: "0.375rem 0.75rem", borderRadius: "0.375rem", border: "2px solid",
+                    cursor: "pointer", fontSize: "0.75rem", fontWeight: 600, transition: "all 0.2s",
+                    background: bonusExpiry === opt.value ? "#8b5cf6" : "white",
+                    color: bonusExpiry === opt.value ? "white" : "#64748b",
+                    borderColor: bonusExpiry === opt.value ? "#8b5cf6" : "#e2e8f0",
+                  }}>
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* หมายเหตุ */}
+            <div style={{ marginBottom: "1rem" }}>
+              <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 600, color: "#475569", marginBottom: "0.375rem" }}>หมายเหตุ (ไม่บังคับ)</label>
+              <input placeholder="เช่น โปรวันเกิด, คืนยอดเสีย" value={bonusNote} onChange={(e) => setBonusNote(e.target.value)} style={inputStyle} />
+            </div>
+
+            {/* ตัวอย่างการคำนวณ */}
+            {bonusAmount && parseFloat(bonusAmount) > 0 && (
+              <div style={{ background: "#f5f3ff", border: "1px solid #ddd6fe", borderRadius: "0.5rem", padding: "0.75rem", marginBottom: "1rem" }}>
+                <p style={{ color: "#6d28d9", fontSize: "0.8rem", fontWeight: 500, margin: 0 }}>
+                  💡 {bonusUser.username} ได้รับ <strong>{parseFloat(bonusAmount).toLocaleString()}</strong> บาท
+                  {parseFloat(bonusMultiplier) > 0
+                    ? ` → ต้องเดิมพัน ${(parseFloat(bonusAmount) * parseFloat(bonusMultiplier)).toLocaleString()} บาท`
+                    : " → ไม่ต้องทำเทิร์น ถอนได้เลย"}
+                  {bonusExpiry !== "0" && parseFloat(bonusMultiplier) > 0
+                    ? ` ภายใน ${Math.round(parseInt(bonusExpiry) / 24)} วัน`
+                    : ""}
+                </p>
+              </div>
+            )}
+
+            {/* ปุ่ม */}
+            <div style={{ display: "flex", gap: "0.75rem" }}>
+              <button onClick={handleGiveBonus} disabled={bonusSaving} style={{ flex: 1, background: "#8b5cf6", color: "white", border: "none", borderRadius: "0.375rem", padding: "0.625rem", fontSize: "0.875rem", fontWeight: 600, cursor: "pointer" }}>
+                {bonusSaving ? "กำลังดำเนินการ..." : "ยืนยันให้เครดิตฟรี"}
+              </button>
+              <button onClick={() => setBonusUser(null)} style={{ flex: 1, background: "white", color: "#475569", border: "1px solid #cbd5e1", borderRadius: "0.375rem", padding: "0.625rem", fontSize: "0.875rem", fontWeight: 600, cursor: "pointer" }}>
+                ยกเลิก
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
