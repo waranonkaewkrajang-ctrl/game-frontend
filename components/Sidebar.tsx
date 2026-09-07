@@ -15,7 +15,9 @@ import {
   CircleDot,
   LogOut,
   Shield,
-  ImageIcon
+  ImageIcon,
+  PanelLeftClose,
+  PanelLeftOpen,
 } from "lucide-react";
 
 const menuItems = [
@@ -114,6 +116,9 @@ export default function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
   
+  // 🆕 State พับ/กาง
+  const [collapsed, setCollapsed] = useState(false);
+
   // State สำหรับเปิด/ปิดเมนูย่อย
   const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({
     users: true,
@@ -195,23 +200,35 @@ useEffect(() => {
 
   return (
     <aside style={{ 
-      width: "260px", 
+      width: collapsed ? "70px" : "260px", 
       background: "white", 
       borderRight: "1px solid #e2e8f0", 
       display: "flex", 
       flexDirection: "column",
       height: "100vh",
       position: "sticky",
-      top: 0
+      top: 0,
+      transition: "width 0.25s ease",
+      overflow: "hidden",
     }}>
-      {/* Header โลโก้ */}
-      <div style={{ padding: "1.5rem 1.25rem", borderBottom: "1px solid #f1f5f9", marginBottom: "1rem" }}>
-        <h2 style={{ fontWeight: 700, fontSize: "1.25rem", color: "#0f172a", letterSpacing: "-0.02em", margin: 0 }}>
-          Game Platform
-        </h2>
-        <p style={{ fontSize: "0.75rem", color: "#64748b", fontWeight: 500, marginTop: "0.25rem", margin: "0.25rem 0 0 0" }}>
-          {currentAdmin ? `Welcome, ${currentAdmin.username}` : "Admin Management"}
-        </p>
+      {/* Header โลโก้ + ปุ่มพับ */}
+      <div style={{ padding: collapsed ? "1.5rem 0.5rem" : "1.5rem 1.25rem", borderBottom: "1px solid #f1f5f9", marginBottom: "1rem", display: "flex", alignItems: "center", justifyContent: collapsed ? "center" : "space-between" }}>
+        {!collapsed && (
+          <div>
+            <h2 style={{ fontWeight: 700, fontSize: "1.25rem", color: "#0f172a", letterSpacing: "-0.02em", margin: 0 }}>
+              Game Platform
+            </h2>
+            <p style={{ fontSize: "0.75rem", color: "#64748b", fontWeight: 500, margin: "0.25rem 0 0 0" }}>
+              {currentAdmin ? `Welcome, ${currentAdmin.username}` : "Admin Management"}
+            </p>
+          </div>
+        )}
+        <button onClick={() => setCollapsed(!collapsed)} style={{ background: "none", border: "none", cursor: "pointer", padding: "4px", borderRadius: "6px", color: "#64748b", display: "flex", alignItems: "center", justifyContent: "center" }}
+          onMouseEnter={(e) => e.currentTarget.style.background = "#f1f5f9"}
+          onMouseLeave={(e) => e.currentTarget.style.background = "none"}
+        >
+          {collapsed ? <PanelLeftOpen size={20} /> : <PanelLeftClose size={20} />}
+        </button>
       </div>
 
       {/* รายการเมนู */}
@@ -235,7 +252,7 @@ useEffect(() => {
                   borderLeft: isActive ? "3px solid #4f46e5" : "3px solid transparent",
                 }}>
                   {menu.icon}
-                  <span style={{ fontSize: "0.875rem", flex: 1 }}>{menu.title}</span>
+                  {!collapsed && <span style={{ fontSize: "0.875rem", flex: 1 }}>{menu.title}</span>}
                   {(menu as any).showBadge && bankChangeCount > 0 && (
                     <span style={{ background: "#dc2626", color: "#fff", fontSize: "0.7rem", fontWeight: 700, minWidth: "20px", height: "20px", borderRadius: "10px", display: "flex", alignItems: "center", justifyContent: "center", padding: "0 6px" }}>
                       {bankChangeCount}
@@ -273,14 +290,14 @@ useEffect(() => {
                 >
                   <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
                     {menu.icon}
-                    <span style={{ fontSize: "0.875rem" }}>{menu.title}</span>
+                    {!collapsed && <span style={{ fontSize: "0.875rem" }}>{menu.title}</span>}
                   </div>
-                  {isOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                  {!collapsed && (isOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />)}
                 </div>
 
                 {/* เมนูย่อย */}
-                {isOpen && (
-                  <div style={{ paddingLeft: "1.25rem", marginTop: "0.15rem", display: "flex", flexDirection: "column", gap: "0.15rem" }}>
+                {isOpen && !collapsed && (
+                  <div style={{ paddingLeft: "1.25rem", marginTop: "0.15rem", display: "flex", flexDirection: "column", gap: "0.15rem" }}> 
                     {visibleSubItems.map((subItem, subIndex) => {
                       const isSubActive = pathname === subItem.href;
                       return (
@@ -329,7 +346,7 @@ useEffect(() => {
           onMouseLeave={(e) => e.currentTarget.style.background = "none"}
         >
           <LogOut size={20} />
-          ออกจากระบบ
+          {!collapsed && "ออกจากระบบ"} 
         </button>
       </div>
     </aside>

@@ -496,9 +496,6 @@ const [bonusSaving, setBonusSaving] = useState(false);
               </button>
               <button onClick={() => setBonusUser(null)} style={{ flex: 1, background: "white", color: "#475569", border: "1px solid #cbd5e1", borderRadius: "0.375rem", padding: "0.625rem", fontSize: "0.875rem", fontWeight: 600, cursor: "pointer" }}>
                 ยกเลิก
-              </button>
-            </div>
-          </div>
         </div>
       )}
 
