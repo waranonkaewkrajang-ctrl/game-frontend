@@ -112,7 +112,7 @@ const menuItems = [
   },
 ];
 
-export default function Sidebar() {
+export default function Sidebar({ onClose }: { onClose?: () => void }) {
   const pathname = usePathname();
   const router = useRouter();
   
@@ -242,7 +242,7 @@ useEffect(() => {
 
             const isActive = pathname === menu.href;
             return (
-              <Link key={index} href={menu.href} style={{ textDecoration: "none" }}>
+              <Link key={index} href={menu.href} onClick={onClose} style={{ textDecoration: "none" }}>
                 <div style={{
                   display: "flex", alignItems: "center", gap: "0.75rem", padding: "0.65rem 0.75rem",
                   borderRadius: "0.5rem", transition: "all 0.15s",
@@ -301,7 +301,7 @@ useEffect(() => {
                     {visibleSubItems.map((subItem, subIndex) => {
                       const isSubActive = pathname === subItem.href;
                       return (
-                        <Link key={subIndex} href={subItem.href} style={{ textDecoration: "none" }}>
+                        <Link key={subIndex} href={subItem.href} onClick={onClose} style={{ textDecoration: "none" }}>
                           <div style={{
                             display: "flex", alignItems: "center", gap: "0.5rem",
                             padding: "0.5rem 0.75rem", borderRadius: "0.5rem", transition: "all 0.15s",
