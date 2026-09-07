@@ -489,13 +489,16 @@ const [bonusSaving, setBonusSaving] = useState(false);
               </div>
             )}
 
-            {/* ปุ่ม */}
+                        {/* ปุ่ม */}
             <div style={{ display: "flex", gap: "0.75rem" }}>
               <button onClick={handleGiveBonus} disabled={bonusSaving} style={{ flex: 1, background: "#8b5cf6", color: "white", border: "none", borderRadius: "0.375rem", padding: "0.625rem", fontSize: "0.875rem", fontWeight: 600, cursor: "pointer" }}>
                 {bonusSaving ? "กำลังดำเนินการ..." : "ยืนยันให้เครดิตฟรี"}
               </button>
               <button onClick={() => setBonusUser(null)} style={{ flex: 1, background: "white", color: "#475569", border: "1px solid #cbd5e1", borderRadius: "0.375rem", padding: "0.625rem", fontSize: "0.875rem", fontWeight: 600, cursor: "pointer" }}>
                 ยกเลิก
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
