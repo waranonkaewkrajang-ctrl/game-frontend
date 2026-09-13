@@ -88,6 +88,12 @@ const menuItems = [
     href: "/dashboard/banners",
     permissionKey: "settings" // ให้ใช้สิทธิ์ระดับตั้งค่า หรือจะเปลี่ยนเป็น "promotions" ก็ได้ครับ
   },
+  {
+    title: "จัดการ Popup",
+    icon: <ImageIcon size={20} />,
+    href: "/dashboard/popups",
+    permissionKey: "settings"
+  },
   // --- เพิ่มเมนูจัดการสิทธิ์ตรงนี้ ---
   {
     title: "จัดการพนักงาน",
