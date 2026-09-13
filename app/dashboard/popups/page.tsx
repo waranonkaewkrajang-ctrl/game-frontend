@@ -24,6 +24,30 @@ export default function PopupsPage() {
   const [showModal, setShowModal] = useState(false);
   const [editingPopup, setEditingPopup] = useState<Popup | null>(null);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+
+  const handleUploadImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+      Swal.fire({ icon: "warning", title: "ไฟล์ใหญ่เกิน 5MB" });
+      return;
+    }
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("image", file);
+      const res = await api.post("/admin/popups/upload-image", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      setForm((prev) => ({ ...prev, image_url: res.data.url }));
+      Swal.fire({ icon: "success", title: "อัปโหลดสำเร็จ", timer: 1000, showConfirmButton: false });
+    } catch {
+      Swal.fire({ icon: "error", title: "อัปโหลดไม่สำเร็จ" });
+    }
+    setUploading(false);
+  };
 
   const [form, setForm] = useState({
     title: "",
@@ -204,9 +228,20 @@ export default function PopupsPage() {
             </div>
 
             <div style={{ marginBottom: "0.75rem" }}>
-              <label style={labelStyle}>รูปภาพ (URL)</label>
-              <input value={form.image_url} onChange={(e) => setForm({ ...form, image_url: e.target.value })} placeholder="https://example.com/image.jpg" style={inputStyle} />
-              {form.image_url && <img src={form.image_url} alt="preview" style={{ marginTop: "0.5rem", maxHeight: "120px", borderRadius: "0.5rem", objectFit: "contain" }} />}
+              <label style={labelStyle}>รูปภาพ</label>
+              <div style={{ display: "flex", gap: "0.5rem", marginBottom: "0.5rem" }}>
+                <label style={{ flex: 1, padding: "0.625rem", borderRadius: "0.375rem", border: "2px dashed #e2e8f0", fontSize: "0.85rem", color: "#64748b", textAlign: "center", cursor: "pointer", background: uploading ? "#f8fafc" : "white" }}>
+                  <input type="file" accept="image/jpeg,image/png,image/gif,image/webp,image/svg+xml" onChange={handleUploadImage} style={{ display: "none" }} />
+                  {uploading ? "กำลังอัปโหลด..." : "📁 เลือกไฟล์ (JPG, PNG, GIF, WEBP, SVG สูงสุด 5MB)"}
+                </label>
+              </div>
+              <input value={form.image_url} onChange={(e) => setForm({ ...form, image_url: e.target.value })} placeholder="หรือวาง URL รูปภาพ" style={{ ...inputStyle, fontSize: "0.8rem" }} />
+              {form.image_url && (
+                <div style={{ marginTop: "0.5rem", position: "relative", display: "inline-block" }}>
+                  <img src={form.image_url.startsWith("/") ? `https://admintg289.sbs${form.image_url}` : form.image_url} alt="preview" style={{ maxHeight: "120px", borderRadius: "0.5rem", objectFit: "contain" }} />
+                  <button onClick={() => setForm({ ...form, image_url: "" })} style={{ position: "absolute", top: "-8px", right: "-8px", width: "22px", height: "22px", borderRadius: "50%", background: "#ef4444", color: "white", border: "none", cursor: "pointer", fontSize: "0.7rem", display: "flex", alignItems: "center", justifyContent: "center" }}>✕</button>
+                </div>
+              )}
             </div>
 
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem", marginBottom: "0.75rem" }}>
