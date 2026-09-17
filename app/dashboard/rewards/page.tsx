@@ -200,7 +200,7 @@ export default function RewardsPage() {
               <option value="cashback">คืนยอดเสีย</option>
               <option value="referral">ค่าแนะนำ</option>
             </select>
-            <select className="input" style={{ minWidth: "150px" }} value={status} onChange={(e) => setStatus(e.target.value)}>
+            <select className="input" style={{ width: "150px", flex: "0 0 auto" }} value={status} onChange={(e) => setStatus(e.target.value)}>
               <option value="">ทุกสถานะ</option>
               <option value="pending">รอรับ</option>
               <option value="claimed">รับแล้ว</option>
@@ -208,10 +208,10 @@ export default function RewardsPage() {
             </select>
           </>
         )}
-        <input type="date" className="input" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} />
+        <input type="date" className="input" style={{ width: "160px", flex: "0 0 auto" }} value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} />
         <span style={{ color: "#64748b", fontSize: "0.875rem" }}>ถึง</span>
-        <input type="date" className="input" value={dateTo} onChange={(e) => setDateTo(e.target.value)} />
-        <select className="input" style={{ minWidth: "130px" }} value={perPage} onChange={(e) => setPerPage(e.target.value)}>
+        <input type="date" className="input" style={{ width: "160px", flex: "0 0 auto" }} value={dateTo} onChange={(e) => setDateTo(e.target.value)} />
+        <select className="input" style={{ width: "130px", flex: "0 0 auto" }} value={perPage} onChange={(e) => setPerPage(e.target.value)}>
           <option value="10">10 รายการ</option>
           <option value="50">50 รายการ</option>
           <option value="100">100 รายการ</option>
