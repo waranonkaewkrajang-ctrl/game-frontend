@@ -57,6 +57,7 @@ const menuItems = [
     subItems: [
       { title: "จัดการโปรโมชัน", href: "/dashboard/promotions", permissionKey: "promotions" },
       { title: "ระบบแนะนำเพื่อน", href: "/dashboard/referrals", permissionKey: "promotions" },
+      { title: "ยอดเสีย & ค่าแนะนำ", href: "/dashboard/rewards", permissionKey: "reports" },
       { title: "สรุปรายงาน", href: "/dashboard/marketing", permissionKey: "reports" },
 
     ],
