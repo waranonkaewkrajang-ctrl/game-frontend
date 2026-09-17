@@ -154,7 +154,10 @@ export default function RewardsPage() {
     }
   };
 
-  useEffect(() => { fetchAll(); }, [tab, perPage]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { fetchAll(); }, [tab, perPage, page]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // เปลี่ยนแท็บหรือจำนวนรายการ → กลับหน้า 1
+  useEffect(() => { setPage(1); }, [tab, perPage]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
