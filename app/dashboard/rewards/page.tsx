@@ -194,8 +194,8 @@ export default function RewardsPage() {
       <form onSubmit={handleSearch} style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", alignItems: "center" }}>
         {tab === "list" && (
           <>
-            <input className="input" style={{ width: "200px" }} placeholder="ค้นหา Username..." value={search} onChange={(e) => setSearch(e.target.value)} />
-            <select className="input" style={{ minWidth: "150px" }} value={type} onChange={(e) => setType(e.target.value)}>
+            <input className="input" style={{ width: "200px", flex: "0 0 auto" }} placeholder="ค้นหา Username..." value={search} onChange={(e) => setSearch(e.target.value)} />
+            <select className="input" style={{ width: "150px", flex: "0 0 auto" }} value={type} onChange={(e) => setType(e.target.value)}>
               <option value="">ทุกประเภท</option>
               <option value="cashback">คืนยอดเสีย</option>
               <option value="referral">ค่าแนะนำ</option>
