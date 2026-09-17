@@ -59,6 +59,17 @@ const inputStyle = {
 const thStyle = { padding: "1rem", color: "#475569", fontWeight: 600 } as const;
 const tdStyle = { padding: "1rem", color: "#64748b" } as const;
 
+const pageBtn = (disabled: boolean) => ({
+  padding: "0.5rem 0.875rem",
+  border: "1px solid #cbd5e1",
+  borderRadius: "0.375rem",
+  background: disabled ? "#f1f5f9" : "white",
+  color: disabled ? "#94a3b8" : "#334155",
+  fontSize: "0.875rem",
+  fontWeight: 600,
+  cursor: disabled ? "not-allowed" : "pointer",
+});
+
 const money = (v: string | number) =>
   "฿" + Number(v).toLocaleString("th-TH", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
@@ -98,6 +109,9 @@ export default function RewardsPage() {
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
   const [perPage, setPerPage] = useState("50");
+  const [page, setPage] = useState(1);
+  const [lastPage, setLastPage] = useState(1);
+  const [total, setTotal] = useState(0);
 
   const params = () => ({
     search: search || undefined,
@@ -106,6 +120,7 @@ export default function RewardsPage() {
     date_from: dateFrom || undefined,
     date_to: dateTo || undefined,
     per_page: perPage,
+    page,
   });
 
   const fetchAll = () => {
@@ -118,11 +133,23 @@ export default function RewardsPage() {
 
     if (tab === "list") {
       api.get("/admin/rewards", { params: p })
-        .then((res) => { setRows(res.data.data.data || []); setLoading(false); })
+        .then((res) => {
+          const d = res.data.data;
+          setRows(d.data || []);
+          setLastPage(d.last_page || 1);
+          setTotal(d.total || 0);
+          setLoading(false);
+        })
         .catch(() => setLoading(false));
     } else {
-      api.get("/admin/rewards/by-user", { params: { date_from: p.date_from, date_to: p.date_to, per_page: p.per_page } })
-        .then((res) => { setByUser(res.data.data.data || []); setLoading(false); })
+      api.get("/admin/rewards/by-user", { params: { date_from: p.date_from, date_to: p.date_to, per_page: p.per_page, page } })
+        .then((res) => {
+          const d = res.data.data;
+          setByUser(d.data || []);
+          setLastPage(d.last_page || 1);
+          setTotal(d.total || 0);
+          setLoading(false);
+        })
         .catch(() => setLoading(false));
     }
   };
@@ -309,6 +336,48 @@ export default function RewardsPage() {
           </div>
         )}
       </div>
+
+      {/* Pagination */}
+      {!loading && total > 0 && (
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "1rem", paddingBottom: "2rem" }}>
+          <div style={{ color: "#64748b", fontSize: "0.875rem" }}>
+            ทั้งหมด {total.toLocaleString("th-TH")} รายการ — หน้า {page} / {lastPage}
+          </div>
+          <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+            <button
+              onClick={() => setPage(1)}
+              disabled={page === 1}
+              style={pageBtn(page === 1)}
+            >
+              หน้าแรก
+            </button>
+            <button
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={page === 1}
+              style={pageBtn(page === 1)}
+            >
+              ‹ ก่อนหน้า
+            </button>
+            <span style={{ fontSize: "0.875rem", fontWeight: 600, color: "#0f172a", padding: "0 0.5rem" }}>
+              {page}
+            </span>
+            <button
+              onClick={() => setPage((p) => Math.min(lastPage, p + 1))}
+              disabled={page >= lastPage}
+              style={pageBtn(page >= lastPage)}
+            >
+              ถัดไป ›
+            </button>
+            <button
+              onClick={() => setPage(lastPage)}
+              disabled={page >= lastPage}
+              style={pageBtn(page >= lastPage)}
+            >
+              หน้าสุดท้าย
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
