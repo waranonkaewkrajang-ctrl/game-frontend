@@ -97,6 +97,7 @@ export default function RewardsPage() {
   const [status, setStatus] = useState("");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
+  const [perPage, setPerPage] = useState("50");
 
   const params = () => ({
     search: search || undefined,
@@ -104,6 +105,7 @@ export default function RewardsPage() {
     status: status || undefined,
     date_from: dateFrom || undefined,
     date_to: dateTo || undefined,
+    per_page: perPage,
   });
 
   const fetchAll = () => {
@@ -119,13 +121,13 @@ export default function RewardsPage() {
         .then((res) => { setRows(res.data.data.data || []); setLoading(false); })
         .catch(() => setLoading(false));
     } else {
-      api.get("/admin/rewards/by-user", { params: { date_from: p.date_from, date_to: p.date_to } })
+      api.get("/admin/rewards/by-user", { params: { date_from: p.date_from, date_to: p.date_to, per_page: p.per_page } })
         .then((res) => { setByUser(res.data.data.data || []); setLoading(false); })
         .catch(() => setLoading(false));
     }
   };
 
-  useEffect(() => { fetchAll(); }, [tab]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { fetchAll(); }, [tab, perPage]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -209,6 +211,12 @@ export default function RewardsPage() {
         <input type="date" className="input" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} />
         <span style={{ color: "#64748b", fontSize: "0.875rem" }}>ถึง</span>
         <input type="date" className="input" value={dateTo} onChange={(e) => setDateTo(e.target.value)} />
+        <select className="input" style={{ minWidth: "130px" }} value={perPage} onChange={(e) => setPerPage(e.target.value)}>
+          <option value="10">10 รายการ</option>
+          <option value="50">50 รายการ</option>
+          <option value="100">100 รายการ</option>
+          <option value="200">200 รายการ</option>
+        </select>
         <button type="submit" style={{ background: "#10b981", color: "white", border: "none", borderRadius: "0.375rem", padding: "0.5rem 1.25rem", fontSize: "0.875rem", fontWeight: 600, cursor: "pointer" }}>
           ค้นหา
         </button>
