@@ -56,13 +56,6 @@ const inputStyle = {
   background: "#ffffff",
 };
 
-const selectStyle = {
-  ...inputStyle,
-  cursor: "pointer",
-  minWidth: "140px",
-  appearance: "auto" as const,
-};
-
 const thStyle = { padding: "1rem", color: "#475569", fontWeight: 600 } as const;
 const tdStyle = { padding: "1rem", color: "#64748b" } as const;
 
@@ -199,23 +192,23 @@ export default function RewardsPage() {
       <form onSubmit={handleSearch} style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", alignItems: "center" }}>
         {tab === "list" && (
           <>
-            <input style={{ ...inputStyle, width: "200px" }} placeholder="ค้นหา Username..." value={search} onChange={(e) => setSearch(e.target.value)} />
-            <select style={selectStyle} value={type} onChange={(e) => setType(e.target.value)}>
-              <option value="" style={{ color: "#334155", background: "#fff" }}>ทุกประเภท</option>
-              <option value="cashback" style={{ color: "#334155", background: "#fff" }}>คืนยอดเสีย</option>
-              <option value="referral" style={{ color: "#334155", background: "#fff" }}>ค่าแนะนำ</option>
+            <input className="input" style={{ width: "200px" }} placeholder="ค้นหา Username..." value={search} onChange={(e) => setSearch(e.target.value)} />
+            <select className="input" style={{ minWidth: "150px" }} value={type} onChange={(e) => setType(e.target.value)}>
+              <option value="">ทุกประเภท</option>
+              <option value="cashback">คืนยอดเสีย</option>
+              <option value="referral">ค่าแนะนำ</option>
             </select>
-            <select style={selectStyle} value={status} onChange={(e) => setStatus(e.target.value)}>
-              <option value="" style={{ color: "#334155", background: "#fff" }}>ทุกสถานะ</option>
-              <option value="pending" style={{ color: "#334155", background: "#fff" }}>รอรับ</option>
-              <option value="claimed" style={{ color: "#334155", background: "#fff" }}>รับแล้ว</option>
-              <option value="expired" style={{ color: "#334155", background: "#fff" }}>หมดอายุ</option>
+            <select className="input" style={{ minWidth: "150px" }} value={status} onChange={(e) => setStatus(e.target.value)}>
+              <option value="">ทุกสถานะ</option>
+              <option value="pending">รอรับ</option>
+              <option value="claimed">รับแล้ว</option>
+              <option value="expired">หมดอายุ</option>
             </select>
           </>
         )}
-        <input type="date" style={inputStyle} value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} />
+        <input type="date" className="input" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} />
         <span style={{ color: "#64748b", fontSize: "0.875rem" }}>ถึง</span>
-        <input type="date" style={inputStyle} value={dateTo} onChange={(e) => setDateTo(e.target.value)} />
+        <input type="date" className="input" value={dateTo} onChange={(e) => setDateTo(e.target.value)} />
         <button type="submit" style={{ background: "#10b981", color: "white", border: "none", borderRadius: "0.375rem", padding: "0.5rem 1.25rem", fontSize: "0.875rem", fontWeight: 600, cursor: "pointer" }}>
           ค้นหา
         </button>
