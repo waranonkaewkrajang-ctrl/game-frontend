@@ -53,6 +53,14 @@ const inputStyle = {
   fontSize: "0.875rem",
   color: "#334155",
   outline: "none",
+  background: "#ffffff",
+};
+
+const selectStyle = {
+  ...inputStyle,
+  cursor: "pointer",
+  minWidth: "140px",
+  appearance: "auto" as const,
 };
 
 const thStyle = { padding: "1rem", color: "#475569", fontWeight: 600 } as const;
@@ -192,16 +200,16 @@ export default function RewardsPage() {
         {tab === "list" && (
           <>
             <input style={{ ...inputStyle, width: "200px" }} placeholder="ค้นหา Username..." value={search} onChange={(e) => setSearch(e.target.value)} />
-            <select style={inputStyle} value={type} onChange={(e) => setType(e.target.value)}>
-              <option value="">ทุกประเภท</option>
-              <option value="cashback">คืนยอดเสีย</option>
-              <option value="referral">ค่าแนะนำ</option>
+            <select style={selectStyle} value={type} onChange={(e) => setType(e.target.value)}>
+              <option value="" style={{ color: "#334155", background: "#fff" }}>ทุกประเภท</option>
+              <option value="cashback" style={{ color: "#334155", background: "#fff" }}>คืนยอดเสีย</option>
+              <option value="referral" style={{ color: "#334155", background: "#fff" }}>ค่าแนะนำ</option>
             </select>
-            <select style={inputStyle} value={status} onChange={(e) => setStatus(e.target.value)}>
-              <option value="">ทุกสถานะ</option>
-              <option value="pending">รอรับ</option>
-              <option value="claimed">รับแล้ว</option>
-              <option value="expired">หมดอายุ</option>
+            <select style={selectStyle} value={status} onChange={(e) => setStatus(e.target.value)}>
+              <option value="" style={{ color: "#334155", background: "#fff" }}>ทุกสถานะ</option>
+              <option value="pending" style={{ color: "#334155", background: "#fff" }}>รอรับ</option>
+              <option value="claimed" style={{ color: "#334155", background: "#fff" }}>รับแล้ว</option>
+              <option value="expired" style={{ color: "#334155", background: "#fff" }}>หมดอายุ</option>
             </select>
           </>
         )}
