@@ -7,6 +7,8 @@ export default function TelegramSettingsPage() {
   const [settings, setSettings] = useState({
     telegram_bot_token: "",
     telegram_chat_id: "",
+    telegram_chat_id_withdraw: "",
+    telegram_chat_id_register: "",
     telegram_notify_deposit: "true",
     telegram_notify_withdraw: "true",
     telegram_notify_register: "true",
@@ -116,7 +118,7 @@ export default function TelegramSettingsPage() {
           </div>
           
           <div style={{ marginBottom: "1.5rem" }}>
-            <label style={labelStyle}>Chat ID (เลือกจากแชทที่ Bot อยู่)</label>
+            <label style={labelStyle}>Chat ID หลัก — แจ้งฝากเงิน / ยอดค้าง / เครดิตฟรี</label>
             <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", flexWrap: "wrap" }}>
               <select
                 value={settings.telegram_chat_id}
@@ -193,6 +195,50 @@ export default function TelegramSettingsPage() {
           >
             {testing ? "กำลังทดสอบ..." : "ทดสอบส่งข้อความ"}
           </button>
+        </div>
+
+        {/* แยกกลุ่มแจ้งเตือน */}
+        <div style={{ background: "white", border: "1px solid #e2e8f0", borderRadius: "12px", padding: "1.5rem" }}>
+          <h3 style={{ fontSize: "1rem", fontWeight: 600, color: "#0f172a", margin: "0 0 0.5rem" }}>แยกกลุ่มแจ้งเตือน</h3>
+          <p style={{ color: "#64748b", fontSize: "0.82rem", margin: "0 0 1.25rem" }}>
+            ถ้าไม่เลือก จะส่งเข้ากลุ่มหลักเหมือนเดิม
+          </p>
+
+          {[
+            { key: "telegram_chat_id_withdraw", label: "กลุ่มแจ้งถอนเงิน" },
+            { key: "telegram_chat_id_register", label: "กลุ่มแจ้งสมาชิกใหม่" },
+          ].map((item) => (
+            <div key={item.key} style={{ marginBottom: "1.25rem" }}>
+              <label style={labelStyle}>{item.label}</label>
+              <select
+                value={(settings as any)[item.key]}
+                onChange={(e) => setSettings({ ...settings, [item.key]: e.target.value })}
+                style={{
+                  width: "100%",
+                  padding: "0.65rem 0.75rem",
+                  background: "#f8fafc",
+                  border: "1px solid #cbd5e1",
+                  borderRadius: "6px",
+                  color: "#0f172a",
+                  fontSize: "0.9rem",
+                  cursor: "pointer",
+                }}
+              >
+                <option value="">-- ใช้กลุ่มหลัก --</option>
+                {(settings as any)[item.key] &&
+                  !chatList.some((c) => c.id === (settings as any)[item.key]) && (
+                    <option value={(settings as any)[item.key]}>
+                      {(settings as any)[item.key]} (ที่บันทึกไว้)
+                    </option>
+                  )}
+                {chatList.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.title} ({c.type}) — {c.id}
+                  </option>
+                ))}
+              </select>
+            </div>
+          ))}
         </div>
 
         {/* เลือกว่าจะแจ้งเตือนอะไรบ้าง */}
