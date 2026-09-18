@@ -12,6 +12,7 @@ export default function UserProfilePage() {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<"deposits" | "withdrawals" | "transactions">("transactions");
+  const [turnover, setTurnover] = useState<any>(null);
 
   const bankIcons: Record<string, string> = {
     KBANK: "/logos/KBANK.webp", SCB: "/logos/SCB.webp", KTB: "/logos/KTB.webp",
@@ -128,6 +129,7 @@ export default function UserProfilePage() {
   };
 
   useEffect(() => {
+    api.get(`/admin/users/${userId}/turnover`).then((res) => setTurnover(res.data.data)).catch(() => {});
     api.get(`/admin/users/${userId}`).then((res) => {
       setUser(res.data.data);
       setLoading(false);
@@ -284,6 +286,137 @@ export default function UserProfilePage() {
         
 
       </div>
+
+      {/* Card: เทิร์นโอเวอร์ */}
+      {turnover && (
+        <div style={{ background: "white", border: "1px solid #e2e8f0", borderRadius: "0.5rem", padding: "1.25rem" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem", borderBottom: "1px solid #f1f5f9", paddingBottom: "0.5rem", flexWrap: "wrap", gap: "0.5rem" }}>
+            <h3 style={{ fontSize: "0.95rem", fontWeight: 700, color: "#0f172a", margin: 0 }}>เทิร์นโอเวอร์ & โบนัส</h3>
+            <span style={{ padding: "0.25rem 0.75rem", borderRadius: "9999px", fontSize: "0.75rem", fontWeight: 700,
+              background: turnover.can_withdraw ? "#dcfce7" : "#fee2e2",
+              color: turnover.can_withdraw ? "#166534" : "#991b1b" }}>
+              {turnover.can_withdraw ? "ถอนได้" : `ติดเทิร์น ฿${fmt(turnover.total_remaining)}`}
+            </span>
+          </div>
+
+          {turnover.claims.length === 0 ? (
+            <div style={{ textAlign: "center", padding: "1.5rem", color: "#94a3b8", fontSize: "0.85rem" }}>ไม่มีประวัติโบนัส</div>
+          ) : (
+            <div style={{ overflowX: "auto" }}>
+              <table style={{ width: "100%", fontSize: "0.82rem", borderCollapse: "collapse" }}>
+                <thead>
+                  <tr style={{ background: "#f8fafc", borderBottom: "1px solid #e2e8f0" }}>
+                    {["ประเภท", "โบนัส", "ต้องทำ", "ทำไปแล้ว", "เหลือ", "คืบหน้า", "สถานะ", "วันที่", ""].map((h) => (
+                      <th key={h} style={{ padding: "0.5rem 0.6rem", color: "#475569", fontWeight: 600, textAlign: "left", whiteSpace: "nowrap" }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {turnover.claims.map((c: any) => (
+                    <tr key={c.id} style={{ borderBottom: "1px solid #f8fafc" }}>
+                      <td style={{ padding: "0.6rem", color: "#64748b" }}>{c.type}</td>
+                      <td style={{ padding: "0.6rem", color: "#0f172a", fontWeight: 600 }}>฿{fmt(c.bonus_amount)}</td>
+                      <td style={{ padding: "0.6rem", color: "#64748b", whiteSpace: "nowrap" }}>฿{fmt(c.turnover_required)} <span style={{ color: "#94a3b8", fontSize: "0.72rem" }}>({c.turnover_multiplier}x)</span></td>
+                      <td style={{ padding: "0.6rem", color: "#2563eb", fontWeight: 600 }}>฿{fmt(c.turnover_current)}</td>
+                      <td style={{ padding: "0.6rem", color: c.remaining > 0 ? "#dc2626" : "#16a34a", fontWeight: 600 }}>฿{fmt(c.remaining)}</td>
+                      <td style={{ padding: "0.6rem", minWidth: "100px" }}>
+                        <div style={{ background: "#f1f5f9", borderRadius: "9999px", height: "6px", overflow: "hidden" }}>
+                          <div style={{ width: `${c.progress_percent}%`, height: "100%", background: c.progress_percent >= 100 ? "#22c55e" : "#3b82f6" }} />
+                        </div>
+                        <span style={{ fontSize: "0.7rem", color: "#64748b" }}>{c.progress_percent}%</span>
+                      </td>
+                      <td style={{ padding: "0.6rem" }}>
+                        <span style={{ padding: "0.2rem 0.5rem", borderRadius: "9999px", fontSize: "0.7rem", fontWeight: 600,
+                          background: c.status === "active" ? "#fef9c3" : c.status === "completed" ? "#dcfce7" : "#f1f5f9",
+                          color: c.status === "active" ? "#854d0e" : c.status === "completed" ? "#166534" : "#64748b" }}>
+                          {c.status}
+                        </span>
+                        {c.is_expired && c.status === "active" && (
+                          <span style={{ marginLeft: "0.25rem", fontSize: "0.65rem", color: "#dc2626" }}>หมดอายุ</span>
+                        )}
+                      </td>
+                      <td style={{ padding: "0.6rem", color: "#94a3b8", fontSize: "0.75rem", whiteSpace: "nowrap" }}>
+                        {new Date(c.created_at).toLocaleDateString("th-TH")}
+                      </td>
+                      <td style={{ padding: "0.6rem" }}>
+                        {c.status === "active" && (
+                          <button
+                            onClick={async () => {
+                              const r = await Swal.fire({
+                                title: "ยกเลิกเทิร์น?",
+                                html: `<p style="font-size:14px;color:#64748b">ลูกค้าจะถอนได้ทันที และเก็บโบนัส ฿${fmt(c.bonus_amount)} ไว้ (ไม่หักเครดิต)</p>`,
+                                input: "text",
+                                inputPlaceholder: "เหตุผล (ไม่บังคับ)",
+                                showCancelButton: true,
+                                confirmButtonText: "ยกเลิกเทิร์น",
+                                cancelButtonText: "ปิด",
+                                confirmButtonColor: "#ef4444",
+                              });
+                              if (!r.isConfirmed) return;
+                              try {
+                                await api.post(`/admin/users/${userId}/turnover/${c.id}/cancel`, { reason: r.value });
+                                Swal.fire({ icon: "success", title: "ยกเลิกสำเร็จ", timer: 1500, showConfirmButton: false });
+                                api.get(`/admin/users/${userId}/turnover`).then((res) => setTurnover(res.data.data));
+                              } catch (e: any) {
+                                Swal.fire({ icon: "error", title: e.response?.data?.message || "ไม่สำเร็จ" });
+                              }
+                            }}
+                            style={{ background: "#fee2e2", color: "#dc2626", border: "none", borderRadius: "0.25rem", padding: "0.3rem 0.6rem", fontSize: "0.72rem", fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap" }}
+                          >
+                            ยกเลิก
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {turnover.by_provider?.length > 0 && (
+            <div style={{ marginTop: "1.25rem" }}>
+              <h4 style={{ fontSize: "0.85rem", fontWeight: 600, color: "#475569", margin: "0 0 0.5rem" }}>
+                เดิมพันตั้งแต่ได้โบนัส — รวม ฿{fmt(turnover.bet_total)}
+              </h4>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", marginBottom: "0.75rem" }}>
+                {turnover.by_provider.map((p: any) => (
+                  <div key={p.provider} style={{ background: "#eff6ff", border: "1px solid #bfdbfe", borderRadius: "0.375rem", padding: "0.5rem 0.75rem", fontSize: "0.78rem" }}>
+                    <div style={{ fontWeight: 700, color: "#1e40af" }}>{p.provider}</div>
+                    <div style={{ color: "#3b82f6" }}>฿{fmt(p.total_bet)} · {p.rounds} รอบ · {p.game_count} เกม</div>
+                  </div>
+                ))}
+              </div>
+
+              <details>
+                <summary style={{ cursor: "pointer", fontSize: "0.8rem", color: "#64748b", userSelect: "none" }}>
+                  ดูรายเกม ({turnover.games.length})
+                </summary>
+                <table style={{ width: "100%", fontSize: "0.78rem", borderCollapse: "collapse", marginTop: "0.5rem" }}>
+                  <thead>
+                    <tr style={{ background: "#f8fafc" }}>
+                      {["ค่าย", "เกม", "รอบ", "ยอดเดิมพัน", "เล่นล่าสุด"].map((h) => (
+                        <th key={h} style={{ padding: "0.4rem 0.6rem", color: "#475569", fontWeight: 600, textAlign: "left" }}>{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {turnover.games.map((g: any, i: number) => (
+                      <tr key={i} style={{ borderBottom: "1px solid #f8fafc" }}>
+                        <td style={{ padding: "0.4rem 0.6rem", color: "#0f172a", fontWeight: 600 }}>{g.provider}</td>
+                        <td style={{ padding: "0.4rem 0.6rem", color: "#64748b" }}>{g.game_id}</td>
+                        <td style={{ padding: "0.4rem 0.6rem", color: "#64748b" }}>{g.rounds}</td>
+                        <td style={{ padding: "0.4rem 0.6rem", color: "#2563eb", fontWeight: 600 }}>฿{fmt(g.total_bet)}</td>
+                        <td style={{ padding: "0.4rem 0.6rem", color: "#94a3b8", fontSize: "0.72rem" }}>{new Date(g.last_played).toLocaleString("th-TH")}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </details>
+            </div>
+          )}
+        </div>
+      )}
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
       {/* Tab: รายการฝาก / ถอน */}
