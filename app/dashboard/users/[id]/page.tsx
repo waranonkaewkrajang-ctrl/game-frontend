@@ -294,7 +294,7 @@ export default function UserProfilePage() {
           {/* Header */}
           <div style={{
             background: turnover.can_withdraw
-              ? "linear-gradient(135deg, #059669, #10b981)"
+              ? "linear-gradient(135deg, #0284c7, #38bdf8)"
               : "linear-gradient(135deg, #b45309, #f59e0b)",
             padding: "1.25rem 1.5rem",
             display: "flex",
