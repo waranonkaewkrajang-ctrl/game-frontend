@@ -373,16 +373,21 @@ export default function UserProfilePage() {
                     }}>
                       {/* บรรทัดบน */}
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "1rem", flexWrap: "wrap", marginBottom: "0.85rem" }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", flexWrap: "wrap" }}>
-                          <span style={{ fontSize: "1.1rem", fontWeight: 700, color: "#0f172a" }}>฿{fmt(c.bonus_amount)}</span>
-                          <span style={{ padding: "0.2rem 0.6rem", borderRadius: "0.3rem", fontSize: "0.7rem", fontWeight: 600, background: "#f1f5f9", color: "#475569" }}>
-                            {c.type}
-                          </span>
+                        <div style={{ display: "flex", flexDirection: "column", gap: "0.35rem" }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", flexWrap: "wrap" }}>
+                            <span style={{ fontSize: "1.1rem", fontWeight: 700, color: "#0f172a" }}>฿{fmt(c.bonus_amount)}</span>
+                            <span style={{ padding: "0.2rem 0.6rem", borderRadius: "0.3rem", fontSize: "0.72rem", fontWeight: 600, background: "#eff6ff", color: "#1e40af", border: "1px solid #bfdbfe" }}>
+                              {c.source_name || c.type}
+                            </span>
                           <span style={{ padding: "0.25rem 0.7rem", borderRadius: "9999px", fontSize: "0.72rem", fontWeight: 700, background: st.bg, color: st.color }}>
                             {st.label}
                           </span>
                           {c.is_expired && isActive && (
                             <span style={{ fontSize: "0.7rem", color: "#dc2626", fontWeight: 600 }}>เลยกำหนดแล้ว</span>
+                          )}
+                          </div>
+                          {c.source_detail && c.source_detail !== c.source_name && (
+                            <span style={{ fontSize: "0.73rem", color: "#94a3b8" }}>{c.source_detail}</span>
                           )}
                         </div>
 
@@ -477,6 +482,9 @@ export default function UserProfilePage() {
                   <h4 style={{ fontSize: "0.88rem", fontWeight: 700, color: "#0f172a", margin: 0 }}>เกมที่เล่นตั้งแต่ได้โบนัส</h4>
                   <span style={{ fontSize: "0.8rem", color: "#64748b" }}>
                     รวม <b style={{ color: "#2563eb" }}>฿{fmt(turnover.bet_total)}</b>
+                    {turnover.claims.some((c: any) => c.status === "active") && (
+                      <> / ต้องทำ <b style={{ color: "#0f172a" }}>฿{fmt(turnover.claims.filter((c: any) => c.status === "active").reduce((s: number, c: any) => s + c.turnover_required, 0))}</b></>
+                    )}
                   </span>
                 </div>
 
