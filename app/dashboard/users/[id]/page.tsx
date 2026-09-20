@@ -16,6 +16,7 @@ export default function UserProfilePage() {
   const [topGames, setTopGames] = useState<any>(null);
   const [gameSort, setGameSort] = useState<"rounds" | "bet">("rounds");
   const [turnoverOpen, setTurnoverOpen] = useState(false);
+  const [heatmap, setHeatmap] = useState<any>(null);
 
   const bankIcons: Record<string, string> = {
     KBANK: "/logos/KBANK.webp", SCB: "/logos/SCB.webp", KTB: "/logos/KTB.webp",
@@ -135,6 +136,8 @@ export default function UserProfilePage() {
     api.get(`/admin/users/${userId}/turnover`).then((res) => setTurnover(res.data.data)).catch(() => {});
     api.get(`/admin/users/${userId}/top-games`, { params: { sort: gameSort, limit: 10 } })
       .then((res) => setTopGames(res.data.data)).catch(() => {});
+    api.get(`/admin/users/${userId}/play-heatmap`, { params: { days: 90 } })
+      .then((res) => setHeatmap(res.data.data)).catch(() => {});
     api.get(`/admin/users/${userId}`).then((res) => {
       setUser(res.data.data);
       setLoading(false);
@@ -287,12 +290,8 @@ export default function UserProfilePage() {
             </div>
           ))}
         </div>
-
-        
-
       </div>
-
-        <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1.5fr) minmax(0, 1fr) minmax(0, 1fr)", gap: "1rem", alignItems: "start" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "1rem", alignItems: "start" }}>
 
             {/* Card: เกมที่เล่นบ่อย */}
       {topGames?.games?.length > 0 && (
@@ -368,6 +367,88 @@ export default function UserProfilePage() {
         </div>
       )}
 
+
+            {/* Card: ช่วงเวลาเล่นเกม */}
+      {heatmap && heatmap.total_rounds > 0 && (
+        <div style={{ background: "white", border: "1px solid #e2e8f0", borderRadius: "0.75rem", padding: "1.25rem" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "0.85rem", flexWrap: "wrap", gap: "0.5rem" }}>
+            <h3 style={{ fontSize: "0.95rem", fontWeight: 700, color: "#0f172a", margin: 0 }}>ช่วงเวลาเล่นเกม</h3>
+            <span style={{ fontSize: "0.72rem", color: "#94a3b8" }}>
+              {heatmap.first_played ? new Date(heatmap.first_played).toLocaleDateString("th-TH", { day: "numeric", month: "numeric", year: "numeric" }) : "-"}
+              {" – "}
+              {heatmap.last_played ? new Date(heatmap.last_played).toLocaleDateString("th-TH", { day: "numeric", month: "numeric", year: "numeric" }) : "-"}
+            </span>
+          </div>
+
+          {/* Legend */}
+          <div style={{ display: "flex", alignItems: "center", gap: "0.35rem", marginBottom: "0.85rem", justifyContent: "center", flexWrap: "wrap" }}>
+            {[
+              { label: "1%", pct: 0.1 },
+              { label: "25%", pct: 0.25 },
+              { label: "50%", pct: 0.5 },
+              { label: "75%", pct: 0.75 },
+              { label: "100%", pct: 1 },
+            ].map((l) => (
+              <div key={l.label} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.2rem" }}>
+                <span style={{ fontSize: "0.6rem", color: "#64748b", fontWeight: 600 }}>{l.label}</span>
+                <div style={{
+                  width: 34, height: 9, borderRadius: "9999px",
+                  background: `rgba(29, 78, 216, ${0.12 + l.pct * 0.88})`,
+                }} />
+              </div>
+            ))}
+          </div>
+
+          {/* Grid */}
+          <div style={{ overflowX: "auto" }}>
+            <table style={{ borderCollapse: "separate", borderSpacing: "2px", margin: "0 auto" }}>
+              <thead>
+                <tr>
+                  <th style={{ width: 38 }} />
+                  {["อา", "จ", "อ", "พ", "พฤ", "ศ", "ส"].map((d) => (
+                    <th key={d} style={{ fontSize: "0.65rem", color: "#64748b", fontWeight: 600, paddingBottom: "0.2rem", minWidth: 26 }}>{d}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {Array.from({ length: 24 }, (_, h) => (
+                  <tr key={h}>
+                    <td style={{ fontSize: "0.6rem", color: "#94a3b8", textAlign: "right", paddingRight: "0.3rem", whiteSpace: "nowrap" }}>
+                      {String(h).padStart(2, "0")}:00
+                    </td>
+                    {Array.from({ length: 7 }, (_, i) => {
+                      const dow = i + 1;
+                      const cell = heatmap.grid?.[dow]?.[h] || { rounds: 0, total_bet: 0 };
+                      const ratio = heatmap.max_rounds > 0 ? cell.rounds / heatmap.max_rounds : 0;
+                      return (
+                        <td key={dow} style={{ padding: 0 }}>
+                          <div
+                            title={cell.rounds > 0
+                              ? `${["อาทิตย์","จันทร์","อังคาร","พุธ","พฤหัส","ศุกร์","เสาร์"][i]} ${String(h).padStart(2,"0")}:00 — ${cell.rounds} รอบ · ฿${fmt(cell.total_bet)}`
+                              : "ไม่มีการเล่น"}
+                            style={{
+                              width: "100%", height: 15, borderRadius: "3px",
+                              background: cell.rounds > 0
+                                ? `rgba(29, 78, 216, ${0.15 + ratio * 0.85})`
+                                : "#eef2f7",
+                              cursor: cell.rounds > 0 ? "pointer" : "default",
+                            }}
+                          />
+                        </td>
+                      );
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <div style={{ marginTop: "0.85rem", paddingTop: "0.75rem", borderTop: "1px solid #f1f5f9", display: "flex", justifyContent: "space-between", fontSize: "0.72rem", color: "#94a3b8", flexWrap: "wrap", gap: "0.5rem" }}>
+            <span>ย้อนหลัง {heatmap.days} วัน</span>
+            <span>รวม {heatmap.total_rounds.toLocaleString("th-TH")} รอบ · ฿{fmt(heatmap.total_bet)}</span>
+          </div>
+        </div>
+      )}
 
             {/* Card: เทิร์นโอเวอร์ */}
       {turnover && (
