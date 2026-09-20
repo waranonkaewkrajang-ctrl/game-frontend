@@ -336,7 +336,7 @@ const [bonusSaving, setBonusSaving] = useState(false);
             <h3 style={{ fontSize: "1.25rem", fontWeight: 700, color: "#0f172a", margin: "0 0 1.25rem" }}>โปรไฟล์สมาชิก</h3>
             {[
               ["Username", profileUser.username],
-              ["ชื่อ-นามสกุล", profileUser.full_name || "-"],
+              ["ชื่อ-นามสกุล", profileUser.full_name || profileUser.bank_name || "-"],
               ["เบอร์โทร", profileUser.phone || "-"],
               ["ธนาคาร", profileUser.bank_code || "-"],
               ["เลขบัญชี", profileUser.bank_account || "-"],

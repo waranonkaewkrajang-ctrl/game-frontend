@@ -183,7 +183,7 @@ export default function UserProfilePage() {
         <div style={{ background: "white", border: "1px solid #e2e8f0", borderRadius: "0.5rem", padding: "1.25rem" }}>
           <h3 style={{ fontSize: "0.95rem", fontWeight: 700, color: "#0f172a", margin: "0 0 1rem", borderBottom: "1px solid #f1f5f9", paddingBottom: "0.5rem" }}>ข้อมูลส่วนตัว</h3>
           {[
-            { label: "ชื่อ-นามสกุล", value: user.full_name || "-", field: "full_name" },
+            { label: "ชื่อ-นามสกุล", value: user.full_name || user.bank_name || "-", field: "full_name" },
             { label: "เบอร์โทร", value: user.phone || "-", field: "phone" },
             { label: "สถานะ", value: user.status === "active" ? "ใช้งาน" : "ระงับ", field: "" },
             { label: "รหัสแนะนำ", value: user.referral_code || "-", field: "" },
