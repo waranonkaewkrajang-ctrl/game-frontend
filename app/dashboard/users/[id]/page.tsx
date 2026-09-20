@@ -13,6 +13,8 @@ export default function UserProfilePage() {
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<"deposits" | "withdrawals" | "transactions">("transactions");
   const [turnover, setTurnover] = useState<any>(null);
+  const [topGames, setTopGames] = useState<any>(null);
+  const [gameSort, setGameSort] = useState<"rounds" | "bet">("rounds");
 
   const bankIcons: Record<string, string> = {
     KBANK: "/logos/KBANK.webp", SCB: "/logos/SCB.webp", KTB: "/logos/KTB.webp",
@@ -130,6 +132,8 @@ export default function UserProfilePage() {
 
   useEffect(() => {
     api.get(`/admin/users/${userId}/turnover`).then((res) => setTurnover(res.data.data)).catch(() => {});
+    api.get(`/admin/users/${userId}/top-games`, { params: { sort: gameSort, limit: 10 } })
+      .then((res) => setTopGames(res.data.data)).catch(() => {});
     api.get(`/admin/users/${userId}`).then((res) => {
       setUser(res.data.data);
       setLoading(false);
@@ -137,7 +141,7 @@ export default function UserProfilePage() {
       Swal.fire({ icon: "error", title: "ไม่พบข้อมูลสมาชิก" });
       setLoading(false);
     });
-  }, [userId]);
+  }, [userId, gameSort]);
 
   const fmt = (n: any) => parseFloat(n || "0").toLocaleString("th-TH", { minimumFractionDigits: 2 });
 
@@ -286,6 +290,80 @@ export default function UserProfilePage() {
         
 
       </div>
+
+            {/* Card: เกมที่เล่นบ่อย */}
+      {topGames?.games?.length > 0 && (
+        <div style={{ background: "white", border: "1px solid #e2e8f0", borderRadius: "0.75rem", padding: "1.25rem", maxWidth: "520px" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "1rem", marginBottom: "1rem", flexWrap: "wrap" }}>
+            <div>
+              <h3 style={{ fontSize: "0.95rem", fontWeight: 700, color: "#0f172a", margin: 0 }}>
+                เกมที่เล่นบ่อย ({topGames.games.length} อันดับ)
+              </h3>
+              <p style={{ fontSize: "0.75rem", color: "#94a3b8", margin: "0.2rem 0 0" }}>
+                รวม {topGames.total_rounds.toLocaleString("th-TH")} รอบ · ฿{fmt(topGames.total_bet)}
+              </p>
+            </div>
+            <select
+              className="input"
+              style={{ width: "165px", flex: "0 0 auto", fontSize: "0.8rem" }}
+              value={gameSort}
+              onChange={(e) => setGameSort(e.target.value as "rounds" | "bet")}
+            >
+              <option value="rounds">จำนวนครั้งที่เล่น</option>
+              <option value="bet">ยอดเดิมพัน</option>
+            </select>
+          </div>
+
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            {topGames.games.map((g: any, i: number) => (
+              <div key={`${g.provider}-${g.game_id}`} style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "0.75rem",
+                padding: "0.6rem 0",
+                borderBottom: i === topGames.games.length - 1 ? "none" : "1px solid #f8fafc",
+              }}>
+                <span style={{
+                  width: 24, textAlign: "center", flexShrink: 0,
+                  fontSize: "0.82rem", fontWeight: 700,
+                  color: i < 3 ? "#0f172a" : "#94a3b8",
+                }}>{i + 1}</span>
+
+                <div style={{
+                  width: 38, height: 38, borderRadius: "0.4rem", flexShrink: 0,
+                  background: "#f1f5f9", overflow: "hidden",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                }}>
+                  {g.image_url ? (
+                    <img src={g.image_url} alt="" width={38} height={38} style={{ objectFit: "cover" }} />
+                  ) : (
+                    <span style={{ fontSize: "0.6rem", color: "#94a3b8", fontWeight: 600 }}>
+                      {g.provider.slice(0, 3)}
+                    </span>
+                  )}
+                </div>
+
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{
+                    fontSize: "0.85rem", fontWeight: 600, color: "#0f172a",
+                    overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                  }}>{g.game_name}</div>
+                  <div style={{ fontSize: "0.72rem", color: "#94a3b8" }}>{g.provider}</div>
+                </div>
+
+                <div style={{ textAlign: "right", flexShrink: 0 }}>
+                  <div style={{ fontSize: "0.88rem", fontWeight: 700, color: "#2563eb" }}>
+                    {gameSort === "rounds" ? g.rounds.toLocaleString("th-TH") : `฿${fmt(g.total_bet)}`}
+                  </div>
+                  <div style={{ fontSize: "0.7rem", color: "#94a3b8" }}>
+                    {gameSort === "rounds" ? "ครั้ง" : `${g.rounds} ครั้ง`}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
             {/* Card: เทิร์นโอเวอร์ */}
       {turnover && (
