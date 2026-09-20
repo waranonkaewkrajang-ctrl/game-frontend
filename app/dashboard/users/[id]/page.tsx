@@ -15,6 +15,7 @@ export default function UserProfilePage() {
   const [turnover, setTurnover] = useState<any>(null);
   const [topGames, setTopGames] = useState<any>(null);
   const [gameSort, setGameSort] = useState<"rounds" | "bet">("rounds");
+  const [turnoverOpen, setTurnoverOpen] = useState(false);
 
   const bankIcons: Record<string, string> = {
     KBANK: "/logos/KBANK.webp", SCB: "/logos/SCB.webp", KTB: "/logos/KTB.webp",
@@ -291,9 +292,11 @@ export default function UserProfilePage() {
 
       </div>
 
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem", alignItems: "start" }}>
+
             {/* Card: เกมที่เล่นบ่อย */}
       {topGames?.games?.length > 0 && (
-        <div style={{ background: "white", border: "1px solid #e2e8f0", borderRadius: "0.75rem", padding: "1.25rem", maxWidth: "520px" }}>
+        <div style={{ background: "white", border: "1px solid #e2e8f0", borderRadius: "0.75rem", padding: "1.25rem" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "1rem", marginBottom: "1rem", flexWrap: "wrap" }}>
             <div>
               <h3 style={{ fontSize: "0.95rem", fontWeight: 700, color: "#0f172a", margin: 0 }}>
@@ -370,43 +373,55 @@ export default function UserProfilePage() {
         <div style={{ background: "white", border: "1px solid #e2e8f0", borderRadius: "0.75rem", overflow: "hidden", boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}>
 
           {/* Header */}
-          <div style={{
-            background: turnover.can_withdraw
-              ? "linear-gradient(135deg, #0284c7, #38bdf8)"
-              : "linear-gradient(135deg, #b45309, #f59e0b)",
-            padding: "1.25rem 1.5rem",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            flexWrap: "wrap",
-            gap: "1rem",
-          }}>
-            <div>
-              <h3 style={{ fontSize: "1rem", fontWeight: 700, color: "white", margin: 0, letterSpacing: "0.01em" }}>
-                เทิร์นโอเวอร์ &amp; เงื่อนไขโบนัส
+          <div
+            onClick={() => setTurnoverOpen(!turnoverOpen)}
+            style={{
+              background: turnover.can_withdraw
+                ? "linear-gradient(135deg, #0284c7, #38bdf8)"
+                : "linear-gradient(135deg, #b45309, #f59e0b)",
+              padding: "0.9rem 1.1rem",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              gap: "0.75rem",
+              cursor: "pointer",
+              userSelect: "none",
+            }}
+          >
+            <div style={{ minWidth: 0 }}>
+              <h3 style={{ fontSize: "0.9rem", fontWeight: 700, color: "white", margin: 0 }}>
+                เทิร์นโอเวอร์ &amp; โบนัส
               </h3>
-              <p style={{ fontSize: "0.78rem", color: "rgba(255,255,255,0.85)", margin: "0.25rem 0 0" }}>
+              <p style={{ fontSize: "0.72rem", color: "rgba(255,255,255,0.85)", margin: "0.15rem 0 0" }}>
                 {turnover.can_withdraw
-                  ? "ลูกค้าไม่ติดเงื่อนไข ถอนได้ปกติ"
-                  : `ต้องทำเทิร์นอีก ฿${fmt(turnover.total_remaining)} จึงจะถอนได้`}
+                  ? "ไม่ติดเงื่อนไข ถอนได้ปกติ"
+                  : `ต้องทำอีก ฿${fmt(turnover.total_remaining)}`}
               </p>
             </div>
-            <div style={{
-              background: "rgba(255,255,255,0.18)",
-              backdropFilter: "blur(8px)",
-              border: "1px solid rgba(255,255,255,0.25)",
-              padding: "0.5rem 1rem",
-              borderRadius: "0.5rem",
-              color: "white",
-              fontSize: "0.85rem",
-              fontWeight: 700,
-              whiteSpace: "nowrap",
-            }}>
-              {turnover.can_withdraw ? "ถอนได้" : "ติดเทิร์น"}
+            <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", flexShrink: 0 }}>
+              <span style={{
+                background: "rgba(255,255,255,0.18)",
+                border: "1px solid rgba(255,255,255,0.25)",
+                padding: "0.3rem 0.7rem",
+                borderRadius: "0.4rem",
+                color: "white",
+                fontSize: "0.75rem",
+                fontWeight: 700,
+                whiteSpace: "nowrap",
+              }}>
+                {turnover.can_withdraw ? "ถอนได้" : "ติดเทิร์น"}
+              </span>
+              <span style={{
+                color: "white",
+                fontSize: "0.9rem",
+                transform: turnoverOpen ? "rotate(180deg)" : "none",
+                transition: "transform 0.2s",
+              }}>▾</span>
             </div>
           </div>
 
-          <div style={{ padding: "1.5rem" }}>
+          {turnoverOpen && (
+          <div style={{ padding: "1.25rem" }}>
 
             {/* สรุปตัวเลข */}
             {turnover.claims.length > 0 && (
@@ -617,8 +632,11 @@ export default function UserProfilePage() {
               </div>
             )}
           </div>
+          )}
         </div>
       )}
+
+      </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
       {/* Tab: รายการฝาก / ถอน */}
