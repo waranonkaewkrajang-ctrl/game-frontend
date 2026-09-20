@@ -3,6 +3,15 @@ import { useEffect, useState } from "react";
 import api from "@/lib/api";
 import Swal from "sweetalert2";
 
+const bankIcons: Record<string, string> = {
+  KBANK: "/logos/KBANK.webp", SCB: "/logos/SCB.webp", KTB: "/logos/KTB.webp",
+  BBL: "/logos/BBL.webp", BAY: "/logos/BAY.webp", GSB: "/logos/GSB.webp",
+  BAAC: "/logos/BAAC.webp", CIMBT: "/logos/CIMBT.webp", GHB: "/logos/GHB.webp",
+  KKP: "/logos/KKP.webp", LHFG: "/logos/LHFG.webp", TISCO: "/logos/TISCO.webp",
+  TTB: "/logos/TTB.webp", TCD: "/logos/TCD.webp", EXIM: "/logos/EXIM.webp",
+  UOBT: "/logos/UOBT.webp", TRUEWALLET: "/logos/TRUEWALLET.webp",
+};
+
 export default function BankChangesPage() {
   const [requests, setRequests] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -103,12 +112,22 @@ export default function BankChangesPage() {
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", marginBottom: "16px" }}>
                   <div style={{ background: "#f8fafc", borderRadius: "8px", padding: "12px" }}>
                     <p style={{ fontSize: "0.7rem", color: "#94a3b8", margin: "0 0 8px", fontWeight: 600, textTransform: "uppercase" }}>บัญชีเดิม</p>
-                    <p style={{ margin: "2px 0", fontSize: "0.85rem", color: "#334155" }}>{req.old_bank_code} - {req.old_bank_account}</p>
+                    <p style={{ margin: "2px 0", fontSize: "0.85rem", color: "#334155", display: "flex", alignItems: "center", gap: "0.4rem" }}>
+  {bankIcons[req.old_bank_code] && (
+    <img src={bankIcons[req.old_bank_code]} alt="" width={18} height={18} style={{ borderRadius: "3px", flexShrink: 0 }} />
+  )}
+  {req.old_bank_code} - {req.old_bank_account}
+</p>
                     <p style={{ margin: "2px 0", fontSize: "0.85rem", fontWeight: 600, color: "#0f172a" }}>{req.old_bank_name || "-"}</p>
                   </div>
                   <div style={{ background: "#eff6ff", borderRadius: "8px", padding: "12px", border: "1px solid #bfdbfe" }}>
                     <p style={{ fontSize: "0.7rem", color: "#3b82f6", margin: "0 0 8px", fontWeight: 600, textTransform: "uppercase" }}>บัญชีใหม่</p>
-                    <p style={{ margin: "2px 0", fontSize: "0.85rem", color: "#334155" }}>{req.new_bank_code} - {req.new_bank_account}</p>
+                    <p style={{ margin: "2px 0", fontSize: "0.85rem", color: "#334155", display: "flex", alignItems: "center", gap: "0.4rem" }}>
+  {bankIcons[req.new_bank_code] && (
+    <img src={bankIcons[req.new_bank_code]} alt="" width={18} height={18} style={{ borderRadius: "3px", flexShrink: 0 }} />
+  )}
+  {req.new_bank_code} - {req.new_bank_account}
+</p>
                     <p style={{ margin: "2px 0", fontSize: "0.85rem", fontWeight: 600, color: "#0f172a" }}>{req.new_bank_name}</p>
                   </div>
                 </div>
