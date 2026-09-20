@@ -292,7 +292,7 @@ export default function UserProfilePage() {
 
       </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1.6fr) minmax(0, 1fr)", gap: "1rem", alignItems: "start" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1.5fr) minmax(0, 1fr) minmax(0, 1fr)", gap: "1rem", alignItems: "start" }}>
 
             {/* Card: เกมที่เล่นบ่อย */}
       {topGames?.games?.length > 0 && (
@@ -367,6 +367,7 @@ export default function UserProfilePage() {
           </div>
         </div>
       )}
+
 
             {/* Card: เทิร์นโอเวอร์ */}
       {turnover && (
@@ -636,9 +637,37 @@ export default function UserProfilePage() {
         </div>
       )}
 
+      {/* Card: ปรับเครดิต / คะแนน / วงล้อ */}
+      <div style={{ background: "white", border: "1px solid #e2e8f0", borderRadius: "0.5rem", padding: "1.25rem" }}>
+        {[
+          { label: "เครดิต", key: "credit", value: user.wallet?.balance, color: "#10b981" },
+          { label: "คะแนน", key: "point", value: user.wallet?.point_balance ?? 0, color: "#f59e0b" },
+          { label: "วงล้อ", key: "spin", value: user.wallet?.ticket_balance ?? 0, color: "#7c3aed", unit: "ใบ" },
+        ].map((item) => (
+          <div key={item.key} style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.75rem" }}>
+            <span style={{ width: "60px", fontSize: "0.9rem", color: "#374151", fontWeight: 500, textAlign: "right" }}>{item.label} :</span>
+            <button onClick={async () => {
+              const { value: amt } = await Swal.fire({ title: `เพิ่ม${item.label}`, input: "number", inputPlaceholder: "ใส่จำนวน", showCancelButton: true, confirmButtonText: "ยืนยัน", cancelButtonText: "ยกเลิก", confirmButtonColor: "#22c55e" });
+              if (!amt || isNaN(Number(amt))) return;
+              const endpoint = item.key === "spin" ? `/admin/users/${user.id}/adjust-tickets` : item.key === "point" ? `/admin/users/${user.id}/adjust-points` : `/admin/users/${user.id}/adjust`;
+              api.post(endpoint, { amount: Number(amt), description: `Admin เพิ่ม${item.label}` })
+                .then(() => { Swal.fire({ icon: "success", title: `เพิ่ม${item.label}สำเร็จ`, timer: 1500, showConfirmButton: false }); api.get(`/admin/users/${userId}`).then((res) => setUser(res.data.data)); })
+                .catch((e) => Swal.fire({ icon: "error", title: e.response?.data?.message || "เกิดข้อผิดพลาด" }));
+            }} style={{ padding: "0.5rem 0.75rem", background: "#22c55e", color: "white", border: "none", borderRadius: "0.375rem", cursor: "pointer", fontWeight: 700, fontSize: "0.9rem" }}>+</button>
+            <input readOnly value={item.key === "credit" ? fmt(item.value) : `${item.value}${item.unit ? ` ${item.unit}` : ""}`} style={{ textAlign: "center", flex: 1, minWidth: 0, borderRadius: "0.375rem", border: "1px solid #d1d5db", padding: "0.25rem 0.4rem", fontSize: "0.8rem", fontWeight: 600, color: "#0f172a", background: "white" }} />
+            <button onClick={async () => {
+              const { value: amt } = await Swal.fire({ title: `ลด${item.label}`, input: "number", inputPlaceholder: "ใส่จำนวน", showCancelButton: true, confirmButtonText: "ยืนยัน", cancelButtonText: "ยกเลิก", confirmButtonColor: "#ef4444" });
+              if (!amt || isNaN(Number(amt))) return;
+              const endpoint = item.key === "spin" ? `/admin/users/${user.id}/adjust-tickets` : item.key === "point" ? `/admin/users/${user.id}/adjust-points` : `/admin/users/${user.id}/adjust`;
+              api.post(endpoint, { amount: -Number(amt), description: `Admin ลด${item.label}` })
+                .then(() => { Swal.fire({ icon: "success", title: `ลด${item.label}สำเร็จ`, timer: 1500, showConfirmButton: false }); api.get(`/admin/users/${userId}`).then((res) => setUser(res.data.data)); })
+                .catch((e) => Swal.fire({ icon: "error", title: e.response?.data?.message || "เกิดข้อผิดพลาด" }));
+            }} style={{ padding: "0.5rem 0.75rem", background: "#ef4444", color: "white", border: "none", borderRadius: "0.375rem", cursor: "pointer", fontWeight: 700, fontSize: "0.9rem" }}>−</button>
+          </div>
+        ))}
       </div>
-
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+      </div>
+      <div>
       {/* Tab: รายการฝาก / ถอน */}
       <div style={{ background: "white", border: "1px solid #e2e8f0", borderRadius: "0.5rem", overflow: "hidden" }}>
         <div style={{ display: "flex", borderBottom: "1px solid #e2e8f0" }}>
@@ -720,38 +749,7 @@ export default function UserProfilePage() {
             )
           )}
         </div>
-      </div>
-
-      {/* Card: ปรับเครดิต / คะแนน / วงล้อ */}
-      <div style={{ background: "white", border: "1px solid #e2e8f0", borderRadius: "0.5rem", padding: "1.25rem", alignSelf: "start" }}>
-        {[
-          { label: "เครดิต", key: "credit", value: user.wallet?.balance, color: "#10b981" },
-          { label: "คะแนน", key: "point", value: user.wallet?.point_balance ?? 0, color: "#f59e0b" },
-          { label: "วงล้อ", key: "spin", value: user.wallet?.ticket_balance ?? 0, color: "#7c3aed", unit: "ใบ" },
-        ].map((item) => (
-          <div key={item.key} style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.75rem", paddingBottom: "0.75rem", borderBottom: "none" }}>
-            <span style={{ width: "60px", fontSize: "0.9rem", color: "#374151", fontWeight: 500, textAlign: "right" }}>{item.label} :</span>
-            <button onClick={async () => {
-              const { value: amt } = await Swal.fire({ title: `เพิ่ม${item.label}`, input: "number", inputPlaceholder: "ใส่จำนวน", showCancelButton: true, confirmButtonText: "ยืนยัน", cancelButtonText: "ยกเลิก", confirmButtonColor: "#22c55e" });
-              if (!amt || isNaN(Number(amt))) return;
-              const endpoint = item.key === "spin" ? `/admin/users/${user.id}/adjust-tickets` : item.key === "point" ? `/admin/users/${user.id}/adjust-points` : `/admin/users/${user.id}/adjust`;
-              api.post(endpoint, { amount: Number(amt), description: `Admin เพิ่ม${item.label}` })
-                .then(() => { Swal.fire({ icon: "success", title: `เพิ่ม${item.label}สำเร็จ`, timer: 1500, showConfirmButton: false }); api.get(`/admin/users/${userId}`).then((res) => setUser(res.data.data)); })
-                .catch((e) => Swal.fire({ icon: "error", title: e.response?.data?.message || "เกิดข้อผิดพลาด" }));
-            }} style={{ padding: "0.5rem 0.75rem", background: "#22c55e", color: "white", border: "none", borderRadius: "0.375rem", cursor: "pointer", fontWeight: 700, fontSize: "0.9rem" }}>+</button>
-            <input readOnly value={item.key === "credit" ? fmt(item.value) : `${item.value}${item.unit ? ` ${item.unit}` : ""}`} style={{ textAlign: "center", flex: 1, minWidth: 0, borderRadius: "0.375rem",border: "1px solid #d1d5db", padding: "0.25rem 0.4rem", fontSize: "0.8rem", fontWeight: 600, color: "#0f172a", background: "white" }} />
-            <button onClick={async () => {
-              const { value: amt } = await Swal.fire({ title: `ลด${item.label}`, input: "number", inputPlaceholder: "ใส่จำนวน", showCancelButton: true, confirmButtonText: "ยืนยัน", cancelButtonText: "ยกเลิก", confirmButtonColor: "#ef4444" });
-              if (!amt || isNaN(Number(amt))) return;
-              const endpoint = item.key === "spin" ? `/admin/users/${user.id}/adjust-tickets` : item.key === "point" ? `/admin/users/${user.id}/adjust-points` : `/admin/users/${user.id}/adjust`;
-              api.post(endpoint, { amount: -Number(amt), description: `Admin ลด${item.label}` })
-                .then(() => { Swal.fire({ icon: "success", title: `ลด${item.label}สำเร็จ`, timer: 1500, showConfirmButton: false }); api.get(`/admin/users/${userId}`).then((res) => setUser(res.data.data)); })
-                .catch((e) => Swal.fire({ icon: "error", title: e.response?.data?.message || "เกิดข้อผิดพลาด" }));
-            }} style={{ padding: "0.5rem 0.75rem", background: "#ef4444", color: "white", border: "none", borderRadius: "0.375rem", cursor: "pointer", fontWeight: 700, fontSize: "0.9rem" }}>−</button>
-          </div>
-        ))}
-      </div>
-
+              </div>
       </div>
     </div>
   );
