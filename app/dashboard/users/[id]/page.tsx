@@ -367,88 +367,175 @@ export default function UserProfilePage() {
         </div>
       )}
 
-
             {/* Card: ช่วงเวลาเล่นเกม */}
-      {heatmap && heatmap.total_rounds > 0 && (
-        <div style={{ background: "white", border: "1px solid #e2e8f0", borderRadius: "0.75rem", padding: "1.25rem" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "0.85rem", flexWrap: "wrap", gap: "0.5rem" }}>
-            <h3 style={{ fontSize: "0.95rem", fontWeight: 700, color: "#0f172a", margin: 0 }}>ช่วงเวลาเล่นเกม</h3>
-            <span style={{ fontSize: "0.72rem", color: "#94a3b8" }}>
-              {heatmap.first_played ? new Date(heatmap.first_played).toLocaleDateString("th-TH", { day: "numeric", month: "numeric", year: "numeric" }) : "-"}
-              {" – "}
-              {heatmap.last_played ? new Date(heatmap.last_played).toLocaleDateString("th-TH", { day: "numeric", month: "numeric", year: "numeric" }) : "-"}
-            </span>
-          </div>
+      {heatmap && heatmap.total_rounds > 0 && (() => {
+        const dayNames = ["อาทิตย์", "จันทร์", "อังคาร", "พุธ", "พฤหัส", "ศุกร์", "เสาร์"];
 
-          {/* Legend */}
-          <div style={{ display: "flex", alignItems: "center", gap: "0.35rem", marginBottom: "0.85rem", justifyContent: "center", flexWrap: "wrap" }}>
-            {[
-              { label: "1%", pct: 0.1 },
-              { label: "25%", pct: 0.25 },
-              { label: "50%", pct: 0.5 },
-              { label: "75%", pct: 0.75 },
-              { label: "100%", pct: 1 },
-            ].map((l) => (
-              <div key={l.label} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.2rem" }}>
-                <span style={{ fontSize: "0.6rem", color: "#64748b", fontWeight: 600 }}>{l.label}</span>
-                <div style={{
-                  width: 34, height: 9, borderRadius: "9999px",
-                  background: `rgba(29, 78, 216, ${0.12 + l.pct * 0.88})`,
-                }} />
+        // รวมรายวัน / รายชั่วโมง
+        const byDay = Array.from({ length: 7 }, (_, i) => {
+          const dow = i + 1;
+          let rounds = 0;
+          for (let h = 0; h < 24; h++) rounds += heatmap.grid?.[dow]?.[h]?.rounds || 0;
+          return { name: dayNames[i], dow, rounds };
+        });
+        const byHour = Array.from({ length: 24 }, (_, h) => {
+          let rounds = 0;
+          for (let d = 1; d <= 7; d++) rounds += heatmap.grid?.[d]?.[h]?.rounds || 0;
+          return { hour: h, rounds };
+        });
+
+        const topDay = [...byDay].sort((a, b) => b.rounds - a.rounds)[0];
+        const maxDay = Math.max(...byDay.map((d) => d.rounds), 1);
+
+        // ช่วงเวลา 4 ช่วง
+        const periods = [
+          { label: "ดึก", range: "00–05", icon: "🌙", hours: [0, 1, 2, 3, 4, 5] },
+          { label: "เช้า", range: "06–11", icon: "🌅", hours: [6, 7, 8, 9, 10, 11] },
+          { label: "บ่าย", range: "12–17", icon: "☀️", hours: [12, 13, 14, 15, 16, 17] },
+          { label: "ค่ำ", range: "18–23", icon: "🌆", hours: [18, 19, 20, 21, 22, 23] },
+        ].map((p) => ({
+          ...p,
+          rounds: p.hours.reduce((s, h) => s + byHour[h].rounds, 0),
+        }));
+        const topPeriod = [...periods].sort((a, b) => b.rounds - a.rounds)[0];
+        const maxPeriod = Math.max(...periods.map((p) => p.rounds), 1);
+
+        // ช่องที่เล่นหนักสุด
+        let peak = { dow: 1, hour: 0, rounds: 0 };
+        for (let d = 1; d <= 7; d++)
+          for (let h = 0; h < 24; h++) {
+            const r = heatmap.grid?.[d]?.[h]?.rounds || 0;
+            if (r > peak.rounds) peak = { dow: d, hour: h, rounds: r };
+          }
+
+        return (
+          <div style={{ background: "white", border: "1px solid #e2e8f0", borderRadius: "0.75rem", padding: "1.25rem" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "1rem", flexWrap: "wrap", gap: "0.4rem" }}>
+              <h3 style={{ fontSize: "0.95rem", fontWeight: 700, color: "#0f172a", margin: 0 }}>พฤติกรรมการเล่น</h3>
+              <span style={{ fontSize: "0.7rem", color: "#94a3b8" }}>ย้อนหลัง {heatmap.days} วัน</span>
+            </div>
+
+            {/* สรุปสั้น */}
+            <div style={{
+              background: "linear-gradient(135deg, #eff6ff, #f8fafc)",
+              border: "1px solid #dbeafe",
+              borderRadius: "0.6rem",
+              padding: "0.9rem 1rem",
+              marginBottom: "1rem",
+            }}>
+              <div style={{ fontSize: "0.72rem", color: "#64748b", marginBottom: "0.3rem", fontWeight: 500 }}>เล่นหนักที่สุด</div>
+              <div style={{ fontSize: "1rem", fontWeight: 700, color: "#1e40af" }}>
+                วัน{dayNames[peak.dow - 1]} {String(peak.hour).padStart(2, "0")}:00 น.
               </div>
-            ))}
-          </div>
+              <div style={{ fontSize: "0.72rem", color: "#64748b", marginTop: "0.25rem" }}>
+                {peak.rounds.toLocaleString("th-TH")} รอบในช่วงนี้ · ชอบเล่นช่วง{topPeriod.label} ({topPeriod.range} น.)
+              </div>
+            </div>
 
-          {/* Grid */}
-          <div style={{ overflowX: "auto" }}>
-            <table style={{ borderCollapse: "separate", borderSpacing: "2px", margin: "0 auto" }}>
-              <thead>
-                <tr>
-                  <th style={{ width: 38 }} />
-                  {["อา", "จ", "อ", "พ", "พฤ", "ศ", "ส"].map((d) => (
-                    <th key={d} style={{ fontSize: "0.65rem", color: "#64748b", fontWeight: 600, paddingBottom: "0.2rem", minWidth: 26 }}>{d}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {Array.from({ length: 24 }, (_, h) => (
-                  <tr key={h}>
-                    <td style={{ fontSize: "0.6rem", color: "#94a3b8", textAlign: "right", paddingRight: "0.3rem", whiteSpace: "nowrap" }}>
-                      {String(h).padStart(2, "0")}:00
-                    </td>
-                    {Array.from({ length: 7 }, (_, i) => {
-                      const dow = i + 1;
-                      const cell = heatmap.grid?.[dow]?.[h] || { rounds: 0, total_bet: 0 };
-                      const ratio = heatmap.max_rounds > 0 ? cell.rounds / heatmap.max_rounds : 0;
-                      return (
-                        <td key={dow} style={{ padding: 0 }}>
-                          <div
-                            title={cell.rounds > 0
-                              ? `${["อาทิตย์","จันทร์","อังคาร","พุธ","พฤหัส","ศุกร์","เสาร์"][i]} ${String(h).padStart(2,"0")}:00 — ${cell.rounds} รอบ · ฿${fmt(cell.total_bet)}`
-                              : "ไม่มีการเล่น"}
-                            style={{
-                              width: "100%", height: 15, borderRadius: "3px",
-                              background: cell.rounds > 0
-                                ? `rgba(29, 78, 216, ${0.15 + ratio * 0.85})`
-                                : "#eef2f7",
-                              cursor: cell.rounds > 0 ? "pointer" : "default",
-                            }}
-                          />
+            {/* วันไหนเล่นเยอะ */}
+            <div style={{ marginBottom: "1rem" }}>
+              <div style={{ fontSize: "0.75rem", color: "#475569", fontWeight: 600, marginBottom: "0.5rem" }}>วันที่เล่นบ่อย</div>
+              {byDay.map((d) => {
+                const pct = (d.rounds / maxDay) * 100;
+                const isTop = d.dow === topDay.dow && d.rounds > 0;
+                return (
+                  <div key={d.dow} style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.3rem" }}>
+                    <span style={{ width: 44, fontSize: "0.7rem", color: isTop ? "#1e40af" : "#64748b", fontWeight: isTop ? 700 : 500, textAlign: "right", flexShrink: 0 }}>
+                      {d.name}
+                    </span>
+                    <div style={{ flex: 1, background: "#f1f5f9", borderRadius: "9999px", height: 14, overflow: "hidden", minWidth: 0 }}>
+                      <div style={{
+                        width: `${pct}%`, height: "100%", borderRadius: "9999px",
+                        background: isTop ? "linear-gradient(90deg, #1d4ed8, #3b82f6)" : "#bfdbfe",
+                        transition: "width 0.4s ease",
+                      }} />
+                    </div>
+                    <span style={{ width: 44, fontSize: "0.68rem", color: "#94a3b8", flexShrink: 0 }}>
+                      {d.rounds.toLocaleString("th-TH")}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* ช่วงเวลา */}
+            <div style={{ marginBottom: "1rem" }}>
+              <div style={{ fontSize: "0.75rem", color: "#475569", fontWeight: 600, marginBottom: "0.5rem" }}>ช่วงเวลาที่เล่น</div>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "0.4rem" }}>
+                {periods.map((p) => {
+                  const isTop = p.label === topPeriod.label && p.rounds > 0;
+                  const pct = (p.rounds / maxPeriod) * 100;
+                  return (
+                    <div key={p.label} style={{
+                      background: isTop ? "#eff6ff" : "#f8fafc",
+                      border: isTop ? "1px solid #93c5fd" : "1px solid #e2e8f0",
+                      borderRadius: "0.5rem",
+                      padding: "0.55rem 0.4rem",
+                      textAlign: "center",
+                    }}>
+                      <div style={{ fontSize: "0.95rem", lineHeight: 1.2 }}>{p.icon}</div>
+                      <div style={{ fontSize: "0.7rem", fontWeight: 700, color: isTop ? "#1e40af" : "#475569", marginTop: "0.15rem" }}>{p.label}</div>
+                      <div style={{ fontSize: "0.58rem", color: "#94a3b8" }}>{p.range} น.</div>
+                      <div style={{ background: "#e2e8f0", borderRadius: "9999px", height: 3, overflow: "hidden", margin: "0.35rem 0 0.25rem" }}>
+                        <div style={{ width: `${pct}%`, height: "100%", background: isTop ? "#2563eb" : "#cbd5e1" }} />
+                      </div>
+                      <div style={{ fontSize: "0.65rem", fontWeight: 600, color: "#0f172a" }}>{p.rounds.toLocaleString("th-TH")}</div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Heatmap ละเอียด (พับไว้) */}
+            <details>
+              <summary style={{ cursor: "pointer", fontSize: "0.75rem", color: "#2563eb", userSelect: "none", fontWeight: 500, padding: "0.35rem 0" }}>
+                ดูตารางละเอียดรายชั่วโมง
+              </summary>
+              <div style={{ overflowX: "auto", marginTop: "0.6rem" }}>
+                <table style={{ borderCollapse: "separate", borderSpacing: "2px", margin: "0 auto" }}>
+                  <thead>
+                    <tr>
+                      <th style={{ width: 34 }} />
+                      {["อา", "จ", "อ", "พ", "พฤ", "ศ", "ส"].map((d) => (
+                        <th key={d} style={{ fontSize: "0.6rem", color: "#64748b", fontWeight: 600, minWidth: 24 }}>{d}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {Array.from({ length: 24 }, (_, h) => (
+                      <tr key={h}>
+                        <td style={{ fontSize: "0.55rem", color: "#94a3b8", textAlign: "right", paddingRight: "0.25rem", whiteSpace: "nowrap" }}>
+                          {String(h).padStart(2, "0")}
                         </td>
-                      );
-                    })}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                        {Array.from({ length: 7 }, (_, i) => {
+                          const dow = i + 1;
+                          const cell = heatmap.grid?.[dow]?.[h] || { rounds: 0, total_bet: 0 };
+                          const ratio = heatmap.max_rounds > 0 ? cell.rounds / heatmap.max_rounds : 0;
+                          return (
+                            <td key={dow} style={{ padding: 0 }}>
+                              <div
+                                title={cell.rounds > 0 ? `${dayNames[i]} ${String(h).padStart(2, "0")}:00 — ${cell.rounds} รอบ · ฿${fmt(cell.total_bet)}` : "ไม่มีการเล่น"}
+                                style={{
+                                  width: "100%", height: 13, borderRadius: "2px",
+                                  background: cell.rounds > 0 ? `rgba(29, 78, 216, ${0.15 + ratio * 0.85})` : "#eef2f7",
+                                }}
+                              />
+                            </td>
+                          );
+                        })}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </details>
 
-          <div style={{ marginTop: "0.85rem", paddingTop: "0.75rem", borderTop: "1px solid #f1f5f9", display: "flex", justifyContent: "space-between", fontSize: "0.72rem", color: "#94a3b8", flexWrap: "wrap", gap: "0.5rem" }}>
-            <span>ย้อนหลัง {heatmap.days} วัน</span>
-            <span>รวม {heatmap.total_rounds.toLocaleString("th-TH")} รอบ · ฿{fmt(heatmap.total_bet)}</span>
+            <div style={{ marginTop: "0.75rem", paddingTop: "0.7rem", borderTop: "1px solid #f1f5f9", fontSize: "0.7rem", color: "#94a3b8", textAlign: "right" }}>
+              รวม {heatmap.total_rounds.toLocaleString("th-TH")} รอบ · ฿{fmt(heatmap.total_bet)}
+            </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
             {/* Card: เทิร์นโอเวอร์ */}
       {turnover && (
