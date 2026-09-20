@@ -291,6 +291,92 @@ export default function UserProfilePage() {
           ))}
         </div>
       </div>
+
+      <div style={{ maxWidth: "1100px" }}>
+      {/* Tab: รายการฝาก / ถอน */}
+      <div style={{ background: "white", border: "1px solid #e2e8f0", borderRadius: "0.5rem", overflow: "hidden" }}>
+        <div style={{ display: "flex", borderBottom: "1px solid #e2e8f0" }}>
+          {[
+            { key: "deposits" as const, label: `รายการฝาก (${deposits.length})` },
+            { key: "withdrawals" as const, label: `รายการถอน (${withdrawals.length})` },
+          ].map((t) => (
+            <button key={t.key} onClick={() => setTab(t.key)}
+              style={{
+                flex: 1, padding: "0.75rem", border: "none", cursor: "pointer",
+                fontSize: "0.85rem", fontWeight: 600,
+                background: tab === t.key ? "#2563eb" : "#f8fafc",
+                color: tab === t.key ? "white" : "#64748b",
+              }}>{t.label}</button>
+          ))}
+        </div>
+
+        <div style={{ overflowX: "auto", maxHeight: "480px", overflowY: "auto" }}>
+          {tab === "deposits" ? (
+            deposits.length === 0 ? (
+              <div style={{ textAlign: "center", padding: "2rem", color: "#94a3b8" }}>ยังไม่มีรายการฝาก</div>
+            ) : (
+              <table style={{ width: "100%", fontSize: "0.85rem", borderCollapse: "collapse" }}>
+                <thead>
+                  <tr style={{ background: "#dbeafe", borderBottom: "1px solid #93c5fd" }}>
+                    {["ID", "จำนวน", "ช่องทาง", "สถานะ", "ทำรายการโดย", "วันที่"].map((h) => (
+                      <th key={h} style={{ padding: "0.5rem 0.75rem", color: "#1e40af", fontWeight: 700, textAlign: "left", fontSize: "0.8rem" }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {deposits.map((d: any) => {
+                    const sc = statusColor(d.status);
+                    return (
+                      <tr key={d.id} style={{ borderBottom: "1px solid #f1f5f9" }}>
+                        <td style={{ padding: "0.75rem 1rem", color: "#64748b" }}>{d.id}</td>
+                        <td style={{ padding: "0.75rem 1rem", color: "#10b981", fontWeight: 600 }}>+฿{fmt(d.amount)}</td>
+                        <td style={{ padding: "0.75rem 1rem", color: "#64748b", fontSize: "0.8rem" }}>{d.channel || "-"}</td>
+                        <td style={{ padding: "0.75rem 1rem" }}>
+                          <span style={{ padding: "0.2rem 0.6rem", borderRadius: "9999px", fontSize: "0.7rem", fontWeight: 600, background: sc.bg, color: sc.color }}>{d.status}</span>
+                        </td>
+                        <td style={{ padding: "0.75rem 1rem", color: "#6366f1", fontSize: "0.8rem", fontWeight: 500 }}>{d.approved_method === "auto" ? "🤖 AUTO" : d.approved_by ? (d.approved_by?.username || `Admin #${d.approved_by}`) : "-"}</td>
+                        <td style={{ padding: "0.75rem 1rem", color: "#64748b", fontSize: "0.8rem" }}>{new Date(d.created_at).toLocaleString("th-TH")}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            )
+          ) : (
+            withdrawals.length === 0 ? (
+              <div style={{ textAlign: "center", padding: "2rem", color: "#94a3b8" }}>ยังไม่มีรายการถอน</div>
+            ) : (
+              <table style={{ width: "100%", fontSize: "0.85rem", borderCollapse: "collapse" }}>
+                <thead>
+                  <tr style={{ background: "#dbeafe", borderBottom: "1px solid #93c5fd" }}>
+                    {["ID", "จำนวน", "สถานะ", "ทำรายการโดย", "วันที่"].map((h) => (
+                      <th key={h} style={{ padding: "0.5rem 0.75rem", color: "#1e40af", fontWeight: 700, textAlign: "left", fontSize: "0.8rem" }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {withdrawals.map((w: any) => {
+                    const sc = statusColor(w.status);
+                    return (
+                      <tr key={w.id} style={{ borderBottom: "1px solid #f1f5f9" }}>
+                        <td style={{ padding: "0.75rem 1rem", color: "#64748b" }}>{w.id}</td>
+                        <td style={{ padding: "0.75rem 1rem", color: "#ef4444", fontWeight: 600 }}>-฿{fmt(w.amount)}</td>
+                        <td style={{ padding: "0.75rem 1rem" }}>
+                          <span style={{ padding: "0.2rem 0.6rem", borderRadius: "9999px", fontSize: "0.7rem", fontWeight: 600, background: sc.bg, color: sc.color }}>{w.status}</span>
+                        </td>
+                        <td style={{ padding: "0.75rem 1rem", color: "#6366f1", fontSize: "0.8rem", fontWeight: 500 }}>{w.approver ? w.approver.username : w.approved_by ? `Admin #${w.approved_by}` : "-"}</td>
+                        <td style={{ padding: "0.75rem 1rem", color: "#64748b", fontSize: "0.8rem" }}>{new Date(w.created_at).toLocaleString("th-TH")}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            )
+          )}
+        </div>
+              </div>
+      </div>
+      
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "1rem", alignItems: "start" }}>
 
             {/* Card: เกมที่เล่นบ่อย */}
@@ -834,90 +920,6 @@ export default function UserProfilePage() {
           </div>
         ))}
       </div>
-      </div>
-      <div style={{ maxWidth: "1100px" }}>
-      {/* Tab: รายการฝาก / ถอน */}
-      <div style={{ background: "white", border: "1px solid #e2e8f0", borderRadius: "0.5rem", overflow: "hidden" }}>
-        <div style={{ display: "flex", borderBottom: "1px solid #e2e8f0" }}>
-          {[
-            { key: "deposits" as const, label: `รายการฝาก (${deposits.length})` },
-            { key: "withdrawals" as const, label: `รายการถอน (${withdrawals.length})` },
-          ].map((t) => (
-            <button key={t.key} onClick={() => setTab(t.key)}
-              style={{
-                flex: 1, padding: "0.75rem", border: "none", cursor: "pointer",
-                fontSize: "0.85rem", fontWeight: 600,
-                background: tab === t.key ? "#2563eb" : "#f8fafc",
-                color: tab === t.key ? "white" : "#64748b",
-              }}>{t.label}</button>
-          ))}
-        </div>
-
-        <div style={{ overflowX: "auto", maxHeight: "480px", overflowY: "auto" }}>
-          {tab === "deposits" ? (
-            deposits.length === 0 ? (
-              <div style={{ textAlign: "center", padding: "2rem", color: "#94a3b8" }}>ยังไม่มีรายการฝาก</div>
-            ) : (
-              <table style={{ width: "100%", fontSize: "0.85rem", borderCollapse: "collapse" }}>
-                <thead>
-                  <tr style={{ background: "#dbeafe", borderBottom: "1px solid #93c5fd" }}>
-                    {["ID", "จำนวน", "ช่องทาง", "สถานะ", "ทำรายการโดย", "วันที่"].map((h) => (
-                      <th key={h} style={{ padding: "0.5rem 0.75rem", color: "#1e40af", fontWeight: 700, textAlign: "left", fontSize: "0.8rem" }}>{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {deposits.map((d: any) => {
-                    const sc = statusColor(d.status);
-                    return (
-                      <tr key={d.id} style={{ borderBottom: "1px solid #f1f5f9" }}>
-                        <td style={{ padding: "0.75rem 1rem", color: "#64748b" }}>{d.id}</td>
-                        <td style={{ padding: "0.75rem 1rem", color: "#10b981", fontWeight: 600 }}>+฿{fmt(d.amount)}</td>
-                        <td style={{ padding: "0.75rem 1rem", color: "#64748b", fontSize: "0.8rem" }}>{d.channel || "-"}</td>
-                        <td style={{ padding: "0.75rem 1rem" }}>
-                          <span style={{ padding: "0.2rem 0.6rem", borderRadius: "9999px", fontSize: "0.7rem", fontWeight: 600, background: sc.bg, color: sc.color }}>{d.status}</span>
-                        </td>
-                        <td style={{ padding: "0.75rem 1rem", color: "#6366f1", fontSize: "0.8rem", fontWeight: 500 }}>{d.approved_method === "auto" ? "🤖 AUTO" : d.approved_by ? (d.approved_by?.username || `Admin #${d.approved_by}`) : "-"}</td>
-                        <td style={{ padding: "0.75rem 1rem", color: "#64748b", fontSize: "0.8rem" }}>{new Date(d.created_at).toLocaleString("th-TH")}</td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            )
-          ) : (
-            withdrawals.length === 0 ? (
-              <div style={{ textAlign: "center", padding: "2rem", color: "#94a3b8" }}>ยังไม่มีรายการถอน</div>
-            ) : (
-              <table style={{ width: "100%", fontSize: "0.85rem", borderCollapse: "collapse" }}>
-                <thead>
-                  <tr style={{ background: "#dbeafe", borderBottom: "1px solid #93c5fd" }}>
-                    {["ID", "จำนวน", "สถานะ", "ทำรายการโดย", "วันที่"].map((h) => (
-                      <th key={h} style={{ padding: "0.5rem 0.75rem", color: "#1e40af", fontWeight: 700, textAlign: "left", fontSize: "0.8rem" }}>{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {withdrawals.map((w: any) => {
-                    const sc = statusColor(w.status);
-                    return (
-                      <tr key={w.id} style={{ borderBottom: "1px solid #f1f5f9" }}>
-                        <td style={{ padding: "0.75rem 1rem", color: "#64748b" }}>{w.id}</td>
-                        <td style={{ padding: "0.75rem 1rem", color: "#ef4444", fontWeight: 600 }}>-฿{fmt(w.amount)}</td>
-                        <td style={{ padding: "0.75rem 1rem" }}>
-                          <span style={{ padding: "0.2rem 0.6rem", borderRadius: "9999px", fontSize: "0.7rem", fontWeight: 600, background: sc.bg, color: sc.color }}>{w.status}</span>
-                        </td>
-                        <td style={{ padding: "0.75rem 1rem", color: "#6366f1", fontSize: "0.8rem", fontWeight: 500 }}>{w.approver ? w.approver.username : w.approved_by ? `Admin #${w.approved_by}` : "-"}</td>
-                        <td style={{ padding: "0.75rem 1rem", color: "#64748b", fontSize: "0.8rem" }}>{new Date(w.created_at).toLocaleString("th-TH")}</td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            )
-          )}
-        </div>
-              </div>
       </div>
     </div>
   );
