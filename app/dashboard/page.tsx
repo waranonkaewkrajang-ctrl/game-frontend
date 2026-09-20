@@ -10,8 +10,10 @@ import {
   Tooltip as RechartsTooltip,
   Legend,
   ResponsiveContainer,
-  LineChart,
+  ComposedChart,
+  Area,
   Line,
+  Cell,
 } from "recharts";
 import { 
   Users, 
@@ -46,8 +48,57 @@ interface DashboardData {
   this_month: { new_users: number; total_deposit: number; total_withdraw: number; total_bet: number; total_win: number };
   overall: { total_users: number; active_users: number; total_balance: number };
   pending: { deposits: number; withdrawals: number };
-  chart_data: { name: string; deposit: number; withdraw: number; bet: number; win: number }[]; 
+    chart_data: { name: string; deposit: number; withdraw: number; bet: number; win: number }[];
 }
+
+// ─── Helper สำหรับกราฟ ───────────────────────────
+const shortNum = (v: number) => {
+  if (Math.abs(v) >= 1_000_000) return `฿${(v / 1_000_000).toFixed(1)}M`;
+  if (Math.abs(v) >= 1_000) return `฿${(v / 1_000).toFixed(v % 1000 === 0 ? 0 : 1)}K`;
+  return `฿${v}`;
+};
+
+const baht = (v: number) =>
+  "฿" + Number(v || 0).toLocaleString("th-TH", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+const ChartTip = ({ active, payload, label }: any) => {
+  if (!active || !payload?.length) return null;
+  return (
+    <div style={{
+      background: "rgba(15,23,42,0.96)",
+      borderRadius: "10px",
+      padding: "0.75rem 1rem",
+      boxShadow: "0 10px 25px -5px rgba(0,0,0,0.3)",
+      minWidth: "170px",
+    }}>
+      <div style={{ color: "#94a3b8", fontSize: "0.72rem", marginBottom: "0.5rem", fontWeight: 600 }}>{label}</div>
+      {payload.map((p: any) => (
+        <div key={p.dataKey} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "1.25rem", marginBottom: "0.25rem" }}>
+          <span style={{ display: "flex", alignItems: "center", gap: "0.4rem", color: "#cbd5e1", fontSize: "0.78rem" }}>
+            <span style={{ width: 8, height: 8, borderRadius: "50%", background: p.color, display: "inline-block" }} />
+            {p.name}
+          </span>
+          <span style={{ color: "white", fontWeight: 700, fontSize: "0.82rem" }}>{baht(p.value)}</span>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+const ChartSummary = ({ items }: { items: { label: string; value: number; color: string }[] }) => (
+  <div style={{ display: "flex", gap: "1.75rem", flexWrap: "wrap", marginBottom: "1.25rem" }}>
+    {items.map((it) => (
+      <div key={it.label}>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.4rem", marginBottom: "0.2rem" }}>
+          <span style={{ width: 8, height: 8, borderRadius: "50%", background: it.color, display: "inline-block" }} />
+          <span style={{ fontSize: "0.75rem", color: "#64748b", fontWeight: 500 }}>{it.label}</span>
+        </div>
+        <div style={{ fontSize: "1.15rem", fontWeight: 700, color: "#0f172a" }}>{baht(it.value)}</div>
+      </div>
+    ))}
+  </div>
+);
+// ─────────────────────────────────────────────────
 
 export default function DashboardPage() {
   const [data, setData] = useState<DashboardData | null>(null);
@@ -237,45 +288,121 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* ===== กราฟสถิติ ===== */}
+            {/* ===== กราฟสถิติ ===== */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(450px, 1fr))", gap: "1.5rem", marginTop: "0.5rem" }}>
-        
-        {/* กราฟฝาก-ถอน */}
-        <div style={{ background: "white", border: "1px solid #f1f5f9", borderRadius: "1rem", padding: "1.5rem", boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.02)" }}>
-          <h3 style={{ fontWeight: 700, color: "#0f172a", fontSize: "1.1rem", margin: "0 0 1.5rem 0" }}>
-            สถิติการฝาก-ถอนย้อนหลัง
-          </h3>
-          <div style={{ width: "100%", height: 320 }}>
+
+        {/* ฝาก-ถอน */}
+        <div style={{ background: "white", border: "1px solid #e2e8f0", borderRadius: "1rem", padding: "1.5rem", boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "1.25rem", flexWrap: "wrap", gap: "0.5rem" }}>
+            <div>
+              <h3 style={{ fontWeight: 700, color: "#0f172a", fontSize: "1.05rem", margin: 0 }}>สถิติการฝาก-ถอน</h3>
+              <p style={{ fontSize: "0.78rem", color: "#94a3b8", margin: "0.2rem 0 0" }}>ย้อนหลัง {data.chart_data?.length || 0} วัน</p>
+            </div>
+            {(() => {
+              const dep = (data.chart_data || []).reduce((s: number, d: any) => s + (d.deposit || 0), 0);
+              const wdr = (data.chart_data || []).reduce((s: number, d: any) => s + (d.withdraw || 0), 0);
+              const net = dep - wdr;
+              return (
+                <div style={{
+                  background: net >= 0 ? "#dcfce7" : "#fee2e2",
+                  color: net >= 0 ? "#166534" : "#991b1b",
+                  padding: "0.35rem 0.8rem",
+                  borderRadius: "0.5rem",
+                  fontSize: "0.78rem",
+                  fontWeight: 700,
+                  whiteSpace: "nowrap",
+                }}>
+                  สุทธิ {net >= 0 ? "+" : ""}{baht(net)}
+                </div>
+              );
+            })()}
+          </div>
+
+          <ChartSummary items={[
+            { label: "ยอดฝากรวม", value: (data.chart_data || []).reduce((s: number, d: any) => s + (d.deposit || 0), 0), color: "#10b981" },
+            { label: "ยอดถอนรวม", value: (data.chart_data || []).reduce((s: number, d: any) => s + (d.withdraw || 0), 0), color: "#f59e0b" },
+          ]} />
+
+          <div style={{ width: "100%", height: 300 }}>
             <ResponsiveContainer>
-              <BarChart data={data.chart_data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: "#64748b", fontSize: 12, fontWeight: 500 }} dy={10} />
-                <YAxis axisLine={false} tickLine={false} tick={{ fill: "#64748b", fontSize: 12, fontWeight: 500 }} tickFormatter={(value) => `฿${value}`} />
-                <RechartsTooltip cursor={{ fill: "#f8fafc" }} contentStyle={{ borderRadius: "12px", border: "none", boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)", fontWeight: 500, color: "#0f172a" }} />
-                <Legend iconType="circle" wrapperStyle={{ fontSize: "13px", paddingTop: "20px", fontWeight: 500, color: "#475569" }} />
-                <Bar dataKey="deposit" name="ยอดฝาก" fill="#10b981" radius={[6, 6, 0, 0]} barSize={16} />
-                <Bar dataKey="withdraw" name="ยอดถอน" fill="#f59e0b" radius={[6, 6, 0, 0]} barSize={16} />
+              <BarChart data={data.chart_data} margin={{ top: 10, right: 8, left: 8, bottom: 0 }} barGap={6}>
+                <defs>
+                  <linearGradient id="gDeposit" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#34d399" />
+                    <stop offset="100%" stopColor="#059669" />
+                  </linearGradient>
+                  <linearGradient id="gWithdraw" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#fbbf24" />
+                    <stop offset="100%" stopColor="#d97706" />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="4 4" vertical={false} stroke="#eef2f7" />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: "#94a3b8", fontSize: 11.5, fontWeight: 500 }} dy={10} />
+                <YAxis axisLine={false} tickLine={false} width={58} tick={{ fill: "#94a3b8", fontSize: 11.5, fontWeight: 500 }} tickFormatter={shortNum} />
+                <RechartsTooltip cursor={{ fill: "rgba(148,163,184,0.08)" }} content={<ChartTip />} />
+                <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: "12.5px", paddingTop: "16px", fontWeight: 500, color: "#475569" }} />
+                <Bar dataKey="deposit" name="ยอดฝาก" fill="url(#gDeposit)" radius={[6, 6, 0, 0]} maxBarSize={38} />
+                <Bar dataKey="withdraw" name="ยอดถอน" fill="url(#gWithdraw)" radius={[6, 6, 0, 0]} maxBarSize={38} />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        {/* กราฟเดิมพัน-ชนะ */}
-        <div style={{ background: "white", border: "1px solid #f1f5f9", borderRadius: "1rem", padding: "1.5rem", boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.02)" }}>
-          <h3 style={{ fontWeight: 700, color: "#0f172a", fontSize: "1.1rem", margin: "0 0 1.5rem 0" }}>
-            สถิติการเดิมพัน-ชนะย้อนหลัง
-          </h3>
-          <div style={{ width: "100%", height: 320 }}>
+        {/* เดิมพัน-ชนะ */}
+        <div style={{ background: "white", border: "1px solid #e2e8f0", borderRadius: "1rem", padding: "1.5rem", boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "1.25rem", flexWrap: "wrap", gap: "0.5rem" }}>
+            <div>
+              <h3 style={{ fontWeight: 700, color: "#0f172a", fontSize: "1.05rem", margin: 0 }}>สถิติการเดิมพัน-ชนะ</h3>
+              <p style={{ fontSize: "0.78rem", color: "#94a3b8", margin: "0.2rem 0 0" }}>ย้อนหลัง {data.chart_data?.length || 0} วัน</p>
+            </div>
+            {(() => {
+              const bet = (data.chart_data || []).reduce((s: number, d: any) => s + (d.bet || 0), 0);
+              const win = (data.chart_data || []).reduce((s: number, d: any) => s + (d.win || 0), 0);
+              const edge = bet > 0 ? ((bet - win) / bet) * 100 : 0;
+              return (
+                <div style={{
+                  background: edge >= 0 ? "#eef2ff" : "#fee2e2",
+                  color: edge >= 0 ? "#4338ca" : "#991b1b",
+                  padding: "0.35rem 0.8rem",
+                  borderRadius: "0.5rem",
+                  fontSize: "0.78rem",
+                  fontWeight: 700,
+                  whiteSpace: "nowrap",
+                }}>
+                  กำไรขั้นต้น {edge.toFixed(1)}%
+                </div>
+              );
+            })()}
+          </div>
+
+          <ChartSummary items={[
+            { label: "ยอดเดิมพันรวม", value: (data.chart_data || []).reduce((s: number, d: any) => s + (d.bet || 0), 0), color: "#6366f1" },
+            { label: "ยอดชนะรวม", value: (data.chart_data || []).reduce((s: number, d: any) => s + (d.win || 0), 0), color: "#ec4899" },
+          ]} />
+
+          <div style={{ width: "100%", height: 300 }}>
             <ResponsiveContainer>
-              <LineChart data={data.chart_data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: "#64748b", fontSize: 12, fontWeight: 500 }} dy={10} />
-                <YAxis axisLine={false} tickLine={false} tick={{ fill: "#64748b", fontSize: 12, fontWeight: 500 }} tickFormatter={(value) => `฿${value}`} />
-                <RechartsTooltip contentStyle={{ borderRadius: "12px", border: "none", boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)", fontWeight: 500, color: "#0f172a" }} />
-                <Legend iconType="circle" wrapperStyle={{ fontSize: "13px", paddingTop: "20px", fontWeight: 500, color: "#475569" }} />
-                <Line type="monotone" dataKey="bet" name="ยอดเดิมพัน" stroke="#6366f1" strokeWidth={4} dot={{ r: 4, strokeWidth: 2 }} activeDot={{ r: 7, strokeWidth: 0 }} />
-                <Line type="monotone" dataKey="win" name="ยอดชนะ" stroke="#ec4899" strokeWidth={4} dot={{ r: 4, strokeWidth: 2 }} activeDot={{ r: 7, strokeWidth: 0 }} />
-              </LineChart>
+              <ComposedChart data={data.chart_data} margin={{ top: 10, right: 8, left: 8, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="gBet" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#6366f1" stopOpacity={0.28} />
+                    <stop offset="100%" stopColor="#6366f1" stopOpacity={0} />
+                  </linearGradient>
+                  <linearGradient id="gWin" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#ec4899" stopOpacity={0.22} />
+                    <stop offset="100%" stopColor="#ec4899" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="4 4" vertical={false} stroke="#eef2f7" />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: "#94a3b8", fontSize: 11.5, fontWeight: 500 }} dy={10} />
+                <YAxis axisLine={false} tickLine={false} width={58} tick={{ fill: "#94a3b8", fontSize: 11.5, fontWeight: 500 }} tickFormatter={shortNum} />
+                <RechartsTooltip content={<ChartTip />} />
+                <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: "12.5px", paddingTop: "16px", fontWeight: 500, color: "#475569" }} />
+                <Area type="monotone" dataKey="bet" name="ยอดเดิมพัน" stroke="none" fill="url(#gBet)" />
+                <Area type="monotone" dataKey="win" name="ยอดชนะ" stroke="none" fill="url(#gWin)" legendType="none" />
+                <Line type="monotone" dataKey="bet" name="ยอดเดิมพัน" stroke="#6366f1" strokeWidth={3} dot={{ r: 3.5, fill: "#6366f1", strokeWidth: 2, stroke: "#fff" }} activeDot={{ r: 6, strokeWidth: 0 }} legendType="none" />
+                <Line type="monotone" dataKey="win" name="ยอดชนะ" stroke="#ec4899" strokeWidth={3} dot={{ r: 3.5, fill: "#ec4899", strokeWidth: 2, stroke: "#fff" }} activeDot={{ r: 6, strokeWidth: 0 }} />
+              </ComposedChart>
             </ResponsiveContainer>
           </div>
         </div>
