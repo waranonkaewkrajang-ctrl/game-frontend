@@ -292,7 +292,7 @@ export default function UserProfilePage() {
 
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem", alignItems: "start" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1.6fr) minmax(0, 1fr)", gap: "1rem", alignItems: "start" }}>
 
             {/* Card: เกมที่เล่นบ่อย */}
       {topGames?.games?.length > 0 && (
@@ -723,7 +723,7 @@ export default function UserProfilePage() {
       </div>
 
       {/* Card: ปรับเครดิต / คะแนน / วงล้อ */}
-      <div style={{ background: "white", border: "1px solid #e2e8f0", borderRadius: "0.5rem", padding: "1.25rem", alignSelf: "start", maxWidth: "320px" }}>
+      <div style={{ background: "white", border: "1px solid #e2e8f0", borderRadius: "0.5rem", padding: "1.25rem", alignSelf: "start" }}>
         {[
           { label: "เครดิต", key: "credit", value: user.wallet?.balance, color: "#10b981" },
           { label: "คะแนน", key: "point", value: user.wallet?.point_balance ?? 0, color: "#f59e0b" },
@@ -739,7 +739,7 @@ export default function UserProfilePage() {
                 .then(() => { Swal.fire({ icon: "success", title: `เพิ่ม${item.label}สำเร็จ`, timer: 1500, showConfirmButton: false }); api.get(`/admin/users/${userId}`).then((res) => setUser(res.data.data)); })
                 .catch((e) => Swal.fire({ icon: "error", title: e.response?.data?.message || "เกิดข้อผิดพลาด" }));
             }} style={{ padding: "0.5rem 0.75rem", background: "#22c55e", color: "white", border: "none", borderRadius: "0.375rem", cursor: "pointer", fontWeight: 700, fontSize: "0.9rem" }}>+</button>
-            <input readOnly value={item.key === "credit" ? fmt(item.value) : `${item.value}${item.unit ? ` ${item.unit}` : ""}`} style={{ textAlign: "center", width: "30%", borderRadius: "0.375rem", border: "1px solid #d1d5db", padding: "0.25rem 0.4rem", fontSize: "0.8rem", fontWeight: 600, color: "#0f172a", background: "white" }} />
+            <input readOnly value={item.key === "credit" ? fmt(item.value) : `${item.value}${item.unit ? ` ${item.unit}` : ""}`} style={{ textAlign: "center", flex: 1, minWidth: 0, borderRadius: "0.375rem",border: "1px solid #d1d5db", padding: "0.25rem 0.4rem", fontSize: "0.8rem", fontWeight: 600, color: "#0f172a", background: "white" }} />
             <button onClick={async () => {
               const { value: amt } = await Swal.fire({ title: `ลด${item.label}`, input: "number", inputPlaceholder: "ใส่จำนวน", showCancelButton: true, confirmButtonText: "ยืนยัน", cancelButtonText: "ยกเลิก", confirmButtonColor: "#ef4444" });
               if (!amt || isNaN(Number(amt))) return;
