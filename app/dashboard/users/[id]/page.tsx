@@ -685,7 +685,7 @@ export default function UserProfilePage() {
           ))}
         </div>
 
-        <div style={{ overflowX: "auto" }}>
+        <div style={{ overflowX: "auto", maxHeight: "480px", overflowY: "auto" }}>
           {tab === "deposits" ? (
             deposits.length === 0 ? (
               <div style={{ textAlign: "center", padding: "2rem", color: "#94a3b8" }}>ยังไม่มีรายการฝาก</div>
