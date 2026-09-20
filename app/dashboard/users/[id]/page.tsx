@@ -317,7 +317,7 @@ export default function UserProfilePage() {
             </select>
           </div>
 
-          <div style={{ display: "flex", flexDirection: "column" }}>
+          <div style={{ display: "flex", flexDirection: "column", maxHeight: "340px", overflowY: "auto" }}>
             {topGames.games.map((g: any, i: number) => (
               <div key={`${g.provider}-${g.game_id}`} style={{
                 display: "flex",
@@ -333,7 +333,7 @@ export default function UserProfilePage() {
                 }}>{i + 1}</span>
 
                 <div style={{
-                  width: 38, height: 38, borderRadius: "0.4rem", flexShrink: 0,
+                  width: 32, height: 32, borderRadius: "0.4rem", flexShrink: 0,
                   background: "#f1f5f9", overflow: "hidden",
                   display: "flex", alignItems: "center", justifyContent: "center",
                 }}>
@@ -348,7 +348,7 @@ export default function UserProfilePage() {
 
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{
-                    fontSize: "0.85rem", fontWeight: 600, color: "#0f172a",
+                    fontSize: "0.8rem", fontWeight: 600, color: "#0f172a",
                     overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
                   }}>{g.game_name}</div>
                   <div style={{ fontSize: "0.72rem", color: "#94a3b8" }}>{g.provider}</div>
