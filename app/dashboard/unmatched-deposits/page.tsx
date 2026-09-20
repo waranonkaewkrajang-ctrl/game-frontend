@@ -4,18 +4,19 @@ import api from "@/lib/api";
 import Swal from "sweetalert2";
 import { AlertCircle, CheckCircle, Trash2, RefreshCw } from "lucide-react";
 
-// แยกธนาคารต้นทางจาก from_account
 const senderBank = (fromAccount?: string) => {
   if (!fromAccount) return "-";
+
+  // 1) TrueWallet เติมจากธนาคาร
+  const tw = fromAccount.match(/^\[DIRECT_TOPUP\]\s*(.+)$/);
+  if (tw) return tw[1].trim();
+
+  // 2) TrueWallet โอนจากวอเลท
+  if (fromAccount.startsWith("[P2P]")) return "TrueWallet";
+
+  // 3) ธนาคาร (SCB) ← ตัวนี้รองรับธนาคารอยู่แล้ว
   const m = fromAccount.match(/X-\d{4}\s+(.+)$/);
   return m ? m[1].trim() : "-";
-};
-
-// ตัดชื่อธนาคารออก เหลือแต่ชื่อ+เลขบัญชี
-const senderName = (fromAccount?: string) => {
-  if (!fromAccount) return "-";
-  const m = fromAccount.match(/^(.*X-\d{4})\s/);
-  return m ? m[1].trim() : fromAccount;
 };
 
 export default function UnmatchedDepositsPage() {
