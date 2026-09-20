@@ -4,6 +4,20 @@ import api from "@/lib/api";
 import Swal from "sweetalert2";
 import { AlertCircle, CheckCircle, Trash2, RefreshCw } from "lucide-react";
 
+// แยกธนาคารต้นทางจาก from_account
+const senderBank = (fromAccount?: string) => {
+  if (!fromAccount) return "-";
+  const m = fromAccount.match(/X-\d{4}\s+(.+)$/);
+  return m ? m[1].trim() : "-";
+};
+
+// ตัดชื่อธนาคารออก เหลือแต่ชื่อ+เลขบัญชี
+const senderName = (fromAccount?: string) => {
+  if (!fromAccount) return "-";
+  const m = fromAccount.match(/^(.*X-\d{4})\s/);
+  return m ? m[1].trim() : fromAccount;
+};
+
 export default function UnmatchedDepositsPage() {
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -25,7 +39,8 @@ export default function UnmatchedDepositsPage() {
       html: `
         <div style="text-align:left;font-size:14px;color:#334155">
           <p><b>ยอดเงิน:</b> ฿${parseFloat(item.amount).toLocaleString("th-TH", { minimumFractionDigits: 2 })}</p>
-          <p><b>ธนาคาร:</b> ${item.bank}</p>
+          <p><b>ธนาคารผู้โอน:</b> ${senderBank(item.from_account)}</p>
+          <p><b>เข้าบัญชี:</b> ${item.bank}</p>
           <p><b>จาก:</b> ${item.from_account || "N/A"}</p>
           <p><b>เวลา:</b> ${item.tx_time || "-"}</p>
           <hr style="margin:12px 0"/>
@@ -55,7 +70,7 @@ export default function UnmatchedDepositsPage() {
   const handleReject = async (item: any) => {
     const result = await Swal.fire({
       title: "ลบรายการนี้?",
-      text: `ยอด ฿${parseFloat(item.amount).toLocaleString()} | ${item.bank} | ${item.from_account || "N/A"}`,
+      text: `ยอด ฿${parseFloat(item.amount).toLocaleString()} | จาก ${senderBank(item.from_account)} | ${senderName(item.from_account)}`,
       icon: "warning",
       showCancelButton: true,
       confirmButtonText: "ใช่ ลบเลย",
@@ -126,8 +141,13 @@ export default function UnmatchedDepositsPage() {
                   <tr key={item.id} style={{ borderBottom: "1px solid #f1f5f9" }}>
                     <td style={{ padding: "0.75rem 1rem", color: "#64748b" }}>{item.id}</td>
                     <td style={{ padding: "0.75rem 1rem", color: "#10b981", fontWeight: 700 }}>฿{parseFloat(item.amount).toLocaleString("th-TH", { minimumFractionDigits: 2 })}</td>
-                    <td style={{ padding: "0.75rem 1rem", fontWeight: 500 }}>{item.bank}</td>
-                    <td style={{ padding: "0.75rem 1rem", color: "#64748b", maxWidth: "200px", overflow: "hidden", textOverflow: "ellipsis" }}>{item.from_account || "-"}</td>
+                    <td style={{ padding: "0.75rem 1rem", fontWeight: 500 }}>
+                      {senderBank(item.from_account)}
+                      <div style={{ fontSize: "0.72rem", color: "#94a3b8", fontWeight: 400 }}>
+                        เข้า {item.bank}
+                      </div>
+                    </td>
+                    <td style={{ padding: "0.75rem 1rem", color: "#64748b", maxWidth: "200px", overflow: "hidden", textOverflow: "ellipsis" }}>{senderName(item.from_account)}</td>
                     <td style={{ padding: "0.75rem 1rem", color: "#64748b", fontSize: "0.8rem" }}>{item.tx_time || "-"}</td>
                     <td style={{ padding: "0.75rem 1rem" }}>
                       <span style={{ padding: "0.2rem 0.6rem", borderRadius: "99px", fontSize: "0.7rem", fontWeight: 600, background: sl.bg, color: sl.color }}>{sl.text}</span>
