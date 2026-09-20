@@ -19,6 +19,19 @@ const senderBank = (fromAccount?: string) => {
   return m ? m[1].trim() : "-";
 };
 
+
+// ตัดชื่อธนาคาร/ประเภทออก เหลือแต่ชื่อผู้โอน
+const senderName = (fromAccount?: string) => {
+  if (!fromAccount) return "-";
+
+  // TrueWallet: ตัด [P2P] / [DIRECT_TOPUP] ออก
+  const tw = fromAccount.match(/^\[(?:P2P|DIRECT_TOPUP)\]\s*(.*)$/);
+  if (tw) return tw[1].trim() || "-";
+
+  const m = fromAccount.match(/^(.*X-\d{4})\s/);
+  return m ? m[1].trim() : fromAccount;
+};
+
 export default function UnmatchedDepositsPage() {
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
