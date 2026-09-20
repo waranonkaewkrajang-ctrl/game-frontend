@@ -422,7 +422,7 @@ export default function UserProfilePage() {
           </div>
 
           {turnoverOpen && (
-          <div style={{ padding: "1.25rem" }}>
+          <div style={{ padding: "1.25rem", maxHeight: "480px", overflowY: "auto" }}>
 
             {/* สรุปตัวเลข */}
             {turnover.claims.length > 0 && (
