@@ -667,7 +667,7 @@ export default function UserProfilePage() {
         ))}
       </div>
       </div>
-      <div>
+      <div style={{ maxWidth: "1100px" }}>
       {/* Tab: รายการฝาก / ถอน */}
       <div style={{ background: "white", border: "1px solid #e2e8f0", borderRadius: "0.5rem", overflow: "hidden" }}>
         <div style={{ display: "flex", borderBottom: "1px solid #e2e8f0" }}>
