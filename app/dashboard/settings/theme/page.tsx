@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import api from "@/lib/api";
 import Swal from "sweetalert2";
 
@@ -8,6 +8,11 @@ type Theme = {
   success: string; danger: string; bg: string; surface: string; text: string; text_muted: string;
   radius: number; btn_depth: number; glow: number;
   font: string; font_scale: number;
+  wheel_slice_mode: string; wheel_slice_a: string; wheel_slice_b: string;
+  wheel_ring: string; wheel_ring_border: string; wheel_glow: string;
+  wheel_dot_a: string; wheel_dot_b: string; wheel_inner_ring: string;
+  wheel_center: string; wheel_center_border: string; wheel_text: string;
+  wheel_center_text: string;
 };
 
 const COLOR_FIELDS: { key: keyof Theme; label: string; hint: string }[] = [
@@ -35,18 +40,59 @@ const rgba = (hex: string, a: number) => {
   return `rgba(${parseInt(h.slice(0, 2), 16)}, ${parseInt(h.slice(2, 4), 16)}, ${parseInt(h.slice(4, 6), 16)}, ${a})`;
 };
 
+const darker = (hex: string) => {
+  const map: Record<string, string> = { "#7c3aed": "#6d28d9", "#5b21b6": "#4c1d95", "#4c1d95": "#2e1065" };
+  const k = (hex || "").toLowerCase();
+  if (map[k]) return map[k];
+  const h = k.replace("#", "");
+  if (!/^[0-9a-f]{6}$/.test(h)) return hex || "#000000";
+  const f = (i: number) => Math.round(parseInt(h.slice(i, i + 2), 16) * 0.72);
+  return `rgb(${f(0)},${f(2)},${f(4)})`;
+};
+
+const readableText = (hex: string) => {
+  const h = (hex || "#000000").replace("#", "");
+  const [r, g, b] = [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16));
+  return (r * 299 + g * 587 + b * 114) / 1000 > 150 ? "#1a1a2e" : "#ffffff";
+};
+
+const WHEEL_COLORS: { key: keyof Theme; label: string; prizeOnly?: boolean }[] = [
+  { key: "wheel_slice_a",       label: "ช่องสี A",       prizeOnly: true },
+  { key: "wheel_slice_b",       label: "ช่องสี B",       prizeOnly: true },
+  { key: "wheel_ring",          label: "วงนอก" },
+  { key: "wheel_ring_border",   label: "ขอบวงนอก" },
+  { key: "wheel_glow",          label: "แสงเรือง" },
+  { key: "wheel_inner_ring",    label: "วงแหวนใน" },
+  { key: "wheel_dot_a",         label: "หมุดไฟ A" },
+  { key: "wheel_dot_b",         label: "หมุดไฟ B" },
+  { key: "wheel_center",        label: "วงกลางกลาง" },
+  { key: "wheel_center_border", label: "ขอบวงกลาง" },
+  { key: "wheel_text",          label: "ตัวอักษรในช่อง" },
+];
+
 export default function ThemeSettingsPage() {
   const [theme, setTheme] = useState<Theme | null>(null);
   const [defaults, setDefaults] = useState<Theme | null>(null);
   const [saving, setSaving] = useState(false);
   const [fonts, setFonts] = useState<string[]>([]);
+  const [wheelPrizes, setWheelPrizes] = useState<{ label: string; color: string }[]>([]);
 
   useEffect(() => {
-    api.get("/admin/theme").then((res) => {
-      setTheme(res.data.data);
+        api.get("/admin/theme").then((res) => {
+      setTheme({ ...res.data.defaults, ...res.data.data });
       setDefaults(res.data.defaults);
       setFonts(res.data.fonts || []);
     }).catch(() => Swal.fire({ icon: "error", title: "โหลดธีมไม่สำเร็จ" }));
+
+    api.get("/admin/spin-wheel/prizes").then((res) => {
+      const raw = res.data?.data ?? res.data;
+      const list = Array.isArray(raw) ? raw : raw?.data || [];
+      setWheelPrizes(
+        list
+          .filter((p: any) => p.is_active === undefined || p.is_active === true || p.is_active === 1)
+          .map((p: any) => ({ label: String(p.label || ""), color: String(p.color || "#7c3aed") }))
+      );
+    }).catch(() => {});
   }, []);
 
   // โหลดทุกฟอนต์มาไว้แสดงตัวอย่างในหน้านี้
@@ -206,6 +252,63 @@ export default function ThemeSettingsPage() {
               onChange={(e) => set("font_scale", Number(e.target.value))} style={{ width: "100%" }} />
             <div style={{ fontSize: "0.7rem", color: "#94a3b8" }}>100% = ขนาดปกติ · มือถือจอเล็กแนะนำ 95-100%</div>
           </div>
+
+          {/* วงล้อ */}
+          <div style={card}>
+            <h3 style={{ fontSize: "0.95rem", fontWeight: 700, margin: "0 0 0.85rem", color: "#0f172a" }}>วงล้อ</h3>
+
+            <div style={{ display: "flex", justifyContent: "center", marginBottom: "1rem", background: "#0a0a1a", borderRadius: "0.75rem", padding: "1rem" }}>
+              <WheelPreview t={theme} prizes={wheelPrizes} />
+            </div>
+
+            {/* โหมดสีช่อง */}
+            <div style={{ ...label, marginBottom: "0.4rem" }}>สีของช่องรางวัล</div>
+            <div style={{ display: "flex", gap: "0.5rem", marginBottom: "1rem" }}>
+              {[
+                { v: "theme", t: "สลับ 2 สี", d: "ใช้ช่องสี A / B ด้านล่าง" },
+                { v: "prize", t: "สีรายช่อง", d: "ใช้สีที่ตั้งในหน้ารางวัลวงล้อ" },
+              ].map((m) => {
+                const active = theme.wheel_slice_mode === m.v;
+                return (
+                  <button key={m.v} onClick={() => set("wheel_slice_mode", m.v)} style={{
+                    flex: 1, padding: "0.6rem", borderRadius: "0.5rem", cursor: "pointer", textAlign: "left",
+                    border: active ? "2px solid #2563eb" : "1px solid #e2e8f0",
+                    background: active ? "#eff6ff" : "white",
+                  }}>
+                    <div style={{ fontSize: "0.82rem", fontWeight: 700, color: "#0f172a" }}>{m.t}</div>
+                    <div style={{ fontSize: "0.68rem", color: "#64748b" }}>{m.d}</div>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* สีส่วนต่างๆ */}
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))", gap: "0.5rem", marginBottom: "1rem" }}>
+              {WHEEL_COLORS.map((f) => {
+                const disabled = f.prizeOnly && theme.wheel_slice_mode === "prize";
+                return (
+                  <label key={f.key} style={{
+                    display: "flex", alignItems: "center", gap: "0.5rem", padding: "0.45rem",
+                    border: "1px solid #f1f5f9", borderRadius: "0.5rem",
+                    opacity: disabled ? 0.4 : 1, cursor: disabled ? "not-allowed" : "pointer",
+                  }}>
+                    <input type="color" disabled={disabled} value={theme[f.key] as string}
+                      onChange={(e) => set(f.key, e.target.value)}
+                      style={{ width: 30, height: 30, border: "none", padding: 0, background: "none", cursor: "inherit", flexShrink: 0 }} />
+                    <span style={{ fontSize: "0.75rem", fontWeight: 600, color: "#334155" }}>{f.label}</span>
+                  </label>
+                );
+              })}
+            </div>
+
+            {/* ข้อความกลาง */}
+            <div style={{ ...label, marginBottom: "0.3rem" }}>ข้อความกลางวงล้อ</div>
+            <input value={theme.wheel_center_text} maxLength={8}
+              onChange={(e) => set("wheel_center_text", e.target.value)}
+              placeholder="SPIN"
+              style={{ width: "100%", padding: "0.5rem 0.75rem", border: "1px solid #cbd5e1", borderRadius: "0.375rem", fontSize: "0.85rem" }} />
+            <div style={{ fontSize: "0.7rem", color: "#94a3b8", marginTop: "0.25rem" }}>สูงสุด 8 ตัวอักษร เช่น SPIN, หมุน, GO</div>
+          </div>
         </div>
 
         {/* ── ฝั่งตัวอย่าง ── */}
@@ -241,4 +344,85 @@ export default function ThemeSettingsPage() {
       </div>
     </div>
   );
+}
+
+
+// ── วงล้อตัวอย่าง (วาดแบบเดียวกับหน้าเว็บลูกค้า) ──
+function WheelPreview({ t, prizes }: { t: Theme; prizes: { label: string; color: string }[] }) {
+  const ref = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = ref.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const list = prizes.length > 0
+      ? prizes
+      : Array.from({ length: 8 }, (_, i) => ({ label: `รางวัล ${i + 1}`, color: "#7c3aed" }));
+
+    const size = canvas.width, cx = size / 2, cy = size / 2;
+    const outerR = size / 2 - 8, wheelR = outerR - 26;
+    const slice = (2 * Math.PI) / list.length;
+    const prizeMode = t.wheel_slice_mode === "prize";
+
+    ctx.clearRect(0, 0, size, size);
+
+    // แสงเรือง
+    const g = ctx.createRadialGradient(cx, cy, outerR - 8, cx, cy, outerR + 8);
+    g.addColorStop(0, rgba(t.wheel_glow, 0.35));
+    g.addColorStop(1, rgba(t.wheel_glow, 0));
+    ctx.beginPath(); ctx.arc(cx, cy, outerR + 8, 0, 2 * Math.PI); ctx.fillStyle = g; ctx.fill();
+
+    // วงนอก
+    ctx.beginPath(); ctx.arc(cx, cy, outerR, 0, 2 * Math.PI);
+    ctx.fillStyle = t.wheel_ring; ctx.fill();
+    ctx.strokeStyle = t.wheel_ring_border; ctx.lineWidth = 3; ctx.stroke();
+
+    // หมุดไฟ
+    for (let i = 0; i < 16; i++) {
+      const a = (i / 16) * 2 * Math.PI;
+      const x = cx + Math.cos(a) * (outerR - 10), y = cy + Math.sin(a) * (outerR - 10);
+      const c = i % 2 === 0 ? t.wheel_dot_a : t.wheel_dot_b;
+      ctx.beginPath(); ctx.arc(x, y, 6, 0, 2 * Math.PI); ctx.fillStyle = rgba(c, 0.35); ctx.fill();
+      ctx.beginPath(); ctx.arc(x, y, 3, 0, 2 * Math.PI); ctx.fillStyle = c; ctx.fill();
+    }
+
+    // วงแหวนใน
+    ctx.beginPath(); ctx.arc(cx, cy, wheelR + 4, 0, 2 * Math.PI);
+    ctx.strokeStyle = t.wheel_inner_ring; ctx.lineWidth = 3;
+    ctx.shadowColor = rgba(t.wheel_inner_ring, 0.6); ctx.shadowBlur = 10; ctx.stroke(); ctx.shadowBlur = 0;
+
+    // ช่องรางวัล
+    list.forEach((p, i) => {
+      const s = i * slice - Math.PI / 2, e = s + slice;
+      const base = prizeMode && p.color ? p.color : (i % 2 === 0 ? t.wheel_slice_a : t.wheel_slice_b);
+      ctx.beginPath(); ctx.moveTo(cx, cy); ctx.arc(cx, cy, wheelR, s, e); ctx.closePath();
+      const sg = ctx.createRadialGradient(cx, cy, size * 0.06, cx, cy, wheelR);
+      sg.addColorStop(0, darker(base)); sg.addColorStop(1, base);
+      ctx.fillStyle = sg; ctx.fill();
+      ctx.strokeStyle = rgba(t.wheel_glow, 0.4); ctx.lineWidth = 1.2; ctx.stroke();
+
+      ctx.save(); ctx.translate(cx, cy); ctx.rotate(s + slice / 2);
+      ctx.fillStyle = prizeMode ? readableText(base) : t.wheel_text;
+      ctx.font = `bold ${size * 0.038}px sans-serif`;
+      ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      ctx.fillText(p.label.length > 10 ? p.label.slice(0, 9) + "…" : p.label, wheelR * 0.6, 0);
+      ctx.restore();
+    });
+
+    // วงกลางกลาง
+    const cr = size * 0.13;
+    const cg = ctx.createRadialGradient(cx, cy - cr * 0.3, 0, cx, cy, cr);
+    cg.addColorStop(0, t.wheel_ring_border); cg.addColorStop(0.7, t.wheel_center); cg.addColorStop(1, darker(t.wheel_center));
+    ctx.beginPath(); ctx.arc(cx, cy, cr, 0, 2 * Math.PI); ctx.fillStyle = cg; ctx.fill();
+    ctx.strokeStyle = t.wheel_center_border; ctx.lineWidth = 3; ctx.stroke();
+
+    ctx.fillStyle = "#f5f3ff";
+    ctx.font = `bold ${size * 0.06}px sans-serif`;
+    ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    ctx.fillText(t.wheel_center_text || "SPIN", cx, cy);
+  }, [t, prizes]);
+
+  return <canvas ref={ref} width={280} height={280} style={{ width: 280, height: 280, maxWidth: "100%" }} />;
 }
