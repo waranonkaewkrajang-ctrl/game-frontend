@@ -2,10 +2,12 @@
 import { useEffect, useState } from "react";
 import api from "@/lib/api";
 import Swal from "sweetalert2";
+import { imageFieldHtml, bindImageField, readImgTransform } from "./prizeImageEditor";
 
 interface Prize {
   id: number; label: string; type: string; value: number; color: string;
   icon: string; image_url: string | null; probability: number; sort_order: number; is_active: boolean;
+  img_scale?: number; img_x?: number; img_y?: number; img_rotate?: number;
 }
 
 interface Multiplier {
@@ -22,81 +24,6 @@ interface Summary {
   today_spins: number; today_credit: number; total_spins: number;
   total_credit: number; total_physical: number; prizes_count: number;
 }
-
-// ── ช่องภาพรางวัล (อัปโหลด / ตัวอย่าง / ลบ) ใช้ในฟอร์ม Swal ──
-const escAttr = (s: string) => s.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
-
-const imageFieldHtml = (current: string | null) => {
-  const url = current ? escAttr(current) : "";
-  const external = !!current && !current.includes("/uploads/");
-  const btn = "padding:7px 12px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer";
-  return `
-    <div>
-      <label style="font-size:13px;color:#374151;font-weight:500;display:block;margin-bottom:4px">รูปรางวัล (ถ้ามี)</label>
-      <div style="display:flex;align-items:center;gap:12px;padding:10px;border:1px dashed #cbd5e1;border-radius:10px;background:#f8fafc">
-        <div style="width:72px;height:72px;border-radius:10px;background:#1e1b4b;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0">
-          <img id="swal-img-preview" src="${url}" style="max-width:100%;max-height:100%;object-fit:contain;${url ? "" : "display:none"}">
-          <span id="swal-img-empty" style="font-size:11px;color:#a5b4fc;${url ? "display:none" : ""}">ไม่มีภาพ</span>
-        </div>
-        <div style="flex:1;min-width:0">
-          <div style="display:flex;gap:6px;flex-wrap:wrap">
-            <button type="button" id="swal-img-pick" style="${btn};border:none;background:#4f46e5;color:white">อัปโหลดภาพ</button>
-            <button type="button" id="swal-img-remove" style="${btn};border:1px solid #fecaca;background:white;color:#dc2626;${url ? "" : "display:none"}">ลบภาพ</button>
-          </div>
-          <div id="swal-img-status" style="font-size:11px;margin-top:6px;color:${external ? "#d97706" : "#64748b"}">
-            ${external ? "ภาพนี้มาจากเว็บภายนอก อาจไม่ขึ้นบนวงล้อ แนะนำอัปโหลดใหม่" : "PNG / JPG / WebP ไม่เกิน 2MB · แนะนำภาพพื้นใส"}
-          </div>
-        </div>
-      </div>
-      <input id="swal-img-file" type="file" accept="image/png,image/jpeg,image/webp,image/gif" style="display:none">
-      <input id="swal-image" type="hidden" value="${url}">
-    </div>`;
-};
-
-const bindImageField = () => {
-  const el = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
-  const file = el<HTMLInputElement>("swal-img-file");
-  const hidden = el<HTMLInputElement>("swal-image");
-  const preview = el<HTMLImageElement>("swal-img-preview");
-  const empty = el<HTMLElement>("swal-img-empty");
-  const removeBtn = el<HTMLElement>("swal-img-remove");
-  const status = el<HTMLElement>("swal-img-status");
-  if (!file || !hidden) return;
-
-  const setStatus = (text: string, color = "#64748b") => { status.textContent = text; status.style.color = color; };
-  const show = (url: string) => {
-    hidden.value = url;
-    preview.style.display = url ? "" : "none";
-    empty.style.display = url ? "none" : "";
-    removeBtn.style.display = url ? "" : "none";
-    if (url) preview.src = url; else preview.removeAttribute("src");
-  };
-
-  el<HTMLElement>("swal-img-pick").onclick = () => file.click();
-  removeBtn.onclick = () => { show(""); setStatus("ลบภาพแล้ว — กดบันทึกเพื่อยืนยัน", "#d97706"); };
-
-  file.onchange = async () => {
-    const f = file.files?.[0];
-    if (!f) return;
-    if (f.size > 2 * 1024 * 1024) { setStatus("ไฟล์ใหญ่เกิน 2MB", "#dc2626"); file.value = ""; return; }
-    setStatus("กำลังอัปโหลด...");
-    Swal.disableButtons();
-    try {
-      const fd = new FormData();
-      fd.append("image", f);
-      const res = await api.post("/admin/spin-wheel/upload-image", fd, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-      show(res.data.url);
-      setStatus("อัปโหลดสำเร็จ ✓", "#16a34a");
-    } catch (e: any) {
-      setStatus(e.response?.data?.message || "อัปโหลดไม่สำเร็จ", "#dc2626");
-    } finally {
-      Swal.enableButtons();
-      file.value = "";
-    }
-  };
-};
 
 export default function SpinWheelAdminPage() {
   const [tab, setTab] = useState<"prizes" | "multipliers" | "settings" | "history">("prizes");
@@ -143,7 +70,8 @@ export default function SpinWheelAdminPage() {
   // =====================================================
   const handleAddPrize = async () => {
     const { value: formValues } = await Swal.fire({
-      title: "เพิ่มรางวัล", didOpen: bindImageField,
+            title: "เพิ่มรางวัล",
+      didOpen: () => bindImageField({ index: prizes.filter((p) => p.is_active).length, total: prizes.filter((p) => p.is_active).length + 1 }),
       html: `
         <div style="display:flex;flex-direction:column;gap:12px;text-align:left;padding:4px 0">
           <div>
@@ -195,6 +123,7 @@ export default function SpinWheelAdminPage() {
           color: (document.getElementById("swal-color") as HTMLInputElement).value,
           icon: (document.getElementById("swal-icon") as HTMLInputElement).value || "★",
           image_url: (document.getElementById("swal-image") as HTMLInputElement).value || null,
+          ...readImgTransform(),
 probability: (() => { const v = parseFloat((document.getElementById("swal-prob") as HTMLInputElement).value); return isNaN(v) ? 10 : v; })(),
           sort_order: prizes.length, is_active: true,
         };
@@ -211,7 +140,11 @@ probability: (() => { const v = parseFloat((document.getElementById("swal-prob")
 
   const handleEditPrize = async (prize: Prize) => {
     const { value: formValues } = await Swal.fire({
-      title: "แก้ไขรางวัล", didOpen: bindImageField,
+      title: "แก้ไขรางวัล",
+      didOpen: () => bindImageField({
+        index: Math.max(0, prizes.filter((p) => p.is_active).findIndex((p) => p.id === prize.id)),
+        total: Math.max(1, prizes.filter((p) => p.is_active).length),
+      }),
       html: `
         <div style="display:flex;flex-direction:column;gap:12px;text-align:left;padding:4px 0">
           <div>
@@ -234,7 +167,7 @@ probability: (() => { const v = parseFloat((document.getElementById("swal-prob")
               <input id="swal-value" class="swal2-input" type="number" value="${prize.value}" style="margin:0;width:100%;box-sizing:border-box">
             </div>
           </div>
-          ${imageFieldHtml(prize.image_url)}
+                    ${imageFieldHtml(prize.image_url, prize)}
           <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
             <div>
               <label style="font-size:13px;color:#374151;font-weight:500;display:block;margin-bottom:4px">สีช่อง</label>
@@ -260,6 +193,7 @@ probability: (() => { const v = parseFloat((document.getElementById("swal-prob")
         color: (document.getElementById("swal-color") as HTMLInputElement).value,
         icon: (document.getElementById("swal-icon") as HTMLInputElement).value || "★",
         image_url: (document.getElementById("swal-image") as HTMLInputElement).value || null,
+        ...readImgTransform(),
         probability: (isNaN(parseFloat((document.getElementById("swal-prob") as HTMLInputElement).value)) ? 10 : parseFloat((document.getElementById("swal-prob") as HTMLInputElement).value)),
       }),
     });
