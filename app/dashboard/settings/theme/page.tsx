@@ -7,6 +7,7 @@ type Theme = {
   primary: string; primary_light: string; accent: string; accent_dark: string;
   success: string; danger: string; bg: string; surface: string; text: string; text_muted: string;
   radius: number; btn_depth: number; glow: number;
+  font: string; font_scale: number;
 };
 
 const COLOR_FIELDS: { key: keyof Theme; label: string; hint: string }[] = [
@@ -38,13 +39,29 @@ export default function ThemeSettingsPage() {
   const [theme, setTheme] = useState<Theme | null>(null);
   const [defaults, setDefaults] = useState<Theme | null>(null);
   const [saving, setSaving] = useState(false);
+  const [fonts, setFonts] = useState<string[]>([]);
 
   useEffect(() => {
     api.get("/admin/theme").then((res) => {
       setTheme(res.data.data);
       setDefaults(res.data.defaults);
+      setFonts(res.data.fonts || []);
     }).catch(() => Swal.fire({ icon: "error", title: "โหลดธีมไม่สำเร็จ" }));
   }, []);
+
+  // โหลดทุกฟอนต์มาไว้แสดงตัวอย่างในหน้านี้
+  useEffect(() => {
+    const list = fonts.filter((f) => f !== "Inter");
+    if (list.length === 0) return;
+    const id = "admin-theme-fonts";
+    if (document.getElementById(id)) return;
+    const link = document.createElement("link");
+    link.id = id;
+    link.rel = "stylesheet";
+    link.href = "https://fonts.googleapis.com/css2?" +
+      list.map((f) => `family=${f.replace(/ /g, "+")}:wght@400;700`).join("&") + "&display=swap";
+    document.head.appendChild(link);
+  }, [fonts]);
 
   if (!theme || !defaults) {
     return <div style={{ padding: "3rem", textAlign: "center", color: "#64748b" }}>กำลังโหลด...</div>;
@@ -159,13 +176,43 @@ export default function ThemeSettingsPage() {
               </div>
             ))}
           </div>
+
+          {/* ฟอนต์ */}
+          <div style={card}>
+            <h3 style={{ fontSize: "0.95rem", fontWeight: 700, margin: "0 0 0.85rem", color: "#0f172a" }}>ตัวอักษร</h3>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))", gap: "0.5rem", marginBottom: "1rem" }}>
+              {fonts.map((f) => {
+                const active = theme.font === f;
+                return (
+                  <button key={f} onClick={() => set("font", f)} style={{
+                    padding: "0.6rem 0.75rem", borderRadius: "0.5rem", cursor: "pointer", textAlign: "left",
+                    border: active ? "2px solid #2563eb" : "1px solid #e2e8f0",
+                    background: active ? "#eff6ff" : "white",
+                  }}>
+                    <div style={{ fontFamily: `'${f}', sans-serif`, fontSize: "1rem", fontWeight: 700, color: "#0f172a" }}>สล็อต 168</div>
+                    <div style={{ fontSize: "0.68rem", color: "#64748b", marginTop: "0.15rem" }}>
+                      {f}{f === "Inter" ? " (ค่าเดิม)" : ""}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.3rem" }}>
+              <span style={label}>ขนาดตัวอักษรทั้งเว็บ</span>
+              <span style={{ fontSize: "0.8rem", fontWeight: 700, color: "#2563eb" }}>{theme.font_scale}%</span>
+            </div>
+            <input type="range" min={85} max={125} value={theme.font_scale}
+              onChange={(e) => set("font_scale", Number(e.target.value))} style={{ width: "100%" }} />
+            <div style={{ fontSize: "0.7rem", color: "#94a3b8" }}>100% = ขนาดปกติ · มือถือจอเล็กแนะนำ 95-100%</div>
+          </div>
         </div>
 
         {/* ── ฝั่งตัวอย่าง ── */}
         <div style={{ ...card, position: "sticky", top: "1rem" }}>
           <h3 style={{ fontSize: "0.95rem", fontWeight: 700, margin: "0 0 0.75rem", color: "#0f172a" }}>ตัวอย่างหน้าเว็บ</h3>
 
-          <div style={{ background: theme.bg, borderRadius: "0.75rem", padding: "1.25rem", color: theme.text }}>
+          <div style={{ background: theme.bg, borderRadius: "0.75rem", padding: "1.25rem", color: theme.text, fontFamily: `'${theme.font}', 'Kanit', sans-serif`, fontSize: `${theme.font_scale}%` }}>
             {/* แถบบน */}
             <div style={{ background: `linear-gradient(135deg, ${theme.primary}, ${theme.primary_light})`, borderRadius: theme.radius, padding: "0.75rem 1rem", display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
               <span style={{ fontWeight: 800, color: "white" }}>SNAKE168</span>
