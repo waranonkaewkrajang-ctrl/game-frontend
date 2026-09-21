@@ -84,7 +84,9 @@ const bindImageField = () => {
     try {
       const fd = new FormData();
       fd.append("image", f);
-      const res = await api.post("/admin/spin-wheel/upload-image", fd);
+      const res = await api.post("/admin/spin-wheel/upload-image", fd, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
       show(res.data.url);
       setStatus("อัปโหลดสำเร็จ ✓", "#16a34a");
     } catch (e: any) {
