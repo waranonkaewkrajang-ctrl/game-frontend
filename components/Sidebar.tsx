@@ -223,7 +223,16 @@ useEffect(() => {
       <div style={{ padding: collapsed ? "1.5rem 0.5rem" : "1.5rem 1.25rem", borderBottom: "1px solid #f1f5f9", marginBottom: "1rem", display: "flex", alignItems: "center", justifyContent: collapsed ? "center" : "space-between" }}>
         {!collapsed && (
           <div>
-            <h2 style={{ fontWeight: 700, fontSize: "1.25rem", color: "#0f172a", letterSpacing: "-0.02em", margin: 0 }}>
+            <img
+              src="/admin-logo.png"
+              alt="Game Platform"
+              style={{ height: "40px", width: "auto", maxWidth: "180px", objectFit: "contain", display: "block" }}
+              onError={(e) => {
+                e.currentTarget.style.display = "none";
+                (e.currentTarget.nextElementSibling as HTMLElement | null)?.style.setProperty("display", "block");
+              }}
+            />
+            <h2 style={{ display: "none", fontWeight: 700, fontSize: "1.25rem", color: "#0f172a", letterSpacing: "-0.02em", margin: 0 }}>
               Game Platform
             </h2>
             <p style={{ fontSize: "0.75rem", color: "#64748b", fontWeight: 500, margin: "0.25rem 0 0 0" }}>

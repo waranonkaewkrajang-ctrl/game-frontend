@@ -31,7 +31,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           >
             <Menu size={24} color="#0f172a" />
           </button>
-          <span style={{ fontWeight: 700, fontSize: "1rem", color: "#0f172a" }}>Game Platform</span>
+          <img
+            src="/admin-logo.png"
+            alt="Game Platform"
+            style={{ height: "32px", width: "auto", maxWidth: "150px", objectFit: "contain", display: "block" }}
+            onError={(e) => {
+              e.currentTarget.style.display = "none";
+              (e.currentTarget.nextElementSibling as HTMLElement | null)?.style.setProperty("display", "inline");
+            }}
+          />
+          <span style={{ display: "none", fontWeight: 700, fontSize: "1rem", color: "#0f172a" }}>Game Platform</span>
           <div style={{ width: "40px" }} />
         </header>
 
