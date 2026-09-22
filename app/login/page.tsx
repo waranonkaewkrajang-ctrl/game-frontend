@@ -169,9 +169,18 @@ export default function LoginPage() {
           background-image: linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px);
           background-size: 44px 44px; mask-image: radial-gradient(circle at 50% 45%, black 20%, transparent 70%); -webkit-mask-image: radial-gradient(circle at 50% 45%, black 20%, transparent 70%); }
         .lg-wrap { position:relative; z-index:1; width:100%; max-width:420px; animation:lgIn .45s ease-out; }
-        .lg-card { background:rgba(255,255,255,.97); border-radius:20px; padding:2.25rem 2rem 2rem;
-          box-shadow: 0 30px 60px -20px rgba(2,6,23,.6), 0 0 0 1px rgba(255,255,255,.08), inset 0 1px 0 rgba(255,255,255,.9);
-          border-top:3px solid #f5b301; }
+        .lg-card { position:relative; border-radius:22px; padding:2.25rem 2rem 2rem;
+          background:linear-gradient(180deg, #ffffff 0%, #f4f6ff 60%, #e9edff 100%);
+          border:1px solid rgba(255,255,255,.95); border-top:3px solid #f5b301;
+          transform:perspective(1200px) rotateX(2deg);
+          box-shadow:
+            inset 0 2px 0 rgba(255,255,255,1),
+            inset 0 -8px 16px rgba(17,32,190,.07),
+            0 8px 0 -1px #c7d2fe,
+            0 14px 0 -3px #8ea2ff,
+            0 20px 0 -6px #4f63e6,
+            0 45px 70px -18px rgba(2,6,23,.85),
+            0 0 70px rgba(37,99,235,.35); }
         .lg-head { text-align:center; margin-bottom:1.6rem; }
         .lg-logo { width:250px; max-width:80%; height:auto; display:block; margin:0 auto; filter:drop-shadow(0 6px 12px rgba(17,32,190,.18)); }
         .lg-divider { display:flex; justify-content:center; margin:1.1rem 0 .9rem; }
@@ -195,9 +204,9 @@ export default function LoginPage() {
         .lg-btn { height:50px; margin-top:.35rem; border:none; border-radius:12px; cursor:pointer; color:white; font-size:.98rem; font-weight:700;
           display:flex; align-items:center; justify-content:center; gap:.5rem; font-family:inherit;
           background:linear-gradient(135deg,#1d3fd6 0%,#1120be 55%,#0b1680 100%);
-          box-shadow:0 10px 20px -8px rgba(17,32,190,.6), inset 0 1px 0 rgba(255,255,255,.25); transition:transform .12s, box-shadow .15s, filter .15s; }
+          box-shadow:0 5px 0 #0a1270, 0 12px 22px -8px rgba(17,32,190,.7), inset 0 1px 0 rgba(255,255,255,.3); transition:transform .12s, box-shadow .15s, filter .15s; }
         .lg-btn:hover:not(:disabled) { filter:brightness(1.08); box-shadow:0 14px 26px -8px rgba(17,32,190,.7), inset 0 -2px 0 #f5b301; }
-        .lg-btn:active:not(:disabled) { transform:translateY(1px); }
+                .lg-btn:active:not(:disabled) { transform:translateY(4px); box-shadow:0 1px 0 #0a1270, inset 0 1px 0 rgba(255,255,255,.3); }
         .lg-btn:disabled { opacity:.75; cursor:not-allowed; }
         .lg-spin { animation:lgSpin .8s linear infinite; }
         .lg-qr { display:flex; justify-content:center; }
