@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import Sidebar from "@/components/Sidebar";
+import TopBar from "@/components/TopBar";
 import { Menu } from "lucide-react";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -43,6 +44,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <span style={{ display: "none", fontWeight: 700, fontSize: "1rem", color: "#0f172a" }}>Game Platform</span>
           <div style={{ width: "40px" }} />
         </header>
+
+        <TopBar />
 
         <main style={{ flex: 1, padding: "1rem", overflow: "auto" }}>
           {children}
