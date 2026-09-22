@@ -226,7 +226,7 @@ useEffect(() => {
             <img
               src="/admin-logo.png"
               alt="Game Platform"
-              style={{ height: "40px", width: "auto", maxWidth: "180px", objectFit: "contain", display: "block" }}
+              style={{ height: "50px", width: "auto", maxWidth: "185px", objectFit: "contain", display: "block", marginBottom: "0.25rem" }}
               onError={(e) => {
                 e.currentTarget.style.display = "none";
                 (e.currentTarget.nextElementSibling as HTMLElement | null)?.style.setProperty("display", "block");

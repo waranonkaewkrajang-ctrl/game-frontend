@@ -34,7 +34,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <img
             src="/admin-logo.png"
             alt="Game Platform"
-            style={{ height: "32px", width: "auto", maxWidth: "150px", objectFit: "contain", display: "block" }}
+            style={{ height: "36px", width: "auto", maxWidth: "160px", objectFit: "contain", display: "block" }}
             onError={(e) => {
               e.currentTarget.style.display = "none";
               (e.currentTarget.nextElementSibling as HTMLElement | null)?.style.setProperty("display", "inline");
