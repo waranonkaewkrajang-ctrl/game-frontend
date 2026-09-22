@@ -68,6 +68,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         .sidebar-wrapper {
           display: flex;
           flex-shrink: 0;
+          position: sticky;
+          top: 0;
+          height: 100vh;
+          align-self: flex-start;
         }
 
         .sidebar-overlay {
