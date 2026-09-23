@@ -97,4 +97,8 @@ export const toLocalInput = (iso: string | null) => {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 };
 
-export const fromLocalInput = (v: string) => (v ? v.replace("T", " ") + ":00" : null);
+export const fromLocalInput = (v: string | null | undefined) => {
+  const s = (v || "").trim();
+  if (!s || !s.includes("T")) return null;
+  return s.replace("T", " ") + ":00";
+};
