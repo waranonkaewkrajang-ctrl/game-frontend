@@ -34,13 +34,14 @@ export default function BankStatementsPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [methodFilter, setMethodFilter] = useState<"all" | "auto" | "manual">("all");
+  const [perPage, setPerPage] = useState("50");
 
   const fetchStatements = async () => {
     try {
       const params = new URLSearchParams();
       if (search) params.set("search", search);
       if (methodFilter !== "all") params.set("method", methodFilter);
-      params.set("per_page", "50");
+            params.set("per_page", perPage);
 
       const [listRes, sumRes] = await Promise.all([
         api.get(`/admin/bank-statements?${params.toString()}`),
@@ -57,7 +58,7 @@ export default function BankStatementsPage() {
 
   useEffect(() => {
     fetchStatements();
-  }, [search, methodFilter]);
+    }, [search, methodFilter, perPage]);
 
   const formatDateTime = (dt: string | null) => {
     if (!dt) return "-";
@@ -101,6 +102,18 @@ export default function BankStatementsPage() {
           <option value="all">ทั้งหมด</option>
           <option value="auto">Auto เท่านั้น</option>
           <option value="manual">Manual เท่านั้น</option>
+        </select>
+        
+        <select
+          value={perPage}
+          onChange={(e) => setPerPage(e.target.value)}
+          style={{ padding: "0.5rem 0.75rem", border: "1px solid #cbd5e1", borderRadius: "0.5rem", fontSize: "0.85rem", fontFamily: "inherit", background: "white", color: "#334155", cursor: "pointer" }}
+        >
+          <option value="10">แสดง 10 รายการ</option>
+          <option value="50">แสดง 50 รายการ</option>
+          <option value="100">แสดง 100 รายการ</option>
+          <option value="500">แสดง 500 รายการ</option>
+          <option value="2000">ทั้งหมด (สูงสุด 2,000)</option>
         </select>
         <button
           onClick={fetchStatements}
