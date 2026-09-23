@@ -130,7 +130,7 @@ export default function ApiTokensPage() {
   };
 
   const card: React.CSSProperties = { background: "white", border: "1px solid #e2e8f0", borderRadius: "0.75rem", padding: "1.25rem" };
-  const th: React.CSSProperties = { padding: "0.7rem 0.9rem", textAlign: "left", color: "#475569", fontWeight: 600, fontSize: "0.8rem", whiteSpace: "nowrap" };
+    const th: React.CSSProperties = { padding: "0.75rem 0.9rem", textAlign: "left", color: "#ffffff", fontWeight: 700, fontSize: "0.8rem", whiteSpace: "nowrap", letterSpacing: "0.01em" }; = { padding: "0.75rem 0.9rem", textAlign: "left", color: "#ffffff", fontWeight: 700, fontSize: "0.8rem", whiteSpace: "nowrap", letterSpacing: "0.01em" };
   const td: React.CSSProperties = { padding: "0.7rem 0.9rem", fontSize: "0.83rem", color: "#334155", whiteSpace: "nowrap" };
   const statusColor = (c: number) => (c === 200 ? "#16a34a" : c === 404 ? "#d97706" : "#dc2626");
 
@@ -177,7 +177,7 @@ export default function ApiTokensPage() {
           <div style={{ overflowX: "auto" }}>
             <table style={{ width: "100%", borderCollapse: "collapse" }}>
               <thead>
-                <tr style={{ background: "#f8fafc", borderBottom: "1px solid #e2e8f0" }}>
+                <tr style={{ background: "linear-gradient(180deg, #2563eb, #1d4ed8)", borderBottom: "2px solid #1e40af" }}>
                   {["ชื่อ", "Token", "IP ที่อนุญาต", "เรียกแล้ว", "ใช้ล่าสุด", "สถานะ", "จัดการ"].map((h) => <th key={h} style={th}>{h}</th>)}
                 </tr>
               </thead>
@@ -226,7 +226,7 @@ export default function ApiTokensPage() {
           <div style={{ maxHeight: "420px", overflow: "auto", borderTop: "1px solid #f1f5f9" }}>
             <table style={{ width: "100%", borderCollapse: "collapse" }}>
               <thead>
-                <tr style={{ background: "#f8fafc", borderBottom: "1px solid #e2e8f0", position: "sticky", top: 0 }}>
+                <tr style={{ background: "linear-gradient(180deg, #2563eb, #1d4ed8)", borderBottom: "2px solid #1e40af", position: "sticky", top: 0 }}>
                   {["เวลา", "Token", "ค้นหา", "IP", "ผล", "หมายเหตุ"].map((h) => <th key={h} style={th}>{h}</th>)}
                 </tr>
               </thead>
