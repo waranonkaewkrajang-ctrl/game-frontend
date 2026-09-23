@@ -26,6 +26,21 @@ export default function ActivitiesPage() {
 
   const set = (k: keyof Activity, v: any) => setForm((f) => ({ ...(f || {}), [k]: v }));
 
+    const cfg = (form?.config || {}) as any;
+  const setCfg = (k: string, v: any) => set("config", { ...cfg, [k]: v });
+
+  const opts: { key: string; label: string }[] = Array.isArray(cfg.options) ? cfg.options : [];
+  const setOpts = (list: any[]) => setCfg("options", list);
+  const addOpt = () => setOpts([...opts, { key: `opt${opts.length + 1}`, label: "" }]);
+  const editOpt = (i: number, field: "key" | "label", v: string) => {
+    const list = opts.slice();
+    list[i] = { ...list[i], [field]: v };
+    setOpts(list);
+  };
+  const delOpt = (i: number) => setOpts(opts.filter((_, x) => x !== i));
+
+  const isPlay = form?.type === "football" || form?.type === "lotto2";
+
   const toggleIn = (k: "slots" | "pages", value: string) => {
     const cur: string[] = ((form?.[k] as string[]) || []).slice();
     const i = cur.indexOf(value);
@@ -237,6 +252,135 @@ export default function ActivitiesPage() {
                   <input type="checkbox" checked={!!form.show_once} onChange={(e) => set("show_once", e.target.checked)} /> แสดงครั้งเดียว
                 </label>
               </div>
+            </div>
+          </div>
+
+                    {/* ── ตั้งค่ากิจกรรม (Pop-up) ── */}
+          <div style={{ marginTop: "1.1rem", paddingTop: "1rem", borderTop: "1px dashed #e2e8f0" }}>
+            <div style={{ fontSize: "0.9rem", fontWeight: 700, color: "#0f172a", marginBottom: "0.8rem" }}>
+              รายละเอียดใน Pop-up {isPlay && <span style={{ fontWeight: 400, color: "#64748b", fontSize: "0.8rem" }}>· กดกล่องแล้วเด้งขึ้นมา</span>}
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: "1rem" }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.8rem" }}>
+                <div>
+                  <span style={label}>กติกา <span style={{ fontWeight: 400, color: "#94a3b8" }}>(ขึ้นบรรทัดใหม่ = 1 ข้อ)</span></span>
+                  <textarea style={{ ...input, minHeight: 92, resize: "vertical" }} value={cfg.rules || ""} onChange={(e) => setCfg("rules", e.target.value)}
+                    placeholder={"ทายผลถูกรับ 100 เครดิต\nทายได้ 1 ครั้งต่อรอบ\nประกาศผลหลังจบเกม"} />
+                </div>
+
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.6rem" }}>
+                  <div>
+                    <span style={label}>ป้ายรางวัล</span>
+                    <input style={input} value={cfg.reward_text || ""} onChange={(e) => setCfg("reward_text", e.target.value)} placeholder="รับ 100 เครดิต" />
+                  </div>
+                  <div>
+                    <span style={label}>ป้ายค่าเข้าร่วม</span>
+                    <input style={input} value={cfg.cost_text || ""} onChange={(e) => setCfg("cost_text", e.target.value)} placeholder="เข้าร่วมฟรี" />
+                  </div>
+                </div>
+
+                {!isPlay && (
+                  <div>
+                    <span style={label}>ข้อความบนปุ่ม</span>
+                    <input style={input} value={cfg.button_text || ""} onChange={(e) => setCfg("button_text", e.target.value)} placeholder="เข้าร่วมกิจกรรม" />
+                  </div>
+                )}
+              </div>
+
+              {isPlay && (
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.8rem" }}>
+                  <div>
+                    <span style={label}>คำถาม / คู่แข่ง</span>
+                    <input style={input} value={cfg.question || ""} onChange={(e) => setCfg("question", e.target.value)} placeholder="ลิเวอร์พูล VS แมนยู" />
+                  </div>
+
+                  <div>
+                    <span style={label}>ตัวเลือกให้ทาย</span>
+                    <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem" }}>
+                      {opts.map((o, i) => (
+                        <div key={i} style={{ display: "grid", gridTemplateColumns: "90px 1fr 32px", gap: "0.4rem" }}>
+                          <input style={{ ...input, padding: "0.4rem 0.5rem", fontSize: "0.78rem" }} value={o.key} onChange={(e) => editOpt(i, "key", e.target.value)} placeholder="รหัส" />
+                          <input style={{ ...input, padding: "0.4rem 0.5rem", fontSize: "0.78rem" }} value={o.label} onChange={(e) => editOpt(i, "label", e.target.value)} placeholder="ข้อความที่ลูกค้าเห็น" />
+                          <button onClick={() => delOpt(i)} style={{ border: "1px solid #fecaca", background: "#fef2f2", color: "#dc2626", borderRadius: "0.4rem", cursor: "pointer" }}>×</button>
+                        </div>
+                      ))}
+                      <button onClick={addOpt} style={{ padding: "0.45rem", border: "1px dashed #cbd5e1", background: "#f8fafc", color: "#475569", borderRadius: "0.45rem", cursor: "pointer", fontSize: "0.8rem", fontFamily: "inherit" }}>
+                        + เพิ่มตัวเลือก
+                      </button>
+                    </div>
+                  </div>
+
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.6rem" }}>
+                    <div>
+                      <span style={label}>ค่าเข้าร่วม</span>
+                      <select style={input} value={cfg.cost_type || "free"} onChange={(e) => setCfg("cost_type", e.target.value)}>
+                        <option value="free">ฟรี</option>
+                        <option value="credit">เครดิต</option>
+                        <option value="ticket">ตั๋ววงล้อ</option>
+                        <option value="point">พอยท์</option>
+                      </select>
+                    </div>
+                    <div>
+                      <span style={label}>จำนวนที่หัก</span>
+                      <input type="number" min={0} style={input} value={cfg.cost_amount ?? 0} onChange={(e) => setCfg("cost_amount", Number(e.target.value))} disabled={(cfg.cost_type || "free") === "free"} />
+                    </div>
+                  </div>
+
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.6rem" }}>
+                    <div>
+                      <span style={label}>รางวัลเมื่อทายถูก</span>
+                      <select style={input} value={cfg.reward_type || "credit"} onChange={(e) => setCfg("reward_type", e.target.value)}>
+                        <option value="credit">เครดิต</option>
+                        <option value="ticket">ตั๋ววงล้อ</option>
+                        <option value="point">พอยท์</option>
+                      </select>
+                    </div>
+                    <div>
+                      <span style={label}>จำนวนรางวัล</span>
+                      <input type="number" min={0} style={input} value={cfg.reward_amount ?? 0} onChange={(e) => setCfg("reward_amount", Number(e.target.value))} />
+                    </div>
+                  </div>
+
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.6rem" }}>
+                    <div>
+                      <span style={label}>วิธีแบ่งรางวัล</span>
+                      <select style={input} value={cfg.reward_mode || "each"} onChange={(e) => setCfg("reward_mode", e.target.value)}>
+                        <option value="each">ได้คนละเท่ากัน</option>
+                        <option value="split">แบ่งกองรางวัล</option>
+                      </select>
+                    </div>
+                    <div>
+                      <span style={label}>ทายได้กี่ครั้ง/รอบ</span>
+                      <input type="number" min={1} max={99} style={input} value={cfg.max_entries ?? 1} onChange={(e) => setCfg("max_entries", Number(e.target.value))} />
+                    </div>
+                  </div>
+
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.6rem" }}>
+                    <div>
+                      <span style={label}>รอบเวลา</span>
+                      <select style={input} value={cfg.cycle || "once"} onChange={(e) => setCfg("cycle", e.target.value)}>
+                        <option value="once">ครั้งเดียว</option>
+                        <option value="daily">ทุกวัน</option>
+                        <option value="weekly">ทุกสัปดาห์</option>
+                        <option value="hours">ทุก X ชั่วโมง</option>
+                      </select>
+                    </div>
+                    <div>
+                      <span style={label}>รอบละกี่ชั่วโมง</span>
+                      <input type="number" min={1} max={720} style={input} value={cfg.cycle_hours ?? 24} onChange={(e) => setCfg("cycle_hours", Number(e.target.value))} disabled={cfg.cycle !== "hours"} />
+                    </div>
+                  </div>
+
+                  <div>
+                    <span style={label}>จ่ายรางวัล</span>
+                    <select style={input} value={cfg.payout_mode || "auto"} onChange={(e) => setCfg("payout_mode", e.target.value)}>
+                      <option value="auto">อัตโนมัติเมื่อกรอกผล</option>
+                      <option value="manual">แอดมินกดอนุมัติทีละคน</option>
+                    </select>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 

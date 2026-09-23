@@ -73,7 +73,7 @@ export const emptyActivity = (): Partial<Activity> => ({
   end_at: null,
   audience: "all",
   show_once: false,
-  config: {},
+    config: { cost_type: "free", cost_amount: 0, reward_type: "credit", reward_amount: 0, reward_mode: "each", max_entries: 1, cycle: "once", cycle_hours: 24, payout_mode: "auto", options: [] },
 });
 
 /** อัปโหลดภาพ → backend แปลงเป็น WebP ให้อัตโนมัติ */
