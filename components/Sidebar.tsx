@@ -117,6 +117,7 @@ const menuItems = [
   { title: "API Token", href: "/dashboard/settings/api-tokens", permissionKey: "settings" },
   { title: "แรงค์สมาชิก", href: "/dashboard/settings/ranks", permissionKey: "settings" },
   { title: "วงล้อนำโชค", href: "/dashboard/spin-wheel", permissionKey: "settings" },
+    { title: "กิจกรรมหน้าเว็บ", href: "/dashboard/activities", permissionKey: "settings" },
 ],
   },
 ];
