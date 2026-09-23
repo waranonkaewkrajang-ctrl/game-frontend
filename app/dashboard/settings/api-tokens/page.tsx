@@ -149,7 +149,7 @@ export default function ApiTokensPage() {
           <button onClick={load} style={{ display: "flex", alignItems: "center", gap: "0.4rem", background: "#f1f5f9", border: "1px solid #e2e8f0", padding: "0.55rem 1rem", borderRadius: "0.5rem", cursor: "pointer", fontSize: "0.85rem", fontWeight: 500, color: "#475569" }}>
             <RefreshCcw size={15} /> รีเฟรช
           </button>
-          <button onClick={createToken} style={{ display: "flex", alignItems: "center", gap: "0.4rem", background: "#0f172a", border: "none", color: "white", padding: "0.55rem 1.1rem", borderRadius: "0.5rem", cursor: "pointer", fontSize: "0.85rem", fontWeight: 600 }}>
+          <button onClick={createToken} style={{ display: "flex", alignItems: "center", gap: "0.4rem", background: "linear-gradient(180deg, #22c55e, #16a34a)", border: "none", color: "white", padding: "0.55rem 1.1rem", borderRadius: "0.5rem", cursor: "pointer", fontSize: "0.85rem", fontWeight: 600, boxShadow: "0 3px 0 #15803d, 0 6px 14px rgba(22,163,74,.35)" }}>
             <Plus size={16} /> สร้าง Token
           </button>
         </div>
