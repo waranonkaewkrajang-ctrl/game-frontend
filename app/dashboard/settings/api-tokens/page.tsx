@@ -163,7 +163,7 @@ export default function ApiTokensPage() {
           <button onClick={() => copy(ENDPOINT_URL, "URL")} style={{ display: "flex", alignItems: "center", gap: "0.3rem", background: "white", border: "1px solid #cbd5e1", padding: "0.4rem 0.7rem", borderRadius: "0.45rem", cursor: "pointer", fontSize: "0.78rem", color: "#334155" }}>
             <Copy size={13} /> คัดลอก URL
           </button>
-          <span style={{ fontSize: "0.75rem", color: "#94a3b8" }}>body: {`{"username":"เบอร์โทร","token":"TOKEN"}`}</span>
+          <code style={{ background: "#0f172a", color: "#fbbf24", padding: "0.5rem 0.8rem", borderRadius: "0.5rem", fontSize: "0.78rem" }}>body: {`{"username":"เบอร์โทร","token":"TOKEN"}`}</code>
         </div>
       </div>
 
