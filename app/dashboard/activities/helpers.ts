@@ -99,6 +99,14 @@ export const toLocalInput = (iso: string | null) => {
 
 export const fromLocalInput = (v: string | null | undefined) => {
   const s = (v || "").trim();
-  if (!s || !s.includes("T")) return null;
-  return s.replace("T", " ") + ":00";
+  if (!s) return null;
+
+  // รับได้ทั้ง "2026-09-24T18:54" และ "2026-09-24 18:54:00"
+  const m = s.match(/^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})/);
+  if (!m) return null;
+
+  const d = new Date(+m[1], +m[2] - 1, +m[3], +m[4], +m[5]);
+  if (isNaN(d.getTime())) return null;
+
+  return `${m[1]}-${m[2]}-${m[3]} ${m[4]}:${m[5]}:00`;
 };
