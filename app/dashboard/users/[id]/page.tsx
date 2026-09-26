@@ -13,6 +13,8 @@ export default function UserProfilePage() {
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<"deposits" | "withdrawals" | "transactions">("transactions");
   const [turnover, setTurnover] = useState<any>(null);
+  const [stuckChecking, setStuckChecking] = useState(false);
+  const [stuckFound, setStuckFound] = useState<{ count: number; amount: number } | null>(null);
   const [topGames, setTopGames] = useState<any>(null);
   const [gameSort, setGameSort] = useState<"rounds" | "bet">("rounds");
   const [turnoverOpen, setTurnoverOpen] = useState(false);
@@ -147,6 +149,55 @@ export default function UserProfilePage() {
     });
   }, [userId, gameSort]);
 
+    // เช็คเดิมพันค้าง — อ่านอย่างเดียว ไม่แตะเงิน
+  const checkStuckBets = async () => {
+    setStuckChecking(true);
+    try {
+      const res = await api.get(`/admin/users/${userId}/stuck-bets`);
+      const rows = res.data.data || [];
+      const sum = res.data.summary || { pending_count: 0, pending_amount: 0 };
+      setStuckFound({ count: sum.pending_count, amount: sum.pending_amount });
+
+      if (sum.pending_count === 0) {
+        Swal.fire({
+          icon: "success",
+          title: "No Stuck Bets",
+          text: "ลูกค้าคนนี้ไม่มีเดิมพันค้าง",
+          confirmButtonColor: "#16a34a",
+        });
+        return;
+      }
+
+      const list = rows
+        .filter((r: any) => r.status === "pending")
+        .map((r: any) => `
+          <div style="text-align:left;background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:10px 12px;margin-bottom:8px">
+            <div style="font-size:12px;color:#9a3412;font-weight:700">${r.bet_at} · ${r.provider}</div>
+            <div style="font-size:18px;font-weight:800;color:#dc2626;margin:2px 0">฿${Number(r.bet_amount).toLocaleString("th-TH", { minimumFractionDigits: 2 })}</div>
+            <div style="font-size:11px;color:#78716c;word-break:break-all">round: ${r.round_id}</div>
+            ${r.txn_id ? `<div style="font-size:11px;color:#78716c;word-break:break-all">txn: ${r.txn_id}</div>` : ""}
+            <div style="font-size:12px;color:#0f172a;margin-top:4px">ค่ายว่า: <b>${r.amb_status || "-"}</b>${r.amb_payout !== null ? ` · ควรคืน ฿${Number(r.amb_payout).toLocaleString("th-TH", { minimumFractionDigits: 2 })}` : ""}</div>
+          </div>`)
+        .join("");
+
+      Swal.fire({
+        title: `⚠️ เดิมพันค้าง — ${user?.username || ""}`,
+        html: `
+          <div style="max-height:380px;overflow-y:auto">${list}</div>
+          <div style="margin-top:10px;padding:10px;background:#fef2f2;border:1px solid #fecaca;border-radius:10px;font-weight:800;color:#b91c1c">
+            รวม ${sum.pending_count} รายการ · ฿${Number(sum.pending_amount).toLocaleString("th-TH", { minimumFractionDigits: 2 })}
+          </div>
+          <div style="margin-top:8px;font-size:11px;color:#94a3b8">ข้อมูลสำหรับตรวจสอบ — ยังไม่มีการคืนเงินอัตโนมัติ</div>`,
+        width: 520,
+        confirmButtonText: "ปิด",
+        confirmButtonColor: "#0f172a",
+      });
+    } catch (e: any) {
+      Swal.fire({ icon: "error", title: "เช็คไม่สำเร็จ", text: e.response?.data?.message || "" });
+    }
+    setStuckChecking(false);
+  };
+
   const fmt = (n: any) => parseFloat(n || "0").toLocaleString("th-TH", { minimumFractionDigits: 2 });
 
   const statusColor = (s: string) => s === "approved" || s === "active" || s === "completed"
@@ -233,6 +284,27 @@ export default function UserProfilePage() {
         {/* Card: การเงิน + ธนาคาร */}
         <div style={{ background: "white", border: "1px solid #e2e8f0", borderRadius: "0.5rem", padding: "1.25rem" }}>
           <h3 style={{ fontSize: "0.95rem", fontWeight: 700, color: "#0f172a", margin: "0 0 1rem", borderBottom: "1px solid #f1f5f9", paddingBottom: "0.5rem" }}>การเงิน & ธนาคาร</h3>
+
+                    <button
+            onClick={checkStuckBets}
+            disabled={stuckChecking}
+            style={{
+              width: "100%", marginBottom: "0.9rem", padding: "0.6rem 1rem", borderRadius: "0.6rem",
+              cursor: stuckChecking ? "wait" : "pointer", fontFamily: "inherit", fontSize: "0.85rem", fontWeight: 700,
+              display: "flex", alignItems: "center", justifyContent: "center", gap: "0.45rem",
+              border: stuckFound && stuckFound.count > 0 ? "1.5px solid #dc2626" : "1.5px solid #fb923c",
+              background: stuckFound && stuckFound.count > 0 ? "#fef2f2" : "white",
+              color: stuckFound && stuckFound.count > 0 ? "#b91c1c" : "#ea580c",
+              transition: "all .15s",
+            }}
+          >
+            {stuckChecking
+              ? "⟳ Checking..."
+              : stuckFound && stuckFound.count > 0
+                ? `⚠️ Stuck Bets (${stuckFound.count}) · ฿${stuckFound.amount.toLocaleString("th-TH", { minimumFractionDigits: 2 })}`
+                : "🔍 Check Stuck Bets"}
+          </button>
+          
           {[
             { label: "ยอดเงินคงเหลือ", value: `฿${fmt(user.wallet?.balance)}`, field: "" },
             { label: "ฝากรวม", value: `฿${fmt(user.wallet?.total_deposit)}`, field: "" },
