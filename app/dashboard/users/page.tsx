@@ -25,6 +25,7 @@ export default function UsersPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [searchBy, setSearchBy] = useState("all");
   const [selected, setSelected] = useState<User | null>(null);
   const [adjustAmount, setAdjustAmount] = useState("");
   const [adjustDesc, setAdjustDesc] = useState("");
@@ -50,7 +51,7 @@ const [bonusSaving, setBonusSaving] = useState(false);
   const fetchUsers = (s?: string, page: number = 1, pp: number = perPage) => {
     setLoading(true);
     api.get("/admin/users", { 
-      params: { search: s, per_page: pp, page } 
+            params: { search: s, search_by: searchBy, per_page: pp, page } 
     }).then((res) => {
       const data = res.data.data;
       setUsers(data.data || data);
@@ -190,9 +191,53 @@ const [bonusSaving, setBonusSaving] = useState(false);
           <h1 style={{ fontSize: "1.5rem", fontWeight: 700, color: "#0f172a", margin: 0 }}>จัดการสมาชิก</h1>
           <p style={{ color: "#64748b", fontSize: "0.875rem", marginTop: "0.25rem" }}>ดูข้อมูล แก้ไข เปิด/ปิดบัญชี และปรับยอดสมาชิก</p>
         </div>
-        <form onSubmit={(e) => { e.preventDefault(); fetchUsers(search); }} style={{ display: "flex", gap: "0.5rem" }}>
-          <input style={{ ...inputStyle, width: "260px" }} placeholder="ค้นหา Username / เบอร์โทร..." value={search} onChange={(e) => setSearch(e.target.value)} />
-          <button type="submit" style={{ background: "#0f172a", color: "white", border: "none", borderRadius: "0.375rem", padding: "0 1.25rem", fontSize: "0.875rem", fontWeight: 500, cursor: "pointer" }}>ค้นหา</button>
+                <form onSubmit={(e) => { e.preventDefault(); fetchUsers(search); }} style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+          <select
+            value={searchBy}
+            onChange={(e) => setSearchBy(e.target.value)}
+            style={{
+              padding: "0.55rem 0.9rem", border: "1px solid #cbd5e1", borderRadius: "999px",
+              fontSize: "0.85rem", color: "#334155", outline: "none", background: "white",
+              cursor: "pointer", fontFamily: "inherit",
+            }}
+          >
+            <option value="all">ทั้งหมด</option>
+            <option value="username">Username</option>
+            <option value="phone">เบอร์โทร</option>
+            <option value="full_name">ชื่อ-นามสกุล</option>
+            <option value="bank_account">เลขบัญชี</option>
+          </select>
+
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder={
+              searchBy === "username" ? "ค้นหา Username..."
+              : searchBy === "phone" ? "ค้นหาเบอร์โทร..."
+              : searchBy === "full_name" ? "ค้นหาชื่อ-นามสกุล..."
+              : searchBy === "bank_account" ? "ค้นหาเลขบัญชี..."
+              : "ค้นหา Username / เบอร์โทร / ชื่อ / เลขบัญชี..."
+            }
+            style={{
+              padding: "0.55rem 1.1rem", border: "1px solid #cbd5e1", borderRadius: "999px",
+              fontSize: "0.85rem", color: "#334155", outline: "none", width: "300px",
+              fontFamily: "inherit", transition: "border-color .15s, box-shadow .15s",
+            }}
+            onFocus={(e) => { e.target.style.borderColor = "#22c55e"; e.target.style.boxShadow = "0 0 0 3px rgba(34,197,94,.12)"; }}
+            onBlur={(e) => { e.target.style.borderColor = "#cbd5e1"; e.target.style.boxShadow = "none"; }}
+          />
+
+          <button
+            type="submit"
+            style={{
+              background: "linear-gradient(180deg, #4ade80, #22c55e)", color: "white", border: "none",
+              borderRadius: "999px", padding: "0.55rem 1.6rem", fontSize: "0.85rem", fontWeight: 600,
+              cursor: "pointer", fontFamily: "inherit",
+              boxShadow: "0 2px 0 #16a34a, 0 4px 10px rgba(34,197,94,.3)",
+            }}
+          >
+            ค้นหา
+          </button>
         </form>
       </div>
 
