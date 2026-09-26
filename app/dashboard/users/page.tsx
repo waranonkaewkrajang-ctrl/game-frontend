@@ -167,6 +167,16 @@ const [bonusSaving, setBonusSaving] = useState(false);
     setBonusSaving(false);
   };
 
+
+  const BANK_NAMES: Record<string, string> = {
+  KBANK: "กสิกรไทย", KTB: "กรุงไทย", SCB: "ไทยพาณิชย์", TRUEWALLET: "ทรูวอลเล็ท",
+  GSB: "ออมสิน", BBL: "กรุงเทพ", TTB: "ทีทีบี", BAY: "กรุงศรี", KKP: "เกียรตินาคิน",
+  KK: "เกียรตินาคิน", BAAC: "ธ.ก.ส.", CIMBT: "ซีไอเอ็มบี", UOBT: "ยูโอบี",
+  TISCO: "ทิสโก้", LHFG: "แลนด์แอนด์เฮ้าส์", GHB: "อาคารสงเคราะห์", EXIM: "เอ็กซิม",
+};
+// KK เป็นรหัสเก่าของเกียรตินาคิน — โลโก้ใช้ไฟล์เดียวกับ KKP
+const bankLogo = (code: string) => `/logos/${code === "KK" ? "KKP" : code}.webp`;
+
   const fmt = (n: string) => parseFloat(n).toLocaleString("th-TH", { minimumFractionDigits: 2 });
 
   const inputStyle = {
@@ -279,7 +289,7 @@ const [bonusSaving, setBonusSaving] = useState(false);
             <table style={{ width: "100%", fontSize: "0.85rem", borderCollapse: "collapse", textAlign: "left" }}>
               <thead>
                 <tr style={{ background: "#f8fafc", borderBottom: "1px solid #e2e8f0" }}>
-                  {["ID", "Username", "ชื่อ", "เบอร์โทร", "ยอดเงิน", "สถานะ", "สมัครเมื่อ", "การจัดการ"].map((h) => (
+                  {["ID", "ธนาคาร", "Username", "ชื่อ", "เบอร์โทร", "ยอดเงิน", "สถานะ", "สมัครเมื่อ", "การจัดการ"].map((h) => (
                     <th key={h} style={{ padding: "0.75rem 1rem", color: "#475569", fontWeight: 600, whiteSpace: "nowrap" }}>{h}</th>
                   ))}
                 </tr>
@@ -290,6 +300,30 @@ const [bonusSaving, setBonusSaving] = useState(false);
                     onMouseEnter={(e) => e.currentTarget.style.background = "#f8fafc"}
                     onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}>
                     <td style={{ padding: "0.75rem 1rem", color: "#64748b" }}>{u.id}</td>
+
+                                        <td style={{ padding: "0.75rem 1rem", whiteSpace: "nowrap" }}>
+                      {u.bank_code ? (
+                        <span style={{ display: "flex", alignItems: "center", gap: "0.45rem" }}>
+                          <img
+                            src={bankLogo(u.bank_code)}
+                            alt={u.bank_code}
+                            style={{ width: 26, height: 26, borderRadius: 6, objectFit: "contain", background: "#f1f5f9", flexShrink: 0 }}
+                            onError={(e) => { e.currentTarget.style.display = "none"; }}
+                          />
+                          <span>
+                            <span style={{ display: "block", fontSize: "0.8rem", color: "#334155", fontWeight: 500 }}>
+                              {BANK_NAMES[u.bank_code] || u.bank_code}
+                            </span>
+                            {u.bank_account && (
+                              <span style={{ display: "block", fontSize: "0.72rem", color: "#94a3b8" }}>{u.bank_account}</span>
+                            )}
+                          </span>
+                        </span>
+                      ) : (
+                        <span style={{ color: "#cbd5e1" }}>-</span>
+                      )}
+                    </td>
+
                     <td style={{ padding: "0.75rem 1rem" }}>
                       <div style={{ fontWeight: 700, color: "#0f172a" }}>{u.username}</div>
                       {u.amb_username && (
@@ -324,7 +358,7 @@ const [bonusSaving, setBonusSaving] = useState(false);
                     </td>
                   </tr>
                 )) : (
-                  <tr><td colSpan={8} style={{ textAlign: "center", padding: "3rem", color: "#64748b" }}>ไม่พบข้อมูลสมาชิก</td></tr>
+                    <tr><td colSpan={9} style={{ textAlign: "center", padding: "3rem", color: "#64748b" }}>ไม่พบข้อมูลสมาชิก</td></tr>
                 )}
               </tbody>
             </table>
