@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import api from "@/lib/api";
 import Swal from "sweetalert2";
-import { Gift, Plus, Edit, Trash2, X, Image, Calendar, Users, Eye } from "lucide-react";
+import { Gift, Plus, Edit, Trash2, X, Image, Calendar, Users, Eye, Gamepad2 } from "lucide-react";
+import GamePicker from "./gamePicker";
 
 interface Promotion {
   id: number;
@@ -21,6 +22,9 @@ interface Promotion {
   claims_per_user: number | null;
   start_at: string | null;
   end_at: string | null;
+  allowed_categories: string[] | null;
+  allowed_providers: string[] | null;
+  allowed_games: string[] | null;
 }
 
 const typeLabels: Record<string, string> = {
@@ -36,6 +40,7 @@ const defaultForm = {
   bonus_percent: "", turnover_multiplier: "", min_deposit: "", max_bonus: "",
   max_withdraw: "", is_active: true, max_claims: "", claims_per_user: "1",
   start_at: "", end_at: "",
+  allowed_categories: [] as string[], allowed_providers: [] as string[], allowed_games: [] as string[],
 };
 
 export default function PromotionsPage() {
@@ -83,6 +88,9 @@ export default function PromotionsPage() {
         claims_per_user: promo.claims_per_user?.toString() || "1",
         start_at: toLocalDatetime(promo.start_at),
         end_at: toLocalDatetime(promo.end_at),
+        allowed_categories: promo.allowed_categories || [],
+        allowed_providers: promo.allowed_providers || [],
+        allowed_games: promo.allowed_games || [],
       });
     } else {
       setFormData({ ...defaultForm });
@@ -109,6 +117,9 @@ export default function PromotionsPage() {
       claims_per_user: Number(formData.claims_per_user) || 1,
       start_at: formData.start_at || null,
       end_at: formData.end_at || null,
+      allowed_categories: formData.allowed_categories,
+      allowed_providers: formData.allowed_providers,
+      allowed_games: formData.allowed_games,
     };
 
     try {
@@ -249,7 +260,7 @@ export default function PromotionsPage() {
       {/* Modal */}
       {isModalOpen && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(15, 23, 42, 0.6)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 50, padding: "1rem" }}>
-          <div style={{ background: "white", borderRadius: "0.75rem", width: "100%", maxWidth: "680px", maxHeight: "90vh", display: "flex", flexDirection: "column", boxShadow: "0 20px 25px -5px rgba(0,0,0,0.1)" }}>
+          <div style={{ background: "white", borderRadius: "0.75rem", width: "100%", maxWidth: "780px", maxHeight: "90vh", display: "flex", flexDirection: "column", boxShadow: "0 20px 25px -5px rgba(0,0,0,0.1)" }}>
 
             {/* Header */}
             <div style={{ padding: "1rem 1.5rem", borderBottom: "1px solid #e2e8f0", display: "flex", justifyContent: "space-between", alignItems: "center", background: "#f8fafc", borderTopLeftRadius: "0.75rem", borderTopRightRadius: "0.75rem" }}>
@@ -349,6 +360,18 @@ export default function PromotionsPage() {
                 <div style={{ gridColumn: "span 2" }}>
                   <label style={labelStyle}>ถอนได้สูงสุด (บาท, 0 = ไม่อั้น)</label>
                   <input type="number" min="0" style={inputStyle} value={formData.max_withdraw} onChange={(e) => setFormData({ ...formData, max_withdraw: e.target.value })} />
+                </div>
+
+                {/* === เข้าเล่นได้ === */}
+                {sectionTitle(<Gamepad2 size={14} color="#dc2626" />, "เข้าเล่นได้ระหว่างติดโปร")}
+
+                <div style={{ gridColumn: "span 2" }}>
+                  <GamePicker
+                    categories={formData.allowed_categories}
+                    providers={formData.allowed_providers}
+                    games={formData.allowed_games}
+                    onChange={(v) => setFormData({ ...formData, allowed_categories: v.categories, allowed_providers: v.providers, allowed_games: v.games })}
+                  />
                 </div>
 
                 {/* === จำกัดสิทธิ์ === */}

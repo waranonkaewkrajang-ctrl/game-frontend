@@ -44,7 +44,7 @@ export default function GamePicker({ categories, providers, games, onChange }: P
 
   // โหลดรายละเอียดเกมที่เลือกไว้ (ตอนเปิดฟอร์มแก้ไข)
   useEffect(() => {
-    if (games.length === 0) { setPickedGames([]); return; }
+    if (!games || games.length === 0) { setPickedGames([]); return; }
     api.post("/admin/game-catalog/games-by-keys", { keys: games })
       .then((r) => setPickedGames(r.data.data || []))
       .catch(() => {});
@@ -92,16 +92,16 @@ export default function GamePicker({ categories, providers, games, onChange }: P
   });
 
   return (
-    <div style={{ border: "1px solid #e2e8f0", borderRadius: "10px", padding: "0.9rem", background: "#f8fafc" }}>
+    <div style={{ border: "1px solid #e2e8f0", borderRadius: "10px", padding: "0.9rem", background: "#f8fafc", marginTop: "0.3rem" }}>
       <div style={{ display: "flex", gap: "0.45rem", marginBottom: "0.8rem", flexWrap: "wrap" }}>
         <button type="button" onClick={() => setTab("cat")} style={tabBtn(tab === "cat")}>
-          ประเภท{categories.length > 0 && ` (${categories.length})`}
+          ประเภท{categories.length > 0 ? ` (${categories.length})` : ""}
         </button>
         <button type="button" onClick={() => setTab("prov")} style={tabBtn(tab === "prov")}>
-          ค่ายเกม{providers.length > 0 && ` (${providers.length})`}
+          ค่ายเกม{providers.length > 0 ? ` (${providers.length})` : ""}
         </button>
         <button type="button" onClick={() => setTab("game")} style={tabBtn(tab === "game")}>
-          เกมเฉพาะ{games.length > 0 && ` (${games.length})`}
+          เกมเฉพาะ{games.length > 0 ? ` (${games.length})` : ""}
         </button>
         <div style={{ flex: 1 }} />
         {total > 0 && (
@@ -144,6 +144,9 @@ export default function GamePicker({ categories, providers, games, onChange }: P
               </div>
             </div>
           ))}
+          {allProviders.length === 0 && (
+            <div style={{ textAlign: "center", padding: "1.5rem", color: "#94a3b8", fontSize: "0.82rem" }}>กำลังโหลดรายชื่อค่าย...</div>
+          )}
         </div>
       )}
 
