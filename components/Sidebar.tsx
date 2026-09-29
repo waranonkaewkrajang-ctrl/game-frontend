@@ -19,17 +19,17 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
 } from "lucide-react";
-
+import { Icon } from "@iconify/react";
 const menuItems = [
   {
     title: "Dashboard",
-    icon: <LayoutDashboard size={20} />,
+    icon: <Icon icon="solar:widget-5-bold-duotone" width={21} />,
     href: "/dashboard",
     permissionKey: "dashboard" 
   },
   {
     title: "จัดการสมาชิก",
-    icon: <Users size={20} />,
+    icon: <Icon icon="solar:users-group-rounded-bold-duotone" width={21} />,
     id: "users",
     subItems: [
       { title: "ข้อมูลสมาชิกทั้งหมด", href: "/dashboard/users", permissionKey: "users" },
@@ -40,7 +40,7 @@ const menuItems = [
   },
   {
     title: "ระบบการเงิน",
-    icon: <WalletCards size={20} />,
+    icon: <Icon icon="solar:wallet-money-bold-duotone" width={21} />,
     id: "finance",
     subItems: [
       { title: "ยอดค้าง", href: "/dashboard/unmatched-deposits", permissionKey: "deposits", badgeKey: "unmatched" },
@@ -52,7 +52,7 @@ const menuItems = [
   },
   {
     title: "โปรโมชัน & การตลาด",
-    icon: <Gift size={20} />,
+    icon: <Icon icon="solar:gift-bold-duotone" width={21} />,
     id: "marketing",
     subItems: [
       { title: "จัดการโปรโมชัน", href: "/dashboard/promotions", permissionKey: "promotions" },
@@ -64,7 +64,7 @@ const menuItems = [
   },
   {
     title: "รายงาน (Reports)",
-    icon: <FileText size={20} />,
+    icon: <Icon icon="solar:chart-square-bold-duotone" width={21} />,
     id: "reports",
     subItems: [
       { title: "สรุปผลประกอบการ", href: "/dashboard/reports", permissionKey: "reports" },
@@ -72,40 +72,40 @@ const menuItems = [
   },
   {
     title: "แจ้งเปลี่ยนบัญชี",
-    icon: <WalletCards size={20} />,
+    icon: <Icon icon="solar:wallet-money-bold-duotone" width={21} />,
     href: "/dashboard/bank-changes",
     permissionKey: "users",
     showBadge: true
   },
   {
     title: "จัดการเกม",
-    icon: <LayoutDashboard size={20} />,
+    icon: <Icon icon="solar:widget-5-bold-duotone" width={21} />,
     href: "/dashboard/games",
     permissionKey: "games"
   },
   {
     title: "จัดการแบนเนอร์",
-    icon: <ImageIcon size={20} />,
+    icon: <Icon icon="solar:gallery-wide-bold-duotone" width={21} />,
     href: "/dashboard/banners",
     permissionKey: "settings" // ให้ใช้สิทธิ์ระดับตั้งค่า หรือจะเปลี่ยนเป็น "promotions" ก็ได้ครับ
   },
   {
     title: "จัดการ Popup",
-    icon: <ImageIcon size={20} />,
+    icon: <Icon icon="solar:chat-square-like-bold-duotone" width={21} />,
     href: "/dashboard/popups",
     permissionKey: "settings"
   },
   // --- เพิ่มเมนูจัดการสิทธิ์ตรงนี้ ---
   {
     title: "จัดการพนักงาน",
-    icon: <Shield size={20} />,
+    icon: <Icon icon="solar:shield-user-bold-duotone" width={21} />,
     href: "/dashboard/admins",
     permissionKey: "settings"
   },
   // ------------------------------
   {
     title: "ตั้งค่าระบบ",
-    icon: <Settings size={20} />,
+    icon: <Icon icon="solar:settings-bold-duotone" width={21} />,
     id: "settings",
     subItems: [
   { title: "ตั้งค่าทั่วไป", href: "/dashboard/settings", permissionKey: "settings" },
