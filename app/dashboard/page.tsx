@@ -1,20 +1,15 @@
 "use client";
 import { useEffect, useState } from "react";
 import api from "@/lib/api";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip as RechartsTooltip,
-  Legend,
-  ResponsiveContainer,
-  ComposedChart,
-  Area,
-  Line,
-  Cell,
-} from "recharts";
+import dynamic from "next/dynamic";
+
+const chartLoading = () => (
+  <div style={{ width: "100%", height: 300, display: "flex", alignItems: "center", justifyContent: "center", color: "#94a3b8", fontSize: "0.85rem" }}>
+    กำลังโหลดกราฟ...
+  </div>
+);
+const DepositChart = dynamic(() => import("./DashboardCharts").then((m) => m.DepositChart), { ssr: false, loading: chartLoading });
+const BetWinChart = dynamic(() => import("./DashboardCharts").then((m) => m.BetWinChart), { ssr: false, loading: chartLoading });
 import { 
   Users, 
   UserPlus,
@@ -323,29 +318,7 @@ export default function DashboardPage() {
             { label: "ยอดถอนรวม", value: (data.chart_data || []).reduce((s: number, d: any) => s + (d.withdraw || 0), 0), color: "#f59e0b" },
           ]} />
 
-          <div style={{ width: "100%", height: 300 }}>
-            <ResponsiveContainer>
-              <BarChart data={data.chart_data} margin={{ top: 10, right: 8, left: 8, bottom: 0 }} barGap={6}>
-                <defs>
-                  <linearGradient id="gDeposit" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#34d399" />
-                    <stop offset="100%" stopColor="#059669" />
-                  </linearGradient>
-                  <linearGradient id="gWithdraw" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#fbbf24" />
-                    <stop offset="100%" stopColor="#d97706" />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="4 4" vertical={false} stroke="#eef2f7" />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: "#94a3b8", fontSize: 11.5, fontWeight: 500 }} dy={10} />
-                <YAxis axisLine={false} tickLine={false} width={58} tick={{ fill: "#94a3b8", fontSize: 11.5, fontWeight: 500 }} tickFormatter={shortNum} />
-                <RechartsTooltip cursor={{ fill: "rgba(148,163,184,0.08)" }} content={<ChartTip />} />
-                <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: "12.5px", paddingTop: "16px", fontWeight: 500, color: "#475569" }} />
-                <Bar dataKey="deposit" name="ยอดฝาก" fill="url(#gDeposit)" radius={[6, 6, 0, 0]} maxBarSize={38} />
-                <Bar dataKey="withdraw" name="ยอดถอน" fill="url(#gWithdraw)" radius={[6, 6, 0, 0]} maxBarSize={38} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
+              <DepositChart data={data.chart_data || []} />
         </div>
 
         {/* เดิมพัน-ชนะ */}
@@ -380,31 +353,7 @@ export default function DashboardPage() {
             { label: "ยอดชนะรวม", value: (data.chart_data || []).reduce((s: number, d: any) => s + (d.win || 0), 0), color: "#ec4899" },
           ]} />
 
-          <div style={{ width: "100%", height: 300 }}>
-            <ResponsiveContainer>
-              <ComposedChart data={data.chart_data} margin={{ top: 10, right: 8, left: 8, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="gBet" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#6366f1" stopOpacity={0.28} />
-                    <stop offset="100%" stopColor="#6366f1" stopOpacity={0} />
-                  </linearGradient>
-                  <linearGradient id="gWin" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#ec4899" stopOpacity={0.22} />
-                    <stop offset="100%" stopColor="#ec4899" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="4 4" vertical={false} stroke="#eef2f7" />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: "#94a3b8", fontSize: 11.5, fontWeight: 500 }} dy={10} />
-                <YAxis axisLine={false} tickLine={false} width={58} tick={{ fill: "#94a3b8", fontSize: 11.5, fontWeight: 500 }} tickFormatter={shortNum} />
-                <RechartsTooltip content={<ChartTip />} />
-                <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: "12.5px", paddingTop: "16px", fontWeight: 500, color: "#475569" }} />
-                <Area type="monotone" dataKey="bet" name="ยอดเดิมพัน" stroke="none" fill="url(#gBet)" />
-                <Area type="monotone" dataKey="win" name="ยอดชนะ" stroke="none" fill="url(#gWin)" legendType="none" />
-                <Line type="monotone" dataKey="bet" name="ยอดเดิมพัน" stroke="#6366f1" strokeWidth={3} dot={{ r: 3.5, fill: "#6366f1", strokeWidth: 2, stroke: "#fff" }} activeDot={{ r: 6, strokeWidth: 0 }} legendType="none" />
-                <Line type="monotone" dataKey="win" name="ยอดชนะ" stroke="#ec4899" strokeWidth={3} dot={{ r: 3.5, fill: "#ec4899", strokeWidth: 2, stroke: "#fff" }} activeDot={{ r: 6, strokeWidth: 0 }} />
-              </ComposedChart>
-            </ResponsiveContainer>
-          </div>
+            <BetWinChart data={data.chart_data || []} />
         </div>
 
       </div>
